@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Initialize rosdep
-RUN rosdep init && rosdep update
+RUN rosdep update --rosdistro=humble
 
 # Set up the ROS 2 environment
 SHELL ["/bin/bash", "-c"]
