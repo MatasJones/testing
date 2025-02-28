@@ -1,27 +1,28 @@
-# Use the official ROS 2 Humble image for ARM64 (Raspberry Pi)
 FROM ros:humble-ros-base
 
-# Set environment variables
-ENV DEBIAN_FRONTEND=noninteractive \
-    ROS_DOMAIN_ID=0 \
-    LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8
+WORKDIR /root/ros2_ws
 
-# Update package list and install dependencies
-RUN apt-get update && apt-get install -y \
-    python3-pip \
-    python3-colcon-common-extensions \
-    python3-rosdep \
-    python3-argcomplete \
-    ros-humble-rmw-cyclonedds-cpp \
-    && rm -rf /var/lib/apt/lists/*
+COPY ./bin/install.sh /root/install.sh
 
-# Initialize rosdep
-RUN rosdep init && rosdep update
+# install bootstrap tools
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    libbox2d-dev \
+    libeigen3-dev \
+    libmatio-dev \
+    libgpiod-dev \
+    ros-humble-rosbag2-storage-mcap \
+    && apt-get clean autoclean \
+    && apt-get autoremove --yes \
+    && rm -rf /var/lib/{apt,dpkg,cache,log}/ \
+    && echo "source /opt/ros/humble/setup.bash; source /root/ros2_ws/install/local_setup.sh" > /root/source.sh \
+    && echo "source /root/source.sh" >> /root/.bashrc \
+    && /root/install.sh  \
+    && /ros_entrypoint.sh
 
-# Set up the ROS 2 environment
-SHELL ["/bin/bash", "-c"]
-RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+COPY ./ws/src /root/ros2_ws/src
 
-# Set the default command to launch a ROS 2 container shell
-CMD ["/bin/bash"]
+RUN . /opt/ros/humble/setup.sh && cd /root/ros2_ws && colcon build --symlink-install --packages-select holohover_msgs holohover_drivers holohover_utils holohover_common  holohover_navigation holohover_control holohover_dmpc
+
+COPY ./bin/stop_controller.sh /root/stop_controller.sh
+COPY ./bin/ocpSpecsSymlink.sh /root/ocpSpecsSymlink.sh
+COPY ./bin/fastrtps_profiles_superclient.xml /root/fastrtps_profiles_superclient.xml
