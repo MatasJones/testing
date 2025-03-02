@@ -28,6 +28,5 @@ docker run -it \
     --hostname $USERNAME \
     --net=host \
     -v /dev:/dev \
-    -v $(pwd)/../latency_test_files:/../latency_testing_files \
     mj_holohover \
 
