@@ -1,1 +1,1 @@
-docker build --pull --no-cache --progress=plain -t MJ_holohover -f Dockerfile ..
+docker build --pull --no-cache --progress=plain -t mj_holohover -f Dockerfile ..

@@ -13,12 +13,10 @@ CONTAINER_NAME="latency_test_container"
 docker stop $CONTAINER_NAME 2>/dev/null || true
 docker rm $CONTAINER_NAME 2>/dev/null || true
 
-USERNAME= matas
-
 # Select docker container
 docker run -it \
     --name latency_test \
-    --rm \ 
+    --rm \
     --privileged \
     --net=host \
     -v /dev:/dev \
