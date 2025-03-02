@@ -7,6 +7,15 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8
 
+USER $USERNAME
+
+# Set a diretory to store the project
+WORKDIR /home/$USERNAME/dev_ws/src
+COPY . .
+
+# Set a directory to build the project
+WORKDIR /home/$USERNAME/dev_ws
+
 # Update package list and install dependencies
 RUN apt-get update && apt-get install -y \
     python3-pip \
