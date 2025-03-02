@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Get the current working directory
 current_dir=$(pwd)
@@ -10,7 +10,6 @@ IMAGE_NAME="latency_test_image"
 CONTAINER_NAME="latency_test_container"
 
 USERNAME=holohover
-GROUPNAME=holohover  # Group name to be used
 
 # Stop and remove any containers with the same name to avoid conflicts
 docker stop $CONTAINER_NAME 2>/dev/null || true
@@ -29,9 +28,6 @@ docker run -it \
     --hostname $USERNAME \
     --net=host \
     -v /dev:/dev \
-    -e USERNAME=$USERNAME \
+    -v $(pwd)/../latency_test_files:/../latency_testing_files \
     mj_holohover \
-
-
-
 
