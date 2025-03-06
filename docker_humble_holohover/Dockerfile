@@ -5,7 +5,8 @@ FROM ros:humble-ros-base
 ENV DEBIAN_FRONTEND=noninteractive \
     ROS_DOMAIN_ID=0 \
     LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8
+    LC_ALL=C.UTF-8 \
+    USERNAME=holohover
 
 # Update package list and install dependencies
 RUN apt-get update && apt-get install -y \
@@ -16,8 +17,22 @@ RUN apt-get update && apt-get install -y \
     ros-humble-rmw-cyclonedds-cpp \
     && rm -rf /var/lib/apt/lists/*
 
-# Initialize rosdep
-RUN rosdep update --rosdistro=humble
+#Initialize rosdep
+#RUN rosdep update --rosdistro=humble
+
+# Create a new user and set permissions
+RUN useradd -m $USERNAME
+
+# Switch to the new user
+USER $USERNAME
+
+# Set the working directory for your project
+WORKDIR /home/$USERNAME/dev_ws/src
+
+# Copy project files into the container
+COPY . .
+
+
 
 # Set up the ROS 2 environment
 SHELL ["/bin/bash", "-c"]

@@ -9,8 +9,6 @@ parent_dir=$(dirname "$current_dir")
 IMAGE_NAME="latency_test_image"
 CONTAINER_NAME="latency_test_container"
 
-USERNAME=holohover
-
 # Stop and remove any containers with the same name to avoid conflicts
 docker stop $CONTAINER_NAME 2>/dev/null || true
 docker rm $CONTAINER_NAME 2>/dev/null || true
@@ -25,7 +23,6 @@ docker run -it \
     --name $CONTAINER_NAME \
     --rm \
     --privileged \
-    --hostname $USERNAME \
     --net=host \
     -v /dev:/dev \
     mj_holohover \
