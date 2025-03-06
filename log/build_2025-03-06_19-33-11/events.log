@@ -1,0 +1,165 @@
+[0.000000] (-) TimerEvent: {}
+[0.000566] (latency_test) JobQueued: {'identifier': 'latency_test', 'dependencies': OrderedDict()}
+[0.000661] (latency_test) JobStarted: {'identifier': 'latency_test'}
+[0.003473] (latency_test) JobProgress: {'identifier': 'latency_test', 'progress': 'cmake'}
+[0.004055] (latency_test) JobProgress: {'identifier': 'latency_test', 'progress': 'build'}
+[0.004920] (latency_test) Command: {'cmd': ['/usr/bin/cmake', '--build', '/home/testing/dev_ws/src/build/latency_test', '--', '-j8', '-l8'], 'cwd': '/home/testing/dev_ws/src/build/latency_test', 'env': OrderedDict([('HOSTNAME', 'docker-desktop'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/root'), ('OLDPWD', '/home/testing/dev_ws'), ('ROS_PYTHON_VERSION', '3'), ('ROS_DISTRO', 'humble'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('USERNAME', 'holohover_new'), ('TERM', 'xterm'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'), ('LANG', 'C.UTF-8'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('ROS_DOMAIN_ID', '0'), ('AMENT_PREFIX_PATH', '/opt/ros/humble'), ('DEBIAN_FRONTEND', 'noninteractive'), ('PWD', '/home/testing/dev_ws/src/build/latency_test'), ('LC_ALL', 'C.UTF-8'), ('PYTHONPATH', '/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/opt/ros/humble')]), 'shell': False}
+[0.023387] (latency_test) StdoutLine: {'line': b'\x1b[35m\x1b[1mConsolidate compiler generated dependencies of target latency_test\x1b[0m\n'}
+[0.081143] (latency_test) StdoutLine: {'line': b'[ 66%] \x1b[32mBuilding CXX object CMakeFiles/latency_test.dir/src/talker.cpp.o\x1b[0m\n'}
+[0.081328] (latency_test) StdoutLine: {'line': b'[ 66%] \x1b[32mBuilding CXX object CMakeFiles/latency_test.dir/src/latency_test_main.cpp.o\x1b[0m\n'}
+[0.099954] (-) TimerEvent: {}
+[0.200965] (-) TimerEvent: {}
+[0.302953] (-) TimerEvent: {}
+[0.403951] (-) TimerEvent: {}
+[0.504956] (-) TimerEvent: {}
+[0.605959] (-) TimerEvent: {}
+[0.706948] (-) TimerEvent: {}
+[0.807958] (-) TimerEvent: {}
+[0.908951] (-) TimerEvent: {}
+[0.949093] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:\x1b[m\x1b[K In constructor \xe2\x80\x98\x1b[01m\x1b[Ktalker::talker(rclcpp::Node*)\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[0.949363] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:3:40:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kclass \xe2\x80\x98\x1b[01m\x1b[Ktalker\x1b[m\x1b[K\xe2\x80\x99 does not have any field named \xe2\x80\x98\x1b[01m\x1b[Kparant\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.949574] (latency_test) StderrLine: {'line': b'    3 | talker::talker(rclcpp::Node* parent) : \x1b[01;31m\x1b[Kparant\x1b[m\x1b[K(parent) {\n'}
+[0.949692] (latency_test) StderrLine: {'line': b'      |                                        \x1b[01;31m\x1b[K^~~~~~\x1b[m\x1b[K\n'}
+[0.949802] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:9:9:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kno matching function for call to \xe2\x80\x98\x1b[01m\x1b[Krclcpp::Node::create_subscription<std_msgs::msg::String>(const char [11])\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.949971] (latency_test) StderrLine: {'line': b'    8 |     this->talker_subscriber_ = \x1b[01;31m\x1b[Kparent->create_subscription<std_msgs::msg::String>\x1b[m\x1b[K\n'}
+[0.950077] (latency_test) StderrLine: {'line': b'      |                                \x1b[01;31m\x1b[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.950185] (latency_test) StderrLine: {'line': b'    9 | \x1b[01;31m\x1b[K        ("PI_TO_COMP")\x1b[m\x1b[K, 10, std::bind(&talker::get_response_time, this, this->send_time);\n'}
+[0.950295] (latency_test) StderrLine: {'line': b'      |         \x1b[01;31m\x1b[K^~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.950398] (latency_test) StderrLine: {'line': b'In file included from \x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28\x1b[m\x1b[K,\n'}
+[0.950506] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22\x1b[m\x1b[K,\n'}
+[0.950610] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155\x1b[m\x1b[K,\n'}
+[0.950718] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/include/talker.h:5\x1b[m\x1b[K,\n'}
+[0.950821] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:1\x1b[m\x1b[K:\n'}
+[0.950939] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:219:3:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[Kcandidate: \xe2\x80\x98\x1b[01m\x1b[Ktemplate<class MessageT, class CallbackT, class AllocatorT, class SubscriptionT, class MessageMemoryStrategyT> std::shared_ptr<ROSMessageT> rclcpp::Node::create_subscription(const string&, const rclcpp::QoS&, CallbackT&&, const rclcpp::SubscriptionOptionsWithAllocator<AllocatorT>&, typename MessageMemoryStrategyT::SharedPtr)\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.951051] (latency_test) StderrLine: {'line': b'  219 |   \x1b[01;36m\x1b[Kcreate_subscription\x1b[m\x1b[K(\n'}
+[0.951153] (latency_test) StderrLine: {'line': b'      |   \x1b[01;36m\x1b[K^~~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.951261] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:219:3:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[K  template argument deduction/substitution failed:\n'}
+[0.951370] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:9:9:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[K  candidate expects 5 arguments, 1 provided\n'}
+[0.951476] (latency_test) StderrLine: {'line': b'    8 |     this->talker_subscriber_ = \x1b[01;36m\x1b[Kparent->create_subscription<std_msgs::msg::String>\x1b[m\x1b[K\n'}
+[0.951582] (latency_test) StderrLine: {'line': b'      |                                \x1b[01;36m\x1b[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.951685] (latency_test) StderrLine: {'line': b'    9 | \x1b[01;36m\x1b[K        ("PI_TO_COMP")\x1b[m\x1b[K, 10, std::bind(&talker::get_response_time, this, this->send_time);\n'}
+[0.951860] (latency_test) StderrLine: {'line': b'      |         \x1b[01;36m\x1b[K^~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.951978] (latency_test) StderrLine: {'line': b'In file included from \x1b[01m\x1b[K/usr/include/c++/11/pstl/glue_algorithm_defs.h:13\x1b[m\x1b[K,\n'}
+[0.952117] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/usr/include/c++/11/algorithm:74\x1b[m\x1b[K,\n'}
+[0.952220] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/executor.hpp:18\x1b[m\x1b[K,\n'}
+[0.952327] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/executors/multi_threaded_executor.hpp:25\x1b[m\x1b[K,\n'}
+[0.952430] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:21\x1b[m\x1b[K,\n'}
+[0.952537] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155\x1b[m\x1b[K,\n'}
+[0.952642] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/include/talker.h:5\x1b[m\x1b[K,\n'}
+[0.952775] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:1\x1b[m\x1b[K:\n'}
+[0.952882] (latency_test) StderrLine: {'line': b'/usr/include/c++/11/functional: In instantiation of \xe2\x80\x98\x1b[01m\x1b[Kstruct std::_Bind_check_arity<void (talker::*)(), talker*, double&>\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[0.952998] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/usr/include/c++/11/functional:768:12:\x1b[m\x1b[K   required from \xe2\x80\x98\x1b[01m\x1b[Kstruct std::_Bind_helper<false, void (talker::*)(), talker*, double&>\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.953140] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/usr/include/c++/11/functional:789:5:\x1b[m\x1b[K   required by substitution of \xe2\x80\x98\x1b[01m\x1b[Ktemplate<class _Func, class ... _BoundArgs> typename std::_Bind_helper<std::__is_socketlike<_Func>::value, _Func, _BoundArgs ...>::type std::bind(_Func&&, _BoundArgs&& ...) [with _Func = void (talker::*)(); _BoundArgs = {talker*, double&}]\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.953305] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:9:38:\x1b[m\x1b[K   required from here\n'}
+[0.953409] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/usr/include/c++/11/functional:756:21:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kstatic assertion failed: Wrong number of arguments for pointer-to-member\n'}
+[0.955951] (latency_test) StderrLine: {'line': b'  755 |       static_assert(_Varargs::\x1b[01;31m\x1b[Kvalue\x1b[m\x1b[K\n'}
+[0.956049] (latency_test) StderrLine: {'line': b'      |                               \x1b[01;31m\x1b[K~~~~~\x1b[m\x1b[K\n'}
+[0.956142] (latency_test) StderrLine: {'line': b'  756 | \x1b[01;31m\x1b[K                    ? sizeof...(_BoundArgs) >= _Arity::value + 1\x1b[m\x1b[K\n'}
+[0.956236] (latency_test) StderrLine: {'line': b'      |                     \x1b[01;31m\x1b[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.960011] (latency_test) StderrLine: {'line': b'  757 | \x1b[01;31m\x1b[K                    : sizeof...(_BoundArgs) == _Arity::value + 1\x1b[m\x1b[K,\n'}
+[0.960128] (latency_test) StderrLine: {'line': b'      |                     \x1b[01;31m\x1b[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.960237] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/usr/include/c++/11/functional:756:21:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[K\xe2\x80\x98\x1b[01m\x1b[K(false ? (2 >= (((long unsigned int)std::integral_constant<long unsigned int, 0>::value) + 1)) : (2 == (((long unsigned int)std::integral_constant<long unsigned int, 0>::value) + 1)))\x1b[m\x1b[K\xe2\x80\x99 evaluates to false\n'}
+[0.960343] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:12:11:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[K\xe2\x80\x98\x1b[01m\x1b[Kclass talker\x1b[m\x1b[K\xe2\x80\x99 has no member named \xe2\x80\x98\x1b[01m\x1b[Ktalker_publiher_\x1b[m\x1b[K\xe2\x80\x99; did you mean \xe2\x80\x98\x1b[01m\x1b[Ktalker_publisher_\x1b[m\x1b[K\xe2\x80\x99?\n'}
+[0.960487] (latency_test) StderrLine: {'line': b'   12 |     this->\x1b[01;31m\x1b[Ktalker_publiher_\x1b[m\x1b[K = parent->create_subscription<std_msgs::msg::String>("COMP_TO_PI", 10);\n'}
+[0.960592] (latency_test) StderrLine: {'line': b'      |           \x1b[01;31m\x1b[K^~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.960696] (latency_test) StderrLine: {'line': b'      |           \x1b[32m\x1b[Ktalker_publisher_\x1b[m\x1b[K\n'}
+[0.960799] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:12:80:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kno matching function for call to \xe2\x80\x98\x1b[01m\x1b[Krclcpp::Node::create_subscription<std_msgs::msg::String>(const char [11], int)\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.960926] (latency_test) StderrLine: {'line': b'   12 |     this->talker_publiher_ = \x1b[01;31m\x1b[Kparent->create_subscription<std_msgs::msg::String>("COMP_TO_PI", 10)\x1b[m\x1b[K;\n'}
+[0.961071] (latency_test) StderrLine: {'line': b'      |                              \x1b[01;31m\x1b[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.961180] (latency_test) StderrLine: {'line': b'In file included from \x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/executors/single_threaded_executor.hpp:28\x1b[m\x1b[K,\n'}
+[0.961287] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:22\x1b[m\x1b[K,\n'}
+[0.961394] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155\x1b[m\x1b[K,\n'}
+[0.961499] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/include/talker.h:5\x1b[m\x1b[K,\n'}
+[0.961605] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:1\x1b[m\x1b[K:\n'}
+[0.961710] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:219:3:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[Kcandidate: \xe2\x80\x98\x1b[01m\x1b[Ktemplate<class MessageT, class CallbackT, class AllocatorT, class SubscriptionT, class MessageMemoryStrategyT> std::shared_ptr<ROSMessageT> rclcpp::Node::create_subscription(const string&, const rclcpp::QoS&, CallbackT&&, const rclcpp::SubscriptionOptionsWithAllocator<AllocatorT>&, typename MessageMemoryStrategyT::SharedPtr)\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.961820] (latency_test) StderrLine: {'line': b'  219 |   \x1b[01;36m\x1b[Kcreate_subscription\x1b[m\x1b[K(\n'}
+[0.961926] (latency_test) StderrLine: {'line': b'      |   \x1b[01;36m\x1b[K^~~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.962027] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/node.hpp:219:3:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[K  template argument deduction/substitution failed:\n'}
+[0.962169] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:12:80:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[K  candidate expects 5 arguments, 2 provided\n'}
+[0.962272] (latency_test) StderrLine: {'line': b'   12 |     this->talker_publiher_ = \x1b[01;36m\x1b[Kparent->create_subscription<std_msgs::msg::String>("COMP_TO_PI", 10)\x1b[m\x1b[K;\n'}
+[0.962373] (latency_test) StderrLine: {'line': b'      |                              \x1b[01;36m\x1b[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.962479] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:13:26:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[K\xe2\x80\x98\x1b[01m\x1b[Kclass talker\x1b[m\x1b[K\xe2\x80\x99 has no member named \xe2\x80\x98\x1b[01m\x1b[Kcreate_wall_timer\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.962586] (latency_test) StderrLine: {'line': b'   13 |     this->timer_ = this->\x1b[01;31m\x1b[Kcreate_wall_timer\x1b[m\x1b[K(\n'}
+[0.962723] (latency_test) StderrLine: {'line': b'      |                          \x1b[01;31m\x1b[K^~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.962848] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:14:9:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kunable to find numeric literal operator \xe2\x80\x98\x1b[01m\x1b[Koperator""ms\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.962962] (latency_test) StderrLine: {'line': b'   14 |         \x1b[01;31m\x1b[K500ms\x1b[m\x1b[K, std::bind(&talker::timer_callback, this));\n'}
+[0.963088] (latency_test) StderrLine: {'line': b'      |         \x1b[01;31m\x1b[K^~~~~\x1b[m\x1b[K\n'}
+[0.963195] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:\x1b[m\x1b[K At global scope:\n'}
+[0.963298] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:19:1:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[KISO C++ forbids declaration of \xe2\x80\x98\x1b[01m\x1b[Kget_response_time\x1b[m\x1b[K\xe2\x80\x99 with no type [\x1b[01;31m\x1b[K-fpermissive\x1b[m\x1b[K]\n'}
+[0.963399] (latency_test) StderrLine: {'line': b'   19 | \x1b[01;31m\x1b[Ktalker\x1b[m\x1b[K::get_response_time() {\n'}
+[0.963537] (latency_test) StderrLine: {'line': b'      | \x1b[01;31m\x1b[K^~~~~~\x1b[m\x1b[K\n'}
+[0.963638] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:19:1:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kno declaration matches \xe2\x80\x98\x1b[01m\x1b[Kint talker::get_response_time()\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.963743] (latency_test) StderrLine: {'line': b'In file included from \x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:1\x1b[m\x1b[K:\n'}
+[0.963844] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/include/talker.h:30:14:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[Kcandidate is: \xe2\x80\x98\x1b[01m\x1b[Kvoid talker::get_response_time()\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.963950] (latency_test) StderrLine: {'line': b'   30 |         void \x1b[01;36m\x1b[Kget_response_time\x1b[m\x1b[K();\n'}
+[0.964045] (latency_test) StderrLine: {'line': b'      |              \x1b[01;36m\x1b[K^~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.964145] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/include/talker.h:11:7:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[K\xe2\x80\x98\x1b[01m\x1b[Kclass talker\x1b[m\x1b[K\xe2\x80\x99 defined here\n'}
+[0.964243] (latency_test) StderrLine: {'line': b'   11 | class \x1b[01;36m\x1b[Ktalker\x1b[m\x1b[K {\n'}
+[0.964342] (latency_test) StderrLine: {'line': b'      |       \x1b[01;36m\x1b[K^~~~~~\x1b[m\x1b[K\n'}
+[0.964447] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:26:1:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[KISO C++ forbids declaration of \xe2\x80\x98\x1b[01m\x1b[Ktimer_callback\x1b[m\x1b[K\xe2\x80\x99 with no type [\x1b[01;31m\x1b[K-fpermissive\x1b[m\x1b[K]\n'}
+[0.964551] (latency_test) StderrLine: {'line': b'   26 | \x1b[01;31m\x1b[Ktalker\x1b[m\x1b[K::timer_callback() {\n'}
+[0.964654] (latency_test) StderrLine: {'line': b'      | \x1b[01;31m\x1b[K^~~~~~\x1b[m\x1b[K\n'}
+[0.964759] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:26:1:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kno declaration matches \xe2\x80\x98\x1b[01m\x1b[Kint talker::timer_callback()\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.964859] (latency_test) StderrLine: {'line': b'In file included from \x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:1\x1b[m\x1b[K:\n'}
+[0.964978] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/include/talker.h:31:14:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[Kcandidate is: \xe2\x80\x98\x1b[01m\x1b[Kvoid talker::timer_callback()\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.965085] (latency_test) StderrLine: {'line': b'   31 |         void \x1b[01;36m\x1b[Ktimer_callback\x1b[m\x1b[K();\n'}
+[0.965212] (latency_test) StderrLine: {'line': b'      |              \x1b[01;36m\x1b[K^~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.965310] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/include/talker.h:11:7:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[K\xe2\x80\x98\x1b[01m\x1b[Kclass talker\x1b[m\x1b[K\xe2\x80\x99 defined here\n'}
+[0.965415] (latency_test) StderrLine: {'line': b'   11 | class \x1b[01;36m\x1b[Ktalker\x1b[m\x1b[K {\n'}
+[0.965513] (latency_test) StderrLine: {'line': b'      |       \x1b[01;36m\x1b[K^~~~~~\x1b[m\x1b[K\n'}
+[0.967104] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/latency_test_main.cpp:\x1b[m\x1b[K In function \xe2\x80\x98\x1b[01m\x1b[Kint main(int, char**)\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[0.967244] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/latency_test_main.cpp:9:15:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kno matching function for call to \xe2\x80\x98\x1b[01m\x1b[Kspin(std::shared_ptr<talker>)\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.967348] (latency_test) StderrLine: {'line': b'    9 |   \x1b[01;31m\x1b[Krclcpp::spin(std::make_shared<talker>())\x1b[m\x1b[K;\n'}
+[0.967451] (latency_test) StderrLine: {'line': b'      |   \x1b[01;31m\x1b[K~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[0.967549] (latency_test) StderrLine: {'line': b'In file included from \x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155\x1b[m\x1b[K,\n'}
+[0.967679] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/latency_test_main.cpp:1\x1b[m\x1b[K:\n'}
+[0.967790] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:45:1:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[Kcandidate: \xe2\x80\x98\x1b[01m\x1b[Kvoid rclcpp::spin(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr)\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.967893] (latency_test) StderrLine: {'line': b'   45 | \x1b[01;36m\x1b[Kspin\x1b[m\x1b[K(rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_ptr);\n'}
+[0.967996] (latency_test) StderrLine: {'line': b'      | \x1b[01;36m\x1b[K^~~~\x1b[m\x1b[K\n'}
+[0.968100] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:45:60:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[K  no known conversion for argument 1 from \xe2\x80\x98\x1b[01m\x1b[Kshared_ptr<\x1b[01;32m\x1b[Ktalker\x1b[m\x1b[K>\x1b[m\x1b[K\xe2\x80\x99 to \xe2\x80\x98\x1b[01m\x1b[Kshared_ptr<\x1b[01;32m\x1b[Krclcpp::node_interfaces::NodeBaseInterface\x1b[m\x1b[K>\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.968202] (latency_test) StderrLine: {'line': b'   45 | spin(\x1b[01;36m\x1b[Krclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_ptr\x1b[m\x1b[K);\n'}
+[0.968307] (latency_test) StderrLine: {'line': b'      |      \x1b[01;36m\x1b[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~\x1b[m\x1b[K\n'}
+[0.968406] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:49:1:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[Kcandidate: \xe2\x80\x98\x1b[01m\x1b[Kvoid rclcpp::spin(rclcpp::Node::SharedPtr)\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.968538] (latency_test) StderrLine: {'line': b'   49 | \x1b[01;36m\x1b[Kspin\x1b[m\x1b[K(rclcpp::Node::SharedPtr node_ptr);\n'}
+[0.968643] (latency_test) StderrLine: {'line': b'      | \x1b[01;36m\x1b[K^~~~\x1b[m\x1b[K\n'}
+[0.968919] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:49:30:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[K  no known conversion for argument 1 from \xe2\x80\x98\x1b[01m\x1b[Kshared_ptr<\x1b[01;32m\x1b[Ktalker\x1b[m\x1b[K>\x1b[m\x1b[K\xe2\x80\x99 to \xe2\x80\x98\x1b[01m\x1b[Kshared_ptr<\x1b[01;32m\x1b[Krclcpp::Node\x1b[m\x1b[K>\x1b[m\x1b[K\xe2\x80\x99\n'}
+[0.969061] (latency_test) StderrLine: {'line': b'   49 | spin(\x1b[01;36m\x1b[Krclcpp::Node::SharedPtr node_ptr\x1b[m\x1b[K);\n'}
+[0.969184] (latency_test) StderrLine: {'line': b'      |      \x1b[01;36m\x1b[K~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~\x1b[m\x1b[K\n'}
+[1.009950] (-) TimerEvent: {}
+[1.093711] (latency_test) StderrLine: {'line': b'In file included from \x1b[01m\x1b[K/usr/include/aarch64-linux-gnu/c++/11/bits/c++allocator.h:33\x1b[m\x1b[K,\n'}
+[1.093984] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/usr/include/c++/11/bits/allocator.h:46\x1b[m\x1b[K,\n'}
+[1.094106] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/usr/include/c++/11/memory:64\x1b[m\x1b[K,\n'}
+[1.094207] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:153\x1b[m\x1b[K,\n'}
+[1.094300] (latency_test) StderrLine: {'line': b'                 from \x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/latency_test_main.cpp:1\x1b[m\x1b[K:\n'}
+[1.094392] (latency_test) StderrLine: {'line': b'/usr/include/c++/11/ext/new_allocator.h: In instantiation of \xe2\x80\x98\x1b[01m\x1b[Kvoid __gnu_cxx::new_allocator<_Tp>::construct(_Up*, _Args&& ...) [with _Up = talker; _Args = {}; _Tp = talker]\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[1.094484] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/usr/include/c++/11/bits/alloc_traits.h:516:17:\x1b[m\x1b[K   required from \xe2\x80\x98\x1b[01m\x1b[Kstatic void std::allocator_traits<std::allocator<_Tp1> >::construct(std::allocator_traits<std::allocator<_Tp1> >::allocator_type&, _Up*, _Args&& ...) [with _Up = talker; _Args = {}; _Tp = talker; std::allocator_traits<std::allocator<_Tp1> >::allocator_type = std::allocator<talker>]\x1b[m\x1b[K\xe2\x80\x99\n'}
+[1.094577] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/usr/include/c++/11/bits/shared_ptr_base.h:519:39:\x1b[m\x1b[K   required from \xe2\x80\x98\x1b[01m\x1b[Kstd::_Sp_counted_ptr_inplace<_Tp, _Alloc, _Lp>::_Sp_counted_ptr_inplace(_Alloc, _Args&& ...) [with _Args = {}; _Tp = talker; _Alloc = std::allocator<talker>; __gnu_cxx::_Lock_policy _Lp = __gnu_cxx::_S_atomic]\x1b[m\x1b[K\xe2\x80\x99\n'}
+[1.094668] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/usr/include/c++/11/bits/shared_ptr_base.h:650:16:\x1b[m\x1b[K   required from \xe2\x80\x98\x1b[01m\x1b[Kstd::__shared_count<_Lp>::__shared_count(_Tp*&, std::_Sp_alloc_shared_tag<_Alloc>, _Args&& ...) [with _Tp = talker; _Alloc = std::allocator<talker>; _Args = {}; __gnu_cxx::_Lock_policy _Lp = __gnu_cxx::_S_atomic]\x1b[m\x1b[K\xe2\x80\x99\n'}
+[1.094760] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/usr/include/c++/11/bits/shared_ptr_base.h:1342:14:\x1b[m\x1b[K   required from \xe2\x80\x98\x1b[01m\x1b[Kstd::__shared_ptr<_Tp, _Lp>::__shared_ptr(std::_Sp_alloc_shared_tag<_Tp>, _Args&& ...) [with _Alloc = std::allocator<talker>; _Args = {}; _Tp = talker; __gnu_cxx::_Lock_policy _Lp = __gnu_cxx::_S_atomic]\x1b[m\x1b[K\xe2\x80\x99\n'}
+[1.094851] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/usr/include/c++/11/bits/shared_ptr.h:409:59:\x1b[m\x1b[K   required from \xe2\x80\x98\x1b[01m\x1b[Kstd::shared_ptr<_Tp>::shared_ptr(std::_Sp_alloc_shared_tag<_Tp>, _Args&& ...) [with _Alloc = std::allocator<talker>; _Args = {}; _Tp = talker]\x1b[m\x1b[K\xe2\x80\x99\n'}
+[1.094942] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/usr/include/c++/11/bits/shared_ptr.h:862:14:\x1b[m\x1b[K   required from \xe2\x80\x98\x1b[01m\x1b[Kstd::shared_ptr<_Tp> std::allocate_shared(const _Alloc&, _Args&& ...) [with _Tp = talker; _Alloc = std::allocator<talker>; _Args = {}]\x1b[m\x1b[K\xe2\x80\x99\n'}
+[1.095065] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/usr/include/c++/11/bits/shared_ptr.h:878:39:\x1b[m\x1b[K   required from \xe2\x80\x98\x1b[01m\x1b[Kstd::shared_ptr<_Tp> std::make_shared(_Args&& ...) [with _Tp = talker; _Args = {}]\x1b[m\x1b[K\xe2\x80\x99\n'}
+[1.095191] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/latency_test_main.cpp:9:40:\x1b[m\x1b[K   required from here\n'}
+[1.095285] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/usr/include/c++/11/ext/new_allocator.h:162:11:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[Kno matching function for call to \xe2\x80\x98\x1b[01m\x1b[Ktalker::talker()\x1b[m\x1b[K\xe2\x80\x99\n'}
+[1.095397] (latency_test) StderrLine: {'line': b'  162 |         { \x1b[01;31m\x1b[K::new((void *)__p) _Up(std::forward<_Args>(__args)...)\x1b[m\x1b[K; }\n'}
+[1.095488] (latency_test) StderrLine: {'line': b'      |           \x1b[01;31m\x1b[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[1.095577] (latency_test) StderrLine: {'line': b'In file included from \x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/src/latency_test_main.cpp:2\x1b[m\x1b[K:\n'}
+[1.095665] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/include/talker.h:14:9:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[Kcandidate: \xe2\x80\x98\x1b[01m\x1b[Ktalker::talker(rclcpp::Node*)\x1b[m\x1b[K\xe2\x80\x99\n'}
+[1.095753] (latency_test) StderrLine: {'line': b'   14 |         \x1b[01;36m\x1b[Ktalker\x1b[m\x1b[K(rclcpp::Node *parent);\n'}
+[1.095843] (latency_test) StderrLine: {'line': b'      |         \x1b[01;36m\x1b[K^~~~~~\x1b[m\x1b[K\n'}
+[1.095954] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/include/talker.h:14:9:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[K  candidate expects 1 argument, 0 provided\n'}
+[1.096080] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/include/talker.h:11:7:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[Kcandidate: \xe2\x80\x98\x1b[01m\x1b[Ktalker::talker(const talker&)\x1b[m\x1b[K\xe2\x80\x99\n'}
+[1.096211] (latency_test) StderrLine: {'line': b'   11 | class \x1b[01;36m\x1b[Ktalker\x1b[m\x1b[K {\n'}
+[1.096306] (latency_test) StderrLine: {'line': b'      |       \x1b[01;36m\x1b[K^~~~~~\x1b[m\x1b[K\n'}
+[1.096400] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/include/talker.h:11:7:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[K  candidate expects 1 argument, 0 provided\n'}
+[1.096516] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/include/talker.h:11:7:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[Kcandidate: \xe2\x80\x98\x1b[01m\x1b[Ktalker::talker(talker&&)\x1b[m\x1b[K\xe2\x80\x99\n'}
+[1.096609] (latency_test) StderrLine: {'line': b'\x1b[01m\x1b[K/home/testing/dev_ws/src/latency_test/include/talker.h:11:7:\x1b[m\x1b[K \x1b[01;36m\x1b[Knote: \x1b[m\x1b[K  candidate expects 1 argument, 0 provided\n'}
+[1.101530] (latency_test) StderrLine: {'line': b'gmake[2]: *** [CMakeFiles/latency_test.dir/build.make:76: CMakeFiles/latency_test.dir/src/talker.cpp.o] Error 1\n'}
+[1.101743] (latency_test) StderrLine: {'line': b'gmake[2]: *** Waiting for unfinished jobs....\n'}
+[1.110952] (-) TimerEvent: {}
+[1.120227] (latency_test) StderrLine: {'line': b'gmake[2]: *** [CMakeFiles/latency_test.dir/build.make:90: CMakeFiles/latency_test.dir/src/latency_test_main.cpp.o] Error 1\n'}
+[1.120404] (latency_test) StderrLine: {'line': b'gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/latency_test.dir/all] Error 2\n'}
+[1.120504] (latency_test) StderrLine: {'line': b'gmake: *** [Makefile:146: all] Error 2\n'}
+[1.121350] (latency_test) CommandEnded: {'returncode': 2}
+[1.127477] (latency_test) JobEnded: {'identifier': 'latency_test', 'rc': 2}
+[1.138446] (-) EventReactorShutdown: {}

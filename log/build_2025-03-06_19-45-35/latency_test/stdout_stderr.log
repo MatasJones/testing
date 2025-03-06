@@ -1,0 +1,115 @@
+[35m[1mConsolidate compiler generated dependencies of target latency_test[0m
+[ 66%] [32mBuilding CXX object CMakeFiles/latency_test.dir/src/talker.cpp.o[0m
+[ 66%] [32mBuilding CXX object CMakeFiles/latency_test.dir/src/latency_test_main.cpp.o[0m
+In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/client.hpp:40[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/callback_group.hpp:24[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/any_executable.hpp:20[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategy.hpp:25[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategies.hpp:18[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor_options.hpp:20[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor.hpp:37[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/multi_threaded_executor.hpp:25[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:21[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+                 from [01m[K/home/testing/dev_ws/src/latency_test/include/talker.h:5[m[K,
+                 from [01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:1[m[K:
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:[m[K In constructor ‘[01m[Ktalker::talker()[m[K’:
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:5:17:[m[K [01;31m[Kerror: [m[K‘[01m[Kparent[m[K’ was not declared in this scope
+    5 |     RCLCPP_INFO([01;31m[Kparent[m[K->get_logger(), "Creating talker");
+      |                 [01;31m[K^~~~~~[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:5:5:[m[K [01;31m[Kerror: [m[Ktemplate argument 1 is invalid
+    5 |     [01;31m[KRCLCPP_INFO[m[K(parent->get_logger(), "Creating talker");
+      |     [01;31m[K^~~~~~~~~~~[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:5:5:[m[K [01;31m[Kerror: [m[Ktemplate argument 1 is invalid
+    5 |     [01;31m[KRCLCPP_INFO[m[K(parent->get_logger(), "Creating talker");
+      |     [01;31m[K^~~~~~~~~~~[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:5:5:[m[K [01;31m[Kerror: [m[Ktemplate argument 1 is invalid
+    5 |     [01;31m[KRCLCPP_INFO[m[K(parent->get_logger(), "Creating talker");
+      |     [01;31m[K^~~~~~~~~~~[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:8:32:[m[K [01;31m[Kerror: [m[K‘[01m[Kparent[m[K’ was not declared in this scope
+    8 |     this->talker_subscriber_ = [01;31m[Kparent[m[K->create_subscription<std_msgs::msg::String>
+      |                                [01;31m[K^~~~~~[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:8:81:[m[K [01;31m[Kerror: [m[Kexpected primary-expression before ‘[01m[K>[m[K’ token
+    8 |     this->talker_subscriber_ = parent->create_subscription<std_msgs::msg::String[01;31m[K>[m[K
+      |                                                                                 [01;31m[K^[m[K
+In file included from [01m[K/usr/include/c++/11/pstl/glue_algorithm_defs.h:13[m[K,
+                 from [01m[K/usr/include/c++/11/algorithm:74[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor.hpp:18[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/multi_threaded_executor.hpp:25[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:21[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+                 from [01m[K/home/testing/dev_ws/src/latency_test/include/talker.h:5[m[K,
+                 from [01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:1[m[K:
+/usr/include/c++/11/functional: In instantiation of ‘[01m[Kstruct std::_Bind_check_arity<void (talker::*)(), talker*, double&>[m[K’:
+[01m[K/usr/include/c++/11/functional:768:12:[m[K   required from ‘[01m[Kstruct std::_Bind_helper<false, void (talker::*)(), talker*, double&>[m[K’
+[01m[K/usr/include/c++/11/functional:789:5:[m[K   required by substitution of ‘[01m[Ktemplate<class _Func, class ... _BoundArgs> typename std::_Bind_helper<std::__is_socketlike<_Func>::value, _Func, _BoundArgs ...>::type std::bind(_Func&&, _BoundArgs&& ...) [with _Func = void (talker::*)(); _BoundArgs = {talker*, double&}][m[K’
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:9:38:[m[K   required from here
+[01m[K/usr/include/c++/11/functional:756:21:[m[K [01;31m[Kerror: [m[Kstatic assertion failed: Wrong number of arguments for pointer-to-member
+  755 |       static_assert(_Varargs::[01;31m[Kvalue[m[K
+      |                               [01;31m[K~~~~~[m[K
+  756 | [01;31m[K                    ? sizeof...(_BoundArgs) >= _Arity::value + 1[m[K
+      |                     [01;31m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+  757 | [01;31m[K                    : sizeof...(_BoundArgs) == _Arity::value + 1[m[K,
+      |                     [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[01m[K/usr/include/c++/11/functional:756:21:[m[K [01;36m[Knote: [m[K‘[01m[K(false ? (2 >= (((long unsigned int)std::integral_constant<long unsigned int, 0>::value) + 1)) : (2 == (((long unsigned int)std::integral_constant<long unsigned int, 0>::value) + 1)))[m[K’ evaluates to false
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:12:11:[m[K [01;31m[Kerror: [m[K‘[01m[Kclass talker[m[K’ has no member named ‘[01m[Ktalker_publiher_[m[K’; did you mean ‘[01m[Ktalker_publisher_[m[K’?
+   12 |     this->[01;31m[Ktalker_publiher_[m[K = parent->create_subscription<std_msgs::msg::String>("COMP_TO_PI", 10);
+      |           [01;31m[K^~~~~~~~~~~~~~~~[m[K
+      |           [32m[Ktalker_publisher_[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:12:79:[m[K [01;31m[Kerror: [m[Kexpected primary-expression before ‘[01m[K>[m[K’ token
+   12 |     this->talker_publiher_ = parent->create_subscription<std_msgs::msg::String[01;31m[K>[m[K("COMP_TO_PI", 10);
+      |                                                                               [01;31m[K^[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:12:81:[m[K [01;35m[Kwarning: [m[Kleft operand of comma operator has no effect [[01;35m[K-Wunused-value[m[K]
+   12 |     this->talker_publiher_ = parent->create_subscription<std_msgs::msg::String>([01;35m[K"COMP_TO_PI"[m[K, 10);
+      |                                                                                 [01;35m[K^~~~~~~~~~~~[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:14:9:[m[K [01;31m[Kerror: [m[Kunable to find numeric literal operator ‘[01m[Koperator""ms[m[K’
+   14 |         [01;31m[K500ms[m[K, std::bind(&talker::timer_callback, this));
+      |         [01;31m[K^~~~~[m[K
+In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/client.hpp:40[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/callback_group.hpp:24[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/any_executable.hpp:20[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategy.hpp:25[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategies.hpp:18[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor_options.hpp:20[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor.hpp:37[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/multi_threaded_executor.hpp:25[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:21[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+                 from [01m[K/home/testing/dev_ws/src/latency_test/include/talker.h:5[m[K,
+                 from [01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:1[m[K:
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:16:5:[m[K [01;31m[Kerror: [m[Ktemplate argument 1 is invalid
+   16 |     [01;31m[KRCLCPP_INFO[m[K(parent->get_logger(), "Talker created");
+      |     [01;31m[K^~~~~~~~~~~[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:16:5:[m[K [01;31m[Kerror: [m[Ktemplate argument 1 is invalid
+   16 |     [01;31m[KRCLCPP_INFO[m[K(parent->get_logger(), "Talker created");
+      |     [01;31m[K^~~~~~~~~~~[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:16:5:[m[K [01;31m[Kerror: [m[Ktemplate argument 1 is invalid
+   16 |     [01;31m[KRCLCPP_INFO[m[K(parent->get_logger(), "Talker created");
+      |     [01;31m[K^~~~~~~~~~~[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:[m[K At global scope:
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:19:1:[m[K [01;31m[Kerror: [m[KISO C++ forbids declaration of ‘[01m[Kget_response_time[m[K’ with no type [[01;31m[K-fpermissive[m[K]
+   19 | [01;31m[Ktalker[m[K::get_response_time() {
+      | [01;31m[K^~~~~~[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:19:1:[m[K [01;31m[Kerror: [m[Kno declaration matches ‘[01m[Kint talker::get_response_time()[m[K’
+In file included from [01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:1[m[K:
+[01m[K/home/testing/dev_ws/src/latency_test/include/talker.h:30:14:[m[K [01;36m[Knote: [m[Kcandidate is: ‘[01m[Kvoid talker::get_response_time()[m[K’
+   30 |         void [01;36m[Kget_response_time[m[K();
+      |              [01;36m[K^~~~~~~~~~~~~~~~~[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/include/talker.h:11:7:[m[K [01;36m[Knote: [m[K‘[01m[Kclass talker[m[K’ defined here
+   11 | class [01;36m[Ktalker[m[K : public rclcpp::Node{
+      |       [01;36m[K^~~~~~[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:26:1:[m[K [01;31m[Kerror: [m[KISO C++ forbids declaration of ‘[01m[Ktimer_callback[m[K’ with no type [[01;31m[K-fpermissive[m[K]
+   26 | [01;31m[Ktalker[m[K::timer_callback() {
+      | [01;31m[K^~~~~~[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:26:1:[m[K [01;31m[Kerror: [m[Kno declaration matches ‘[01m[Kint talker::timer_callback()[m[K’
+In file included from [01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:1[m[K:
+[01m[K/home/testing/dev_ws/src/latency_test/include/talker.h:31:14:[m[K [01;36m[Knote: [m[Kcandidate is: ‘[01m[Kvoid talker::timer_callback()[m[K’
+   31 |         void [01;36m[Ktimer_callback[m[K();
+      |              [01;36m[K^~~~~~~~~~~~~~[m[K
+[01m[K/home/testing/dev_ws/src/latency_test/include/talker.h:11:7:[m[K [01;36m[Knote: [m[K‘[01m[Kclass talker[m[K’ defined here
+   11 | class [01;36m[Ktalker[m[K : public rclcpp::Node{
+      |       [01;36m[K^~~~~~[m[K
+gmake[2]: *** [CMakeFiles/latency_test.dir/build.make:76: CMakeFiles/latency_test.dir/src/talker.cpp.o] Error 1
+gmake[2]: *** Waiting for unfinished jobs....
+gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/latency_test.dir/all] Error 2
+gmake: *** [Makefile:146: all] Error 2

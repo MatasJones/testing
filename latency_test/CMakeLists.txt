@@ -15,12 +15,13 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
+# Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)  # If you're using std_msgs for message passing
 
 include_directories(
-  include/latency_test
+  include
 )
 
 if(BUILD_TESTING)
@@ -34,15 +35,27 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+# Create the executable
 add_executable(latency_test
   src/talker.cpp
   src/latency_test_main.cpp
 )
 
-ament_target_dependencies(latency_test rclcpp)
+ament_target_dependencies(
+  latency_test
+  rclcpp
+  std_msgs  # Include std_msgs if you're using it for your messages
+)
 
+install(
+  DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+)
+
+# Install the target
 install(TARGETS
   latency_test
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 ament_package()

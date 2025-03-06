@@ -1,0 +1,17 @@
+[0.005s] Invoking command in '/home/testing/dev_ws/src/build/latency_test': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/testing/dev_ws/src/build/latency_test -- -j8 -l8
+[0.026s] [35m[1mConsolidate compiler generated dependencies of target latency_test[0m
+[0.086s] [ 33%] [32mBuilding CXX object CMakeFiles/latency_test.dir/src/talker.cpp.o[0m
+[0.087s] [ 66%] [32mBuilding CXX object CMakeFiles/latency_test.dir/src/latency_test_main.cpp.o[0m
+[1.046s] [01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:[m[K In member function ‘[01m[Kvoid talker::get_response_time(std_msgs::msg::String_<std::allocator<void> >::SharedPtr)[m[K’:
+[1.047s] [01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:18:71:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kmsg[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+[1.047s]    18 | void talker::get_response_time([01;35m[Kconst std_msgs::msg::String::SharedPtr msg[m[K) {
+[1.047s]       |                                [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~[m[K
+[1.052s] [01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:[m[K In member function ‘[01m[Kvoid talker::timer_callback()[m[K’:
+[1.052s] [01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:32:5:[m[K [01;31m[Kerror: [m[K‘[01m[Ktalker_publisher_[m[K’ was not declared in this scope; did you mean ‘[01m[Ktalker_subscriber_[m[K’?
+[1.052s]    32 |     [01;31m[Ktalker_publisher_[m[K->publish(message);
+[1.052s]       |     [01;31m[K^~~~~~~~~~~~~~~~~[m[K
+[1.052s]       |     [32m[Ktalker_subscriber_[m[K
+[1.901s] gmake[2]: *** [CMakeFiles/latency_test.dir/build.make:76: CMakeFiles/latency_test.dir/src/talker.cpp.o] Error 1
+[1.902s] gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/latency_test.dir/all] Error 2
+[1.902s] gmake: *** [Makefile:146: all] Error 2
+[1.902s] Invoked command in '/home/testing/dev_ws/src/build/latency_test' returned '2': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/testing/dev_ws/src/build/latency_test -- -j8 -l8

@@ -1,0 +1,27 @@
+[35m[1mConsolidate compiler generated dependencies of target latency_test[0m
+[ 66%] [32mBuilding CXX object CMakeFiles/latency_test.dir/src/latency_test_main.cpp.o[0m
+[ 66%] [32mBuilding CXX object CMakeFiles/latency_test.dir/src/talker.cpp.o[0m
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:[m[K In member function ‘[01m[Kvoid talker::get_response_time(std_msgs::msg::String_<std::allocator<void> >::SharedPtr)[m[K’:
+[01m[K/home/testing/dev_ws/src/latency_test/src/talker.cpp:19:71:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kmsg[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+   19 | void talker::get_response_time([01;35m[Kconst std_msgs::msg::String::SharedPtr msg[m[K) {
+      |                                [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~[m[K
+[100%] [32m[1mLinking CXX executable latency_test[0m
+[100%] Built target latency_test
+-- Install configuration: ""
+-- Installing: /home/testing/dev_ws/src/install/latency_test/lib/latency_test/latency_test
+-- Set runtime path of "/home/testing/dev_ws/src/install/latency_test/lib/latency_test/latency_test" to ""
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/ament_index/resource_index/package_run_dependencies/latency_test
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/ament_index/resource_index/parent_prefix_path/latency_test
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/latency_test/environment/ament_prefix_path.sh
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/latency_test/environment/ament_prefix_path.dsv
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/latency_test/environment/path.sh
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/latency_test/environment/path.dsv
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/latency_test/local_setup.bash
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/latency_test/local_setup.sh
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/latency_test/local_setup.zsh
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/latency_test/local_setup.dsv
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/latency_test/package.dsv
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/ament_index/resource_index/packages/latency_test
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/latency_test/cmake/latency_testConfig.cmake
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/latency_test/cmake/latency_testConfig-version.cmake
+-- Installing: /home/testing/dev_ws/src/install/latency_test/share/latency_test/package.xml

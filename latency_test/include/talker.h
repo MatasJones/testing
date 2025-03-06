@@ -8,10 +8,10 @@
 #include <iostream>    
 #include <chrono> 
 
-class talker {
+class talker : public rclcpp::Node{
     public:
 
-        talker(rclcpp::Node *parent);
+        talker();
         double send_time;
         int count_ = 0;
         
@@ -20,16 +20,15 @@ class talker {
         rclcpp::TimerBase::SharedPtr timer_;
 
         // Declare a Publisher
-        rclcpp::Publisher<std_msgs::msg::String>>::SharedPtr talker_publisher_;
+        rclcpp::Publisher<std_msgs::msg::String>::SharedPtr talker_publisher_;
 
         // Declare a subscriber
-        rclcpp::Subscriber<std_msgs::msg::String>>::SharedPtr talker_subscriber_;
+        rclcpp::Subscription<std_msgs::msg::String>::SharedPtr talker_subscriber_;
 
         std::chrono::time_point<std::chrono::system_clock> start, end;
         
-        void get_response_time();
-        void timer_callback() 
-
-}
+        void get_response_time(const std_msgs::msg::String::SharedPtr msg);
+        void timer_callback();
+};
 
 #endif

@@ -6,12 +6,7 @@ current_dir=$(pwd)
 # Use dirname to get the parent directory
 parent_dir=$(dirname "$current_dir")
 
-IMAGE_NAME="latency_test_image"
 CONTAINER_NAME="latency_test_container"
-
-# Stop and remove any containers with the same name to avoid conflicts
-docker stop $CONTAINER_NAME 2>/dev/null || true
-docker rm $CONTAINER_NAME 2>/dev/null || true
 
 # Select Docker container parameters
 # --rm is used to automatically remove the container when it is closed
@@ -25,5 +20,7 @@ docker run -it \
     --privileged \
     --net=host \
     -v /dev:/dev \
-    mj_holohover \
+    -v $parent_dir:/home/testing/dev_ws/src \
+    -v holohover_volume_new:/home/ \
+    mj_holohover_new \
 
