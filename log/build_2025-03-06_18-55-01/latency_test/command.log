@@ -1,4 +1,0 @@
-Invoking command in '/home/testing/dev_ws/src/build/latency_test': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/testing/dev_ws/src/latency_test -DCMAKE_INSTALL_PREFIX=/home/testing/dev_ws/src/install/latency_test
-Invoked command in '/home/testing/dev_ws/src/build/latency_test' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/testing/dev_ws/src/latency_test -DCMAKE_INSTALL_PREFIX=/home/testing/dev_ws/src/install/latency_test
-Invoking command in '/home/testing/dev_ws/src/build/latency_test': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/testing/dev_ws/src/build/latency_test -- -j8 -l8
-Invoked command in '/home/testing/dev_ws/src/build/latency_test' returned '2': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/testing/dev_ws/src/build/latency_test -- -j8 -l8

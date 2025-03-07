@@ -1,0 +1,4 @@
+[01m[K/home/testing/dev_ws/src/latency_test_talker/src/talker.cpp:[m[K In member function ‘[01m[Kvoid talker::get_response_time(std_msgs::msg::String_<std::allocator<void> >::SharedPtr)[m[K’:
+[01m[K/home/testing/dev_ws/src/latency_test_talker/src/talker.cpp:19:71:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kmsg[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+   19 | void talker::get_response_time([01;35m[Kconst std_msgs::msg::String::SharedPtr msg[m[K) {
+      |                                [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~[m[K

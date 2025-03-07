@@ -1,0 +1,2 @@
+source;share/latency_test_talker/environment/ament_prefix_path.sh
+source;share/latency_test_talker/environment/path.sh

@@ -1,0 +1,2 @@
+Invoking command in '/home/testing/dev_ws/src/build/latency_test': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/testing/dev_ws/src/latency_test_talker -DCMAKE_INSTALL_PREFIX=/home/testing/dev_ws/src/install/latency_test
+Invoked command in '/home/testing/dev_ws/src/build/latency_test' returned '1': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/testing/dev_ws/src/latency_test_talker -DCMAKE_INSTALL_PREFIX=/home/testing/dev_ws/src/install/latency_test
