@@ -1,4 +1,4 @@
-/home/testing/dev_ws/src/install/latency_test_talker/share/latency_test_talker/launch/launch.py
+/home/testing/dev_ws/src/install/latency_test_talker/share/latency_test_talker/launch/talker_launch.py
 /home/testing/dev_ws/src/install/latency_test_talker/lib/latency_test_talker/latency_test_talker
 /home/testing/dev_ws/src/install/latency_test_talker/share/ament_index/resource_index/package_run_dependencies/latency_test_talker
 /home/testing/dev_ws/src/install/latency_test_talker/share/ament_index/resource_index/parent_prefix_path/latency_test_talker

@@ -38,7 +38,7 @@ endif()
 # Create the executable
 add_executable(latency_test_talker
   src/talker.cpp
-  src/latency_test_main.cpp
+  src/talker_main.cpp
 )
 
 ament_target_dependencies(

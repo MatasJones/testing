@@ -210,30 +210,6 @@ latency_test_talker/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/latency_test_talker.dir/build.make CMakeFiles/latency_test_talker.dir/build
 .PHONY : latency_test_talker/fast
 
-src/latency_test_main.o: src/latency_test_main.cpp.o
-.PHONY : src/latency_test_main.o
-
-# target to build an object file
-src/latency_test_main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/latency_test_talker.dir/build.make CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.o
-.PHONY : src/latency_test_main.cpp.o
-
-src/latency_test_main.i: src/latency_test_main.cpp.i
-.PHONY : src/latency_test_main.i
-
-# target to preprocess a source file
-src/latency_test_main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/latency_test_talker.dir/build.make CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.i
-.PHONY : src/latency_test_main.cpp.i
-
-src/latency_test_main.s: src/latency_test_main.cpp.s
-.PHONY : src/latency_test_main.s
-
-# target to generate assembly for a file
-src/latency_test_main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/latency_test_talker.dir/build.make CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.s
-.PHONY : src/latency_test_main.cpp.s
-
 src/talker.o: src/talker.cpp.o
 .PHONY : src/talker.o
 
@@ -258,6 +234,30 @@ src/talker.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/latency_test_talker.dir/build.make CMakeFiles/latency_test_talker.dir/src/talker.cpp.s
 .PHONY : src/talker.cpp.s
 
+src/talker_main.o: src/talker_main.cpp.o
+.PHONY : src/talker_main.o
+
+# target to build an object file
+src/talker_main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/latency_test_talker.dir/build.make CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.o
+.PHONY : src/talker_main.cpp.o
+
+src/talker_main.i: src/talker_main.cpp.i
+.PHONY : src/talker_main.i
+
+# target to preprocess a source file
+src/talker_main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/latency_test_talker.dir/build.make CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.i
+.PHONY : src/talker_main.cpp.i
+
+src/talker_main.s: src/talker_main.cpp.s
+.PHONY : src/talker_main.s
+
+# target to generate assembly for a file
+src/talker_main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/latency_test_talker.dir/build.make CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.s
+.PHONY : src/talker_main.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -274,12 +274,12 @@ help:
 	@echo "... latency_test_talker_uninstall"
 	@echo "... uninstall"
 	@echo "... latency_test_talker"
-	@echo "... src/latency_test_main.o"
-	@echo "... src/latency_test_main.i"
-	@echo "... src/latency_test_main.s"
 	@echo "... src/talker.o"
 	@echo "... src/talker.i"
 	@echo "... src/talker.s"
+	@echo "... src/talker_main.o"
+	@echo "... src/talker_main.i"
+	@echo "... src/talker_main.s"
 .PHONY : help
 
 

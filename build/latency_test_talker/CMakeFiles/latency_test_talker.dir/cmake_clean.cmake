@@ -1,8 +1,8 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.o"
-  "CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.o.d"
   "CMakeFiles/latency_test_talker.dir/src/talker.cpp.o"
   "CMakeFiles/latency_test_talker.dir/src/talker.cpp.o.d"
+  "CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.o"
+  "CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.o.d"
   "latency_test_talker"
   "latency_test_talker.pdb"
 )

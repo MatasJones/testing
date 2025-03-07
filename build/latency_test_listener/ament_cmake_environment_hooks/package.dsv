@@ -1,0 +1,4 @@
+source;share/latency_test_listener/local_setup.bash
+source;share/latency_test_listener/local_setup.dsv
+source;share/latency_test_listener/local_setup.sh
+source;share/latency_test_listener/local_setup.zsh

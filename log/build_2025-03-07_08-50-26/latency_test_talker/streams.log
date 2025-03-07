@@ -1,0 +1,3 @@
+[0.012s] Invoking command in '/home/testing/dev_ws/src/build/latency_test_talker': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/testing/dev_ws/src/build/latency_test_talker -- -j8 -l8
+[0.041s] [35m[1mConsolidate compiler generated dependencies of target latency_test_talker[0m
+[0.162s] [100%] Built target latency_test_talker

@@ -83,30 +83,30 @@ CMakeFiles/latency_test_talker.dir/src/talker.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/latency_test_talker.dir/src/talker.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/testing/dev_ws/src/latency_test_talker/src/talker.cpp -o CMakeFiles/latency_test_talker.dir/src/talker.cpp.s
 
-CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.o: CMakeFiles/latency_test_talker.dir/flags.make
-CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.o: /home/testing/dev_ws/src/latency_test_talker/src/latency_test_main.cpp
-CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.o: CMakeFiles/latency_test_talker.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/testing/dev_ws/src/build/latency_test_talker/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.o -MF CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.o.d -o CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.o -c /home/testing/dev_ws/src/latency_test_talker/src/latency_test_main.cpp
+CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.o: CMakeFiles/latency_test_talker.dir/flags.make
+CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.o: /home/testing/dev_ws/src/latency_test_talker/src/talker_main.cpp
+CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.o: CMakeFiles/latency_test_talker.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/testing/dev_ws/src/build/latency_test_talker/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.o -MF CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.o.d -o CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.o -c /home/testing/dev_ws/src/latency_test_talker/src/talker_main.cpp
 
-CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/testing/dev_ws/src/latency_test_talker/src/latency_test_main.cpp > CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.i
+CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/testing/dev_ws/src/latency_test_talker/src/talker_main.cpp > CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.i
 
-CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/testing/dev_ws/src/latency_test_talker/src/latency_test_main.cpp -o CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.s
+CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/testing/dev_ws/src/latency_test_talker/src/talker_main.cpp -o CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.s
 
 # Object files for target latency_test_talker
 latency_test_talker_OBJECTS = \
 "CMakeFiles/latency_test_talker.dir/src/talker.cpp.o" \
-"CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.o"
+"CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.o"
 
 # External object files for target latency_test_talker
 latency_test_talker_EXTERNAL_OBJECTS =
 
 latency_test_talker: CMakeFiles/latency_test_talker.dir/src/talker.cpp.o
-latency_test_talker: CMakeFiles/latency_test_talker.dir/src/latency_test_main.cpp.o
+latency_test_talker: CMakeFiles/latency_test_talker.dir/src/talker_main.cpp.o
 latency_test_talker: CMakeFiles/latency_test_talker.dir/build.make
 latency_test_talker: /opt/ros/humble/lib/librclcpp.so
 latency_test_talker: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_fastrtps_c.so

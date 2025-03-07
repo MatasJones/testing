@@ -1,0 +1,59 @@
+[0.014s] Invoking command in '/home/testing/dev_ws/src/build/latency_test_listener': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/testing/dev_ws/src/latency_test_listener -DCMAKE_INSTALL_PREFIX=/home/testing/dev_ws/src/install/latency_test_listener
+[0.067s] -- The C compiler identification is GNU 11.4.0
+[0.121s] -- The CXX compiler identification is GNU 11.4.0
+[0.134s] -- Detecting C compiler ABI info
+[0.238s] -- Detecting C compiler ABI info - done
+[0.251s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.252s] -- Detecting C compile features
+[0.253s] -- Detecting C compile features - done
+[0.258s] -- Detecting CXX compiler ABI info
+[0.377s] -- Detecting CXX compiler ABI info - done
+[0.389s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.390s] -- Detecting CXX compile features
+[0.391s] -- Detecting CXX compile features - done
+[0.397s] -- Found ament_cmake: 1.3.11 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.518s] -- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+[0.619s] -- Found rclcpp: 16.0.11 (/opt/ros/humble/share/rclcpp/cmake)
+[0.648s] -- Found rosidl_generator_c: 3.1.6 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.656s] -- Found rosidl_adapter: 3.1.6 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.662s] -- Found rosidl_generator_cpp: 3.1.6 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.671s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.686s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.727s] -- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[0.729s] -- Found rmw_fastrtps_cpp: 6.2.7 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)
+[0.780s] -- Found OpenSSL: /usr/lib/aarch64-linux-gnu/libcrypto.so (found version "3.0.2")  
+[0.794s] -- Found FastRTPS: /opt/ros/humble/include  
+[0.812s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[0.819s] -- Looking for pthread.h
+[0.904s] -- Looking for pthread.h - found
+[0.907s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[0.992s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+[0.993s] -- Found Threads: TRUE  
+[1.035s] -- Found ament_lint_auto: 0.12.11 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[1.111s] -- Added test 'copyright' to check source files copyright and LICENSE
+[1.120s] -- Added test 'cppcheck' to perform static code analysis on C / C++ code
+[1.122s] -- Configured cppcheck include dirs: /home/testing/dev_ws/src/latency_test_listener/include
+[1.122s] -- Configured cppcheck exclude dirs and/or files: 
+[1.129s] -- Added test 'cpplint' to check C / C++ code against the Google style
+[1.129s] -- Configured cpplint exclude dirs and/or files: 
+[1.131s] -- Added test 'flake8' to check Python code syntax and style conventions
+[1.134s] -- Added test 'lint_cmake' to check CMake code style
+[1.136s] -- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257
+[1.147s] -- Added test 'uncrustify' to check C / C++ code style
+[1.147s] -- Configured uncrustify additional arguments: 
+[1.149s] -- Added test 'xmllint' to check XML markup files
+[1.162s] -- Configuring done
+[1.207s] -- Generating done
+[1.232s] -- Build files have been written to: /home/testing/dev_ws/src/build/latency_test_listener
+[1.239s] Invoked command in '/home/testing/dev_ws/src/build/latency_test_listener' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/testing/dev_ws/src/latency_test_listener -DCMAKE_INSTALL_PREFIX=/home/testing/dev_ws/src/install/latency_test_listener
+[1.245s] Invoking command in '/home/testing/dev_ws/src/build/latency_test_listener': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/testing/dev_ws/src/build/latency_test_listener -- -j8 -l8
+[1.293s] [ 50%] [32mBuilding CXX object CMakeFiles/latency_test_listener.dir/src/listener.cpp.o[0m
+[1.315s] [100%] [32m[1mLinking CXX executable latency_test_listener[0m
+[1.399s] /usr/bin/ld: /usr/lib/gcc/aarch64-linux-gnu/11/../../../aarch64-linux-gnu/Scrt1.o: in function `_start':
+[1.400s] (.text+0x1c): undefined reference to `main'
+[1.401s] /usr/bin/ld: (.text+0x20): undefined reference to `main'
+[1.404s] collect2: error: ld returned 1 exit status
+[1.406s] gmake[2]: *** [CMakeFiles/latency_test_listener.dir/build.make:159: latency_test_listener] Error 1
+[1.406s] gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/latency_test_listener.dir/all] Error 2
+[1.407s] gmake: *** [Makefile:146: all] Error 2
+[1.408s] Invoked command in '/home/testing/dev_ws/src/build/latency_test_listener' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/testing/dev_ws/src/build/latency_test_listener -- -j8 -l8
