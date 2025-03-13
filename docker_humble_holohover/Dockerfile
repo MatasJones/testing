@@ -29,8 +29,8 @@ COPY . .
 
 WORKDIR /home/$USERNAME/dev_ws/src
 
-RUN rosdep update \
-    && rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y -r
+# RUN rosdep update \
+#     && rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y -r
 
 # Set the default command to launch a ROS 2 container shell
 CMD ["/bin/bash"]

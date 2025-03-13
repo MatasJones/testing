@@ -18,7 +18,6 @@ docker run -it \
     --name $CONTAINER_NAME \
     --rm \
     --privileged \
-    --net=host \
     -v /dev:/dev \
     -v $parent_dir:/home/testing/dev_ws/src \
     -v holohover_volume_new:/home/ \
