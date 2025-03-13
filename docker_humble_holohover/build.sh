@@ -1,1 +1,1 @@
-docker build --progress=plain -t mj_holohover_new -f Dockerfile ..
+docker build --progress=plain -t 192.168.0.122 -f Dockerfile ..
