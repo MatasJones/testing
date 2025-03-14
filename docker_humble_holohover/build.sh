@@ -1,1 +1,1 @@
-docker build --progress=plain -t 192.168.0.122 -f Dockerfile ..
+docker build --progress=plain -t testing_image:latest -f Dockerfile .. 
