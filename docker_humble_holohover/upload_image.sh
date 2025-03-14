@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# /**
+#  * @brief Important, if you get issues with HTTP/HTTPS, you need to add your
+#  * IP:PORT to the daemon.json file in /etc/docker/daemon.json as "insecure-registries" : ["IP:PORT"]
+#  *
+#  */
+
 source config.sh
 
 echo "Starting upload.."
