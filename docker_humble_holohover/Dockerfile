@@ -12,14 +12,17 @@ ARG USERNAME=testing
 ENV USERNAME=${USERNAME}
 
 # Update package list and install dependencies
-RUN apt-get update && apt-get install -y \
-    sudo \
-    python3-pip \
-    python3-colcon-common-extensions \
-    python3-rosdep \
-    python3-argcomplete \
-    ros-humble-rmw-cyclonedds-cpp \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    libbox2d-dev \
+    libeigen3-dev \
+    libmatio-dev \
+    libgpiod-dev \
+    ros-humble-rosbag2-storage-mcap \
+    && apt-get clean autoclean \
+    && apt-get autoremove --yes \
+    && rm -rf /var/lib/{apt,dpkg,cache,log}/ \
+    && echo "source /opt/ros/humble/setup.bash; source /home/${USERNAME}/dev_ws/install/local_setup.sh" > /root/source.sh \
+    && echo "source /$root/source.sh" >> /root/.bashrc
 
 # Set the working directory for the user
 WORKDIR /home/${USERNAME}/dev_ws/src
@@ -27,7 +30,9 @@ WORKDIR /home/${USERNAME}/dev_ws/src
 # Copy project files into the container
 COPY . .
 
-WORKDIR /home/$USERNAME/dev_ws/src
+WORKDIR /home/$USERNAME/dev_ws
+
+RUN . /opt/ros/humble/setup.sh && colcon build --symlink-install
 
 # RUN rosdep update \
 #     && rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y -r

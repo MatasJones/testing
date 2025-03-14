@@ -19,8 +19,7 @@ docker run -it \
     --rm \
     --privileged \
     -v /dev:/dev \
-    -h 192.168.0.122 \
-    -v $parent_dir:/home/testing/dev_ws/src \
-    -v holohover_volume_new:/home/ \
-    mj_holohover_new \
-
+    -h testing_image:latest \
+     testing_image:latest 
+    #-v $parent_dir/testing_logs:/home/testing/dev_ws/src \
+   
