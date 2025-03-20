@@ -15,3 +15,5 @@ CMD="docker tag $MAIN_IMAGE_NAME localhost:$MAIN_PORT/$MAIN_IMAGE_NAME"
 CMD="docker push localhost:$MAIN_PORT/$MAIN_IMAGE_NAME"
 
 bash -c "$CMD"
+
+CMD="echo "source /opt/ros/<ros-distro>/setup.bash" >> ~/.bashrc"
