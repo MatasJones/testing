@@ -1,27 +1,28 @@
 #ifndef LISTENER_H
 #define LISTENER_H
 
+#include "custom_msg/msg/int16msg.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 
-#include <iostream>    
 #include <chrono>
+#include <iostream>
 
-class listener : public rclcpp :: Node {
+class listener : public rclcpp::Node {
 
-    public:
-        listener();
-        int count_ = 0;
+public:
+  listener();
+  int count_ = 0;
 
-    private:
+private:
+  // Declare a Publisher
+  rclcpp::Publisher<custom_msg::msg::Int16msg>::SharedPtr listener_publisher_;
 
-        // Declare a Publisher
-        rclcpp::Publisher<std_msgs::msg::String>::SharedPtr listener_publisher_;
+  // Declare a subscriber
+  rclcpp::Subscription<custom_msg::msg::Int16msg>::SharedPtr
+      listener_subscriber_;
 
-        // Declare a subscriber
-        rclcpp::Subscription<std_msgs::msg::String>::SharedPtr listener_subscriber_;
-
-        void echo(const std_msgs::msg::String::SharedPtr msg);
+  void echo(const custom_msg::msg::Int16msg::SharedPtr msg);
 };
 
 #endif

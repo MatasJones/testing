@@ -1,0 +1,186 @@
+[0.093s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build', '--packages-select', 'custom_msg']
+[0.093s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=8, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=['custom_msg'], packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, mixin_files=None, mixin=None, verb_parser=<colcon_mixin.mixin.mixin_argument.MixinArgumentDecorator object at 0x7ffffe200fd0>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x7ffffe200a00>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x7ffffe200a00>>, mixin_verb=('build',))
+[0.166s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.167s] INFO:colcon.colcon_metadata.package_discovery.colcon_meta:Using configuration from '/root/.colcon/metadata/default/Gazebo.meta'
+[0.167s] INFO:colcon.colcon_metadata.package_discovery.colcon_meta:Using configuration from '/root/.colcon/metadata/default/fastrtps.meta'
+[0.167s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.167s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.167s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.167s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[0.168s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.168s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/testing/dev_ws/src'
+[0.168s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.168s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[0.168s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[0.168s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[0.168s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[0.168s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[0.169s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[0.169s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[0.169s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[0.176s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[0.176s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[0.176s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[0.176s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[0.176s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[0.177s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[0.177s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[0.177s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[0.178s] Level 1:colcon.colcon_core.package_identification:_identify(custom_msg) by extensions ['ignore', 'ignore_ament_install']
+[0.178s] Level 1:colcon.colcon_core.package_identification:_identify(custom_msg) by extension 'ignore'
+[0.178s] Level 1:colcon.colcon_core.package_identification:_identify(custom_msg) by extension 'ignore_ament_install'
+[0.178s] Level 1:colcon.colcon_core.package_identification:_identify(custom_msg) by extensions ['colcon_pkg']
+[0.178s] Level 1:colcon.colcon_core.package_identification:_identify(custom_msg) by extension 'colcon_pkg'
+[0.179s] Level 1:colcon.colcon_core.package_identification:_identify(custom_msg) by extensions ['colcon_meta']
+[0.179s] Level 1:colcon.colcon_core.package_identification:_identify(custom_msg) by extension 'colcon_meta'
+[0.179s] Level 1:colcon.colcon_core.package_identification:_identify(custom_msg) by extensions ['ros']
+[0.179s] Level 1:colcon.colcon_core.package_identification:_identify(custom_msg) by extension 'ros'
+[0.184s] DEBUG:colcon.colcon_core.package_identification:Package 'custom_msg' with type 'ros.ament_cmake' and name 'custom_msg'
+[0.185s] Level 1:colcon.colcon_core.package_identification:_identify(docker_humble_holohover) by extensions ['ignore', 'ignore_ament_install']
+[0.185s] Level 1:colcon.colcon_core.package_identification:_identify(docker_humble_holohover) by extension 'ignore'
+[0.185s] Level 1:colcon.colcon_core.package_identification:_identify(docker_humble_holohover) by extension 'ignore_ament_install'
+[0.185s] Level 1:colcon.colcon_core.package_identification:_identify(docker_humble_holohover) by extensions ['colcon_pkg']
+[0.185s] Level 1:colcon.colcon_core.package_identification:_identify(docker_humble_holohover) by extension 'colcon_pkg'
+[0.185s] Level 1:colcon.colcon_core.package_identification:_identify(docker_humble_holohover) by extensions ['colcon_meta']
+[0.185s] Level 1:colcon.colcon_core.package_identification:_identify(docker_humble_holohover) by extension 'colcon_meta'
+[0.185s] Level 1:colcon.colcon_core.package_identification:_identify(docker_humble_holohover) by extensions ['ros']
+[0.185s] Level 1:colcon.colcon_core.package_identification:_identify(docker_humble_holohover) by extension 'ros'
+[0.185s] Level 1:colcon.colcon_core.package_identification:_identify(docker_humble_holohover) by extensions ['cmake', 'python']
+[0.185s] Level 1:colcon.colcon_core.package_identification:_identify(docker_humble_holohover) by extension 'cmake'
+[0.185s] Level 1:colcon.colcon_core.package_identification:_identify(docker_humble_holohover) by extension 'python'
+[0.185s] Level 1:colcon.colcon_core.package_identification:_identify(docker_humble_holohover) by extensions ['python_setup_py']
+[0.185s] Level 1:colcon.colcon_core.package_identification:_identify(docker_humble_holohover) by extension 'python_setup_py'
+[0.186s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[0.186s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[0.186s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[0.186s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_listener) by extensions ['ignore', 'ignore_ament_install']
+[0.186s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_listener) by extension 'ignore'
+[0.186s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_listener) by extension 'ignore_ament_install'
+[0.186s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_listener) by extensions ['colcon_pkg']
+[0.187s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_listener) by extension 'colcon_pkg'
+[0.187s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_listener) by extensions ['colcon_meta']
+[0.187s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_listener) by extension 'colcon_meta'
+[0.187s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_listener) by extensions ['ros']
+[0.187s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_listener) by extension 'ros'
+[0.187s] DEBUG:colcon.colcon_core.package_identification:Package 'latency_test_listener' with type 'ros.ament_cmake' and name 'latency_test_listener'
+[0.188s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_talker) by extensions ['ignore', 'ignore_ament_install']
+[0.188s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_talker) by extension 'ignore'
+[0.188s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_talker) by extension 'ignore_ament_install'
+[0.188s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_talker) by extensions ['colcon_pkg']
+[0.188s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_talker) by extension 'colcon_pkg'
+[0.188s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_talker) by extensions ['colcon_meta']
+[0.188s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_talker) by extension 'colcon_meta'
+[0.188s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_talker) by extensions ['ros']
+[0.188s] Level 1:colcon.colcon_core.package_identification:_identify(latency_test_talker) by extension 'ros'
+[0.189s] DEBUG:colcon.colcon_core.package_identification:Package 'latency_test_talker' with type 'ros.ament_cmake' and name 'latency_test_talker'
+[0.190s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[0.190s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[0.190s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[0.190s] Level 1:colcon.colcon_core.package_identification:_identify(testing_logs) by extensions ['ignore', 'ignore_ament_install']
+[0.190s] Level 1:colcon.colcon_core.package_identification:_identify(testing_logs) by extension 'ignore'
+[0.190s] Level 1:colcon.colcon_core.package_identification:_identify(testing_logs) by extension 'ignore_ament_install'
+[0.190s] Level 1:colcon.colcon_core.package_identification:_identify(testing_logs) by extensions ['colcon_pkg']
+[0.190s] Level 1:colcon.colcon_core.package_identification:_identify(testing_logs) by extension 'colcon_pkg'
+[0.190s] Level 1:colcon.colcon_core.package_identification:_identify(testing_logs) by extensions ['colcon_meta']
+[0.190s] Level 1:colcon.colcon_core.package_identification:_identify(testing_logs) by extension 'colcon_meta'
+[0.190s] Level 1:colcon.colcon_core.package_identification:_identify(testing_logs) by extensions ['ros']
+[0.190s] Level 1:colcon.colcon_core.package_identification:_identify(testing_logs) by extension 'ros'
+[0.191s] Level 1:colcon.colcon_core.package_identification:_identify(testing_logs) by extensions ['cmake', 'python']
+[0.191s] Level 1:colcon.colcon_core.package_identification:_identify(testing_logs) by extension 'cmake'
+[0.191s] Level 1:colcon.colcon_core.package_identification:_identify(testing_logs) by extension 'python'
+[0.191s] Level 1:colcon.colcon_core.package_identification:_identify(testing_logs) by extensions ['python_setup_py']
+[0.191s] Level 1:colcon.colcon_core.package_identification:_identify(testing_logs) by extension 'python_setup_py'
+[0.191s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[0.191s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[0.191s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[0.191s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[0.191s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[0.206s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'latency_test_listener' in 'latency_test_listener'
+[0.206s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'latency_test_talker' in 'latency_test_talker'
+[0.206s] Level 5:colcon.colcon_core.verb:set package 'custom_msg' build argument 'cmake_args' from command line to 'None'
+[0.206s] Level 5:colcon.colcon_core.verb:set package 'custom_msg' build argument 'cmake_target' from command line to 'None'
+[0.206s] Level 5:colcon.colcon_core.verb:set package 'custom_msg' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.206s] Level 5:colcon.colcon_core.verb:set package 'custom_msg' build argument 'cmake_clean_cache' from command line to 'False'
+[0.206s] Level 5:colcon.colcon_core.verb:set package 'custom_msg' build argument 'cmake_clean_first' from command line to 'False'
+[0.206s] Level 5:colcon.colcon_core.verb:set package 'custom_msg' build argument 'cmake_force_configure' from command line to 'False'
+[0.206s] Level 5:colcon.colcon_core.verb:set package 'custom_msg' build argument 'ament_cmake_args' from command line to 'None'
+[0.206s] Level 5:colcon.colcon_core.verb:set package 'custom_msg' build argument 'catkin_cmake_args' from command line to 'None'
+[0.206s] Level 5:colcon.colcon_core.verb:set package 'custom_msg' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.206s] DEBUG:colcon.colcon_core.verb:Building package 'custom_msg' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/testing/dev_ws/src/build/custom_msg', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/testing/dev_ws/src/install/custom_msg', 'merge_install': False, 'path': '/home/testing/dev_ws/src/custom_msg', 'symlink_install': False, 'test_result_base': None}
+[0.206s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[0.209s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[0.210s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/testing/dev_ws/src/custom_msg' with build type 'ament_cmake'
+[0.210s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/testing/dev_ws/src/custom_msg'
+[0.211s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.212s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.212s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.251s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/testing/dev_ws/src/build/custom_msg': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/testing/dev_ws/src/custom_msg -DCMAKE_INSTALL_PREFIX=/home/testing/dev_ws/src/install/custom_msg
+[4.563s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/testing/dev_ws/src/build/custom_msg' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/testing/dev_ws/src/custom_msg -DCMAKE_INSTALL_PREFIX=/home/testing/dev_ws/src/install/custom_msg
+[4.565s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/testing/dev_ws/src/build/custom_msg': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/testing/dev_ws/src/build/custom_msg -- -j8 -l8
+[9.508s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/testing/dev_ws/src/build/custom_msg' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/testing/dev_ws/src/build/custom_msg -- -j8 -l8
+[9.547s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/testing/dev_ws/src/build/custom_msg': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/testing/dev_ws/src/build/custom_msg
+[9.816s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(custom_msg)
+[9.818s] Level 1:colcon.colcon_core.environment:checking '/home/testing/dev_ws/src/install/custom_msg' for CMake module files
+[9.818s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/testing/dev_ws/src/build/custom_msg' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/testing/dev_ws/src/build/custom_msg
+[9.820s] Level 1:colcon.colcon_core.environment:checking '/home/testing/dev_ws/src/install/custom_msg' for CMake config files
+[9.823s] Level 1:colcon.colcon_core.shell:create_environment_hook('custom_msg', 'cmake_prefix_path')
+[9.823s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/hook/cmake_prefix_path.ps1'
+[9.824s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/hook/cmake_prefix_path.dsv'
+[9.824s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/hook/cmake_prefix_path.sh'
+[9.825s] Level 1:colcon.colcon_core.environment:checking '/home/testing/dev_ws/src/install/custom_msg/lib'
+[9.826s] Level 1:colcon.colcon_core.shell:create_environment_hook('custom_msg', 'ld_library_path_lib')
+[9.826s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/hook/ld_library_path_lib.ps1'
+[9.826s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/hook/ld_library_path_lib.dsv'
+[9.827s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/hook/ld_library_path_lib.sh'
+[9.827s] Level 1:colcon.colcon_core.environment:checking '/home/testing/dev_ws/src/install/custom_msg/bin'
+[9.827s] Level 1:colcon.colcon_core.environment:checking '/home/testing/dev_ws/src/install/custom_msg/lib/pkgconfig/custom_msg.pc'
+[9.828s] Level 1:colcon.colcon_core.environment:checking '/home/testing/dev_ws/src/install/custom_msg/lib/python3.10/site-packages'
+[9.828s] Level 1:colcon.colcon_core.environment:checking '/home/testing/dev_ws/src/install/custom_msg/bin'
+[9.829s] INFO:colcon.colcon_core.shell:Creating package script '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/package.ps1'
+[9.830s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/package.dsv'
+[9.830s] INFO:colcon.colcon_core.shell:Creating package script '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/package.sh'
+[9.831s] INFO:colcon.colcon_core.shell:Creating package script '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/package.bash'
+[9.832s] INFO:colcon.colcon_core.shell:Creating package script '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/package.zsh'
+[9.833s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/testing/dev_ws/src/install/custom_msg/share/colcon-core/packages/custom_msg)
+[9.834s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(custom_msg)
+[9.834s] Level 1:colcon.colcon_core.environment:checking '/home/testing/dev_ws/src/install/custom_msg' for CMake module files
+[9.835s] Level 1:colcon.colcon_core.environment:checking '/home/testing/dev_ws/src/install/custom_msg' for CMake config files
+[9.838s] Level 1:colcon.colcon_core.shell:create_environment_hook('custom_msg', 'cmake_prefix_path')
+[9.838s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/hook/cmake_prefix_path.ps1'
+[9.838s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/hook/cmake_prefix_path.dsv'
+[9.839s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/hook/cmake_prefix_path.sh'
+[9.839s] Level 1:colcon.colcon_core.environment:checking '/home/testing/dev_ws/src/install/custom_msg/lib'
+[9.839s] Level 1:colcon.colcon_core.shell:create_environment_hook('custom_msg', 'ld_library_path_lib')
+[9.840s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/hook/ld_library_path_lib.ps1'
+[9.840s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/hook/ld_library_path_lib.dsv'
+[9.840s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/hook/ld_library_path_lib.sh'
+[9.841s] Level 1:colcon.colcon_core.environment:checking '/home/testing/dev_ws/src/install/custom_msg/bin'
+[9.841s] Level 1:colcon.colcon_core.environment:checking '/home/testing/dev_ws/src/install/custom_msg/lib/pkgconfig/custom_msg.pc'
+[9.841s] Level 1:colcon.colcon_core.environment:checking '/home/testing/dev_ws/src/install/custom_msg/lib/python3.10/site-packages'
+[9.841s] Level 1:colcon.colcon_core.environment:checking '/home/testing/dev_ws/src/install/custom_msg/bin'
+[9.841s] INFO:colcon.colcon_core.shell:Creating package script '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/package.ps1'
+[9.842s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/package.dsv'
+[9.842s] INFO:colcon.colcon_core.shell:Creating package script '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/package.sh'
+[9.843s] INFO:colcon.colcon_core.shell:Creating package script '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/package.bash'
+[9.843s] INFO:colcon.colcon_core.shell:Creating package script '/home/testing/dev_ws/src/install/custom_msg/share/custom_msg/package.zsh'
+[9.843s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/testing/dev_ws/src/install/custom_msg/share/colcon-core/packages/custom_msg)
+[9.844s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[9.844s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[9.844s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '0'
+[9.844s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[9.851s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.notify_send': Could not find 'notify-send'
+[9.851s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[9.851s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[9.851s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[9.852s] DEBUG:colcon.colcon_notification.desktop_notification.notify2:Failed to initialize notify2: org.freedesktop.DBus.Error.NotSupported: Unable to autolaunch a dbus-daemon without a $DISPLAY for X11
+[9.852s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[9.853s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/testing/dev_ws/src/install/local_setup.ps1'
+[9.854s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/testing/dev_ws/src/install/_local_setup_util_ps1.py'
+[9.855s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/testing/dev_ws/src/install/setup.ps1'
+[9.856s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/testing/dev_ws/src/install/local_setup.sh'
+[9.857s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/testing/dev_ws/src/install/_local_setup_util_sh.py'
+[9.857s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/testing/dev_ws/src/install/setup.sh'
+[9.858s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/testing/dev_ws/src/install/local_setup.bash'
+[9.859s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/testing/dev_ws/src/install/setup.bash'
+[9.859s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/testing/dev_ws/src/install/local_setup.zsh'
+[9.860s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/testing/dev_ws/src/install/setup.zsh'

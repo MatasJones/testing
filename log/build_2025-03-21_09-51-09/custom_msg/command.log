@@ -1,0 +1,6 @@
+Invoking command in '/home/testing/dev_ws/src/build/custom_msg': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/testing/dev_ws/src/custom_msg -DCMAKE_INSTALL_PREFIX=/home/testing/dev_ws/src/install/custom_msg
+Invoked command in '/home/testing/dev_ws/src/build/custom_msg' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/testing/dev_ws/src/custom_msg -DCMAKE_INSTALL_PREFIX=/home/testing/dev_ws/src/install/custom_msg
+Invoking command in '/home/testing/dev_ws/src/build/custom_msg': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/testing/dev_ws/src/build/custom_msg -- -j8 -l8
+Invoked command in '/home/testing/dev_ws/src/build/custom_msg' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/testing/dev_ws/src/build/custom_msg -- -j8 -l8
+Invoking command in '/home/testing/dev_ws/src/build/custom_msg': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/testing/dev_ws/src/build/custom_msg
+Invoked command in '/home/testing/dev_ws/src/build/custom_msg' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/testing/dev_ws/src/build/custom_msg

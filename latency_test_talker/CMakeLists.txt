@@ -19,6 +19,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)  # If you're using std_msgs for message passing
+find_package(custom_msg REQUIRED)
 
 include_directories(
   include
@@ -45,6 +46,7 @@ ament_target_dependencies(
   latency_test_talker
   rclcpp
   std_msgs  # Include std_msgs if you're using it for your messages
+  custom_msg
 )
 
 install(
