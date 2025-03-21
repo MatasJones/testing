@@ -1,6 +1,0 @@
-{
-  "package_name": "custom_msg",
-  "non_idl_tuples": [
-    "/home/testing/dev_ws/src/custom_msg:msg/Int16msg.msg"
-  ]
-}
