@@ -3,6 +3,7 @@
 talker::talker() : Node("talker"), count_(0) {
 
   RCLCPP_INFO(this->get_logger(), "Creating talker");
+  talker::create_logger();
 
   // This block creates a subscriber on a specified topic and binds it to a
   // callback
@@ -36,11 +37,19 @@ void talker::get_response_time(
   // substract the recieve and send timestamps to get elapsed time in
   // microseconds
   double elapsed_time = recieving_time - sending_time;
+  std::time_t time = std::time(nullptr);
 
+  std::string timestamp = std::string(std::asctime(std::gmtime(&time)));
+  timestamp.pop_back(); // Remove trailing '\n'
+  std::string log = timestamp + " | " + std::to_string(elapsed_time) + "\n";
+
+  talker::log(log);
   // Log the elapsed time in microseconds
   RCLCPP_INFO(this->get_logger(), "Msg received from listener: %d",
               static_cast<int>(msg->id));
   RCLCPP_INFO(this->get_logger(), "Elapsed time: %f ms", elapsed_time);
+
+  // Write to csv file the elapsed time
 }
 
 void talker::timer_callback() {
@@ -55,4 +64,27 @@ void talker::timer_callback() {
 
   // Publish message on topic
   talker_publisher_->publish(message);
+}
+
+void talker::create_logger() {
+
+  this->file.open(this->logger_name, std::ios::out | std::ios::trunc);
+
+  if (!this->file.is_open()) {
+    RCLCPP_INFO(this->get_logger(), "Error occurred during file creation!");
+    return;
+  }
+
+  this->file.close();
+  RCLCPP_INFO(this->get_logger(), "Logger created");
+}
+
+template <typename T> void talker::log(T data) {
+  this->file.open(this->logger_name, std::ios::out | std::ios::app);
+  if (!this->file.is_open()) {
+    RCLCPP_INFO(this->get_logger(), "Error occurred during file writing!");
+    return;
+  }
+  this->file << data << "\n";
+  this->file.close();
 }

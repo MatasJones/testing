@@ -7,8 +7,13 @@
 #include "std_msgs/msg/string.hpp"
 
 #include <chrono>
+#include <fstream>
 #include <iostream>
+#include <string>
 #include <thread>
+#include <time.h>
+
+using namespace std;
 
 class talker : public rclcpp::Node {
 public:
@@ -27,11 +32,15 @@ private:
       talker_subscriber_;
 
   std::chrono::time_point<std::chrono::system_clock> start, end;
-
+  std::ofstream file;
+  std::string logger_name = "/home/testing/dev_ws/src/testing_logs/logger.csv";
   double sending_time, recieving_time;
 
   void get_response_time(const custom_msg::msg::CustomString::SharedPtr msg);
   void timer_callback();
+  void create_logger();
+
+  template <typename T> void log(T data);
 };
 
 #endif
