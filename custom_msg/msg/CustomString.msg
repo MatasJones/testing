@@ -1,3 +1,4 @@
 #CustomString
-int16 id
+uint8 id
+int32 size
 string message

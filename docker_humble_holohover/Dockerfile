@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     libeigen3-dev \
     libmatio-dev \
     libgpiod-dev \
+    libyaml-cpp-dev \
     ros-humble-rosbag2-storage-mcap \
     && apt-get clean autoclean \
     && apt-get autoremove --yes \

@@ -20,6 +20,8 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)  # If you're using std_msgs for message passing
 find_package(custom_msg REQUIRED)
+find_package(yaml-cpp REQUIRED)
+
 
 include_directories(
   include
@@ -41,6 +43,8 @@ add_executable(latency_test_talker
   src/talker.cpp
   src/talker_main.cpp
 )
+
+target_link_libraries(latency_test_talker yaml-cpp)
 
 ament_target_dependencies(
   latency_test_talker

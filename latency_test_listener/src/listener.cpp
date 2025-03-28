@@ -19,9 +19,13 @@ listener::listener() : Node("listener"), count_(0) {
 
 void listener::echo(const custom_msg::msg::CustomString::SharedPtr msg) {
 
+  auto message = custom_msg::msg::CustomString();
+  message.id = msg->id;
+  std::string test_string(msg->size, 'B');
+  message.message = test_string;
+  message.size = msg->size;
+
+  listener_publisher_->publish(message);
   RCLCPP_INFO(this->get_logger(),
               "Msg received from computer! Sending response..., %d", count_++);
-  auto message = custom_msg::msg::CustomString();
-  message.id = msg->id + 22;
-  listener_publisher_->publish(message);
 }

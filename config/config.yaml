@@ -1,1 +1,3 @@
-clear
+repetitions: 30  # Number of times to send each message size
+sizes: [1, 10, 100, 1000, 10000, 100000, 1000000]  # Message sizes in bytes (+4 byte for the size of the message)
+# Test parameters
