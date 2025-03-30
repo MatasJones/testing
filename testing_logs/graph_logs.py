@@ -55,11 +55,16 @@ def plot_data_from_csv(csv_file_path):
     bars = ax2.bar(filtered_avg_values.index, filtered_avg_values.values, 
                    color=[color_dict[p] for p in filtered_avg_values.index], alpha=0.6)
 
-    ax2.set_xlabel("Message Size [bytes]")
-    ax2.set_ylabel("Roundtrip Time [ms]")
-    ax2.set_title("Roundtrip Time vs. Message Size")
+    ax2.set_xlabel("Message size [bytes]")
+    ax2.set_ylabel("Average roundtrip time [ms]")
+    ax2.set_title("Avergae Roundtrip Time vs Message Size")
     ax2.set_xticks(filtered_avg_values.index)
     ax2.set_xticklabels([f"10^{int(x)}" for x in filtered_avg_values.index])
+
+    # Add the values above each column of the histogram
+    for bar in bars:
+        height = bar.get_height()
+        ax2.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.4f}', ha='center', va='bottom', fontsize=10)
 
     # Show the figure with both plots
     plt.tight_layout()
@@ -68,3 +73,4 @@ def plot_data_from_csv(csv_file_path):
 # Path to your CSV file
 csv_file_path = '/Users/matasjones/Documents/Coding_projects/testing/testing_logs/logger1.csv'
 plot_data_from_csv(csv_file_path)
+
