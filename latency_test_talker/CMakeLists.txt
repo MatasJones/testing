@@ -21,7 +21,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)  # If you're using std_msgs for message passing
 find_package(custom_msg REQUIRED)
 find_package(yaml-cpp REQUIRED)
-
+find_package(sync_service REQUIRED)
 
 include_directories(
   include
@@ -51,6 +51,7 @@ ament_target_dependencies(
   rclcpp
   std_msgs  # Include std_msgs if you're using it for your messages
   custom_msg
+  sync_service
 )
 
 install(

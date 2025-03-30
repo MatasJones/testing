@@ -21,3 +21,5 @@ else
     echo "Ping to $SERVER_IP failed..."
 
 fi # Used to indicated the end of an if statement block
+
+python3 /Users/matasjones/Documents/Coding_projects/testing/testing_logs/graph_logs.py

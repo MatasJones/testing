@@ -6,6 +6,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 
+#include "sync_service/srv/sync_check.hpp"
+
 #include <chrono>
 #include <filesystem>
 #include <fstream>
@@ -30,15 +32,12 @@ private:
   // Declare a Publisher
   rclcpp::Publisher<custom_msg::msg::CustomString>::SharedPtr talker_publisher_;
 
-  // Declare a subscriber
-  rclcpp::Subscription<custom_msg::msg::CustomString>::SharedPtr
-      sync_subscriber_;
+  // Declare a service client
+  rclcpp::Client<sync_service::srv::SyncCheck>::SharedPtr sync_client_;
 
+  // Declare a Subscriber
   rclcpp::Subscription<custom_msg::msg::CustomString>::SharedPtr
       talker_subscriber_;
-
-  // Declare a thread
-  std::thread exp_thread_;
 
   std::chrono::time_point<std::chrono::system_clock> start, end;
   std::ofstream file;
@@ -55,7 +54,7 @@ private:
 
   std::string config_file_path = cwd.string() + "/src/config/config.yaml";
 
-  void perform_sync();
+  bool perform_sync();
   void get_response_time(const custom_msg::msg::CustomString::SharedPtr msg);
   void create_logger();
   void setup_experiment();

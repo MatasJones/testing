@@ -14,7 +14,20 @@ listener::listener() : Node("listener"), count_(0) {
   this->listener_publisher_ =
       this->create_publisher<custom_msg::msg::CustomString>(("PI_TO_COMP"), 10);
 
+  this->sync_service_ = this->create_service<sync_service::srv::SyncCheck>(
+      "/latency_test_listener/sync_service",
+      std::bind(&listener::sync_response, this, std::placeholders::_1,
+                std::placeholders::_2));
+
   RCLCPP_INFO(this->get_logger(), "Listener created");
+}
+
+void listener::sync_response(
+    const std::shared_ptr<sync_service::srv::SyncCheck::Request> request,
+    std::shared_ptr<sync_service::srv::SyncCheck::Response> response) {
+  (void)request;
+  response->response = true;
+  RCLCPP_INFO(this->get_logger(), "Sync request received");
 }
 
 void listener::echo(const custom_msg::msg::CustomString::SharedPtr msg) {
