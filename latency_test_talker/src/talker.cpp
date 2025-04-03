@@ -130,6 +130,11 @@ void talker::run_experiment() {
   // If the experiment is completed, shutdown the node
   if (static_cast<std::vector<int>::size_type>(current_size) == sizes.size()) {
     RCLCPP_INFO(this->get_logger(), "Experiment completed");
+    // Tell listener nodes to shutdown
+    auto request = std::make_shared<sync_service::srv::SyncCheck::Request>();
+    request->request = false;
+    auto result = sync_client_->async_send_request(request);
+    std::this_thread::sleep_for(std::chrono::seconds(5));
     rclcpp::shutdown();
   }
 

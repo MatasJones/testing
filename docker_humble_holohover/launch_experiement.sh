@@ -20,9 +20,9 @@ if ping -c 1 ${REMOTE_IPS[1]} &> /dev/null; then
         echo "Container of holo:${REMOTE_IPS[1]} is launched."
     fi
 
-    CMD="docker exec -t holo_testing_container bash -c 'if [ -f /home/testing/dev_ws/install/latency_test_listener/share/latency_test_listener/launch/listener_launch.py ]; then echo \"File exists\"; else echo \"File does not exist\"; fi'"
+    #CMD="docker exec -t holo_testing_container bash -c 'if [ -f /home/testing/dev_ws/install/latency_test_listener/share/latency_test_listener/launch/listener_launch.py ]; then echo \"File exists\"; else echo \"File does not exist\"; fi'"
 
-    ssh ${USERS[1]}@${REMOTE_IPS[1]} "$CMD"
+    #ssh ${USERS[1]}@${REMOTE_IPS[1]} "$CMD"
 
 
     CMD="docker exec holo_testing_container bash -c 'source /home/testing/dev_ws/install/setup.bash && ros2 launch latency_test_listener listener_launch.py > /dev/null 2>&1 &'"
@@ -54,7 +54,7 @@ if ping -c 1 ${SERVER_IP} &> /dev/null; then
         echo "Container of main:${SERVER_IP} is launched."
     fi
 
-    CMD="docker exec main_testing_container bash -c 'source /home/testing/dev_ws/install/setup.bash && ros2 launch latency_test_talker talker_launch.py > /dev/null '" #2>&1 &'"
+    CMD="docker exec main_testing_container bash -c 'source /home/testing/dev_ws/install/setup.bash && ros2 launch latency_test_talker talker_launch.py'"
 
     ssh ${USERS[1]}@${SERVER_IP} "$CMD"
 
@@ -65,13 +65,10 @@ else
 
 fi # Used to indicated the end of an if statement block
 
-echo "All nodes launched!"
+echo "Test done, retrieving logs.."
 
-# Launch test
+# Retrieve logs and graph results
+bash /Users/matasjones/Documents/Coding_projects/testing/docker_humble_holohover/get_logs.sh
 
-# Retrieve logs
-
-# Graph results
-
-# Terminate experiment
+echo "All done!"
 

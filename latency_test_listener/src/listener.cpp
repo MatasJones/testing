@@ -25,7 +25,17 @@ listener::listener() : Node("listener"), count_(0) {
 void listener::sync_response(
     const std::shared_ptr<sync_service::srv::SyncCheck::Request> request,
     std::shared_ptr<sync_service::srv::SyncCheck::Response> response) {
-  (void)request;
+  if (!request) {
+    // Check if request is null
+    RCLCPP_ERROR(this->get_logger(), "Received a null request");
+    return;
+  }
+
+  bool state = request->request;
+  if (state == false) {
+    RCLCPP_INFO(this->get_logger(), "Sync request received");
+    rclcpp::shutdown();
+  }
   response->response = true;
   RCLCPP_INFO(this->get_logger(), "Sync request received");
 }
