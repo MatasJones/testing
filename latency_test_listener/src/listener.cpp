@@ -33,7 +33,7 @@ listener::listener() : Node("listener"), count_(0) {
 void listener::echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg) {
   RCLCPP_INFO(this->get_logger(), "Sync message received");
   auto message = custom_msg::msg::SyncMsg();
-  message.id = msg->id;
+  message.id = id;
   message.message = "Sync check response";
 
   sync_publisher_->publish(message);
@@ -102,19 +102,8 @@ void listener::get_ip_addr() {
   freeaddrinfo(res); // Free the linked list
   RCLCPP_INFO(this->get_logger(), "config path: %s", config_file_path.c_str());
   YAML::Node config = YAML::LoadFile(config_file_path); // Load the config file
-  RCLCPP_INFO(this->get_logger(), "YAML content: %s",
-              YAML::Dump(config).c_str());
 
   // Extract the ID from the config file
-  if (config["id"]) {
-    if (config["id"]["192.168.0.131"]) {
-      int id = config["id"]["192.168.0.131"].as<int>();
-      RCLCPP_INFO(this->get_logger(), "ID for IP %s: %d", ip_addr.c_str(), id);
-    } else {
-      RCLCPP_ERROR(this->get_logger(), "IP address %s not found in config file",
-                   ip_addr.c_str());
-    }
-  } else {
-    RCLCPP_ERROR(this->get_logger(), "'id' section not found in config file");
-  }
+  id = config["id"][ip_addr].as<int>();
+  RCLCPP_INFO(this->get_logger(), "ID for IP %s: %d", ip_addr.c_str(), id);
 }

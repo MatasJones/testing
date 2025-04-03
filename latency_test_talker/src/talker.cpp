@@ -43,7 +43,8 @@ talker::talker() : Node("talker"), count_(0) {
 }
 
 bool talker::echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg) {
-  RCLCPP_INFO(this->get_logger(), "mux activated..");
+  int id = msg->id;
+  RCLCPP_INFO(this->get_logger(), "Sync check from listener %d", id);
   return 0;
 }
 
