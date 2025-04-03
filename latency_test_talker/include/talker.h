@@ -3,6 +3,7 @@
 
 #include "custom_msg/msg/custom_string.hpp"
 #include "custom_msg/msg/int16msg.hpp"
+#include "custom_msg/msg/sync_msg.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 
@@ -29,15 +30,17 @@ public:
 private:
   rclcpp::TimerBase::SharedPtr timer_;
 
-  // Declare a Publisher
+  // Declare the Publishers
   rclcpp::Publisher<custom_msg::msg::CustomString>::SharedPtr talker_publisher_;
+  rclcpp::Publisher<custom_msg::msg::SyncMsg>::SharedPtr sync_publisher_;
 
   // Declare a service client
   rclcpp::Client<sync_service::srv::SyncCheck>::SharedPtr sync_client_;
 
-  // Declare a Subscriber
+  // Declare the Subscribers
   rclcpp::Subscription<custom_msg::msg::CustomString>::SharedPtr
       talker_subscriber_;
+  rclcpp::Subscription<custom_msg::msg::SyncMsg>::SharedPtr sync_subscriber_;
 
   std::chrono::time_point<std::chrono::system_clock> start, end;
   std::ofstream file;
@@ -59,6 +62,7 @@ private:
   void create_logger();
   void setup_experiment();
   void run_experiment();
+  bool echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg);
 
   template <typename T> void log(T data);
 };

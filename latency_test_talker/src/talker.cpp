@@ -13,6 +13,10 @@ talker::talker() : Node("talker"), count_(0) {
           ("/latency_test_listener/PI_TO_COMP"), 10,
           std::bind(&talker::get_response_time, this, std::placeholders::_1));
 
+  this->sync_subscriber_ = this->create_subscription<custom_msg::msg::SyncMsg>(
+      ("/latency_test_talker/SYNC_TOPIC_IN"), 10,
+      std::bind(&talker::echo_sync, this, std::placeholders::_1));
+
   // Create a service client
   this->sync_client_ = this->create_client<sync_service::srv::SyncCheck>(
       "/latency_test_listener/sync_service");
@@ -21,48 +25,39 @@ talker::talker() : Node("talker"), count_(0) {
   this->talker_publisher_ =
       this->create_publisher<custom_msg::msg::CustomString>(("COMP_TO_PI"), 10);
 
+  this->sync_publisher_ = this->create_publisher<custom_msg::msg::SyncMsg>(
+      ("/latency_test_talker/SYNC_TOPIC_OUT"), 10);
+
   // Set up the experiment parameters from the config file
   talker::setup_experiment();
 
   // // Perform sync check
-  if (talker::perform_sync() == false) {
-    RCLCPP_INFO(this->get_logger(), "Failed to perform sync check");
-    rclcpp::shutdown();
-  }
+  // if (talker::perform_sync() == false) {
+  //   RCLCPP_INFO(this->get_logger(), "Failed to perform sync check");
+  //   rclcpp::shutdown();
+  // }
 
   // Run the experiment
   this->timer_ = this->create_wall_timer(
-      std::chrono::milliseconds(200), std::bind(&talker::run_experiment, this));
+      std::chrono::milliseconds(200), std::bind(&talker::perform_sync, this));
+}
+
+bool talker::echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg) {
+  RCLCPP_INFO(this->get_logger(), "mux activated..");
+  return 0;
 }
 
 bool talker::perform_sync() {
+  // Create a SyncMsg message
+  auto message = custom_msg::msg::SyncMsg();
+  message.id = 0;
+  message.message = "Sync check";
 
-  // Wait for the service to be available, if not available, return to avoid
-  // issues
-  if (!sync_client_->wait_for_service(std::chrono::seconds(10))) {
-    RCLCPP_INFO(this->get_logger(), "Still waiting for service...");
-    return 0;
-  }
+  // Publish the SyncMsg message
+  sync_publisher_->publish(message);
+  RCLCPP_INFO(this->get_logger(), "Sync message sent");
 
-  // Create a request object, empty in this case
-  auto request = std::make_shared<sync_service::srv::SyncCheck::Request>();
-  request->request = true;
-
-  // Send the request to the service server and store the future response
-  auto result = sync_client_->async_send_request(request);
-
-  // Wait for the result
-  if (rclcpp::spin_until_future_complete(this->get_node_base_interface(),
-                                         result) ==
-      rclcpp::FutureReturnCode::SUCCESS) {
-
-    RCLCPP_INFO(this->get_logger(), "Server response: %s",
-                result.get()->response ? "true" : "false");
-  } else {
-    RCLCPP_ERROR(this->get_logger(), "Failed to call service");
-    rclcpp::shutdown();
-  }
-  return 1;
+  return true;
 }
 
 void talker::get_response_time(
