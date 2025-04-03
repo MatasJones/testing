@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source config.sh
-echo "Starting experiment latency.."
+echo "Starting latency experiment.."
 
 # SSH to listeners and launch nodes
 if ping -c 1 ${REMOTE_IPS[1]} &> /dev/null; then 
@@ -17,15 +17,23 @@ if ping -c 1 ${REMOTE_IPS[1]} &> /dev/null; then
     else
         echo "Container of ${REMOTE_IPS[1]} is not running, launching container..."
         ssh ${USERS[1]}@${REMOTE_IPS[1]} "bash /home/ubuntu/testing/docker_humble_holohover/holo_docker_remote_launch.sh"
+        echo "Container of ${REMOTE_IPS[1]} is launched."
     fi
 
-    #CMD="docker exec -it holo_testing_container bash -c 'source /home/ubuntu/holohover_ws/install/setup.bash && ros2 launch holohover_launch holohover.launch.py'"
-    
-    # Send command to devices
-    #ssh ${USERS[1]}@${REMOTE_IPS[1]} $CMD
+    CMD="docker exec -t holo_testing_container bash -c 'if [ -f /home/testing/dev_ws/install/latency_test_listener/share/latency_test_listener/launch/listener_launch.py ]; then echo \"File exists\"; else echo \"File does not exist\"; fi'"
+
+    ssh ${USERS[1]}@${REMOTE_IPS[1]} "$CMD"
+
+
+    CMD="docker exec holo_testing_container bash -c 'source /home/testing/dev_ws/install/setup.bash && ros2 launch latency_test_listener listener_launch.py'"
+     #> /dev/null 2>&1 &'"
+
+    ssh ${USERS[1]}@${REMOTE_IPS[1]} "$CMD"
+
+    echo "Listener node launched on ${REMOTE_IPS[1]}."
 
 else
-    echo "Ping to $SERVER_IP failed..."
+    echo "Ping to ${REMOTE_IPS[1]} failed..."
 
 fi # Used to indicated the end of an if statement block
 

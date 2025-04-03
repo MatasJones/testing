@@ -52,8 +52,8 @@ ament_target_dependencies(
 )
 
 install(
-  DIRECTORY launch/
-  DESTINATION share/${PROJECT_NAME}/launch
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
 )
 
 # Install the target
