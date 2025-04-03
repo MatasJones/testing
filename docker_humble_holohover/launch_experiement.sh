@@ -16,7 +16,7 @@ if ping -c 1 ${REMOTE_IPS[1]} &> /dev/null; then
     # If not running, launch the container
     else
         echo "Container of ${REMOTE_IPS[1]} is not running, launching container..."
-        ssh ${USERS[1]}@${REMOTE_IPS[1]} "bash /home/ubuntu/testing/docker_humble_holohover/holo_docker_launch.sh"
+        ssh ${USERS[1]}@${REMOTE_IPS[1]} "bash /home/ubuntu/testing/docker_humble_holohover/holo_docker_remote_launch.sh"
     fi
 
     #CMD="docker exec -it holo_testing_container bash -c 'source /home/ubuntu/holohover_ws/install/setup.bash && ros2 launch holohover_launch holohover.launch.py'"
