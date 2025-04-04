@@ -47,8 +47,6 @@ void talker::echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg) {
   RCLCPP_INFO(this->get_logger(), "Sync check from listener %d", id);
   // If the listener is synced, set the index of the sync array to 1
   sync_array[id - 1] = 1;
-  RCLCPP_INFO(this->get_logger(), "sync_array[%d] = %d", id - 1,
-              sync_array[id - 1]);
 }
 
 void talker::perform_sync() {
@@ -67,6 +65,10 @@ void talker::perform_sync() {
     }
     if (sync_status == true) {
       RCLCPP_INFO(this->get_logger(), "Sync check done!");
+      this->timer_->cancel();
+      this->exp_timer_ =
+          this->create_wall_timer(std::chrono::milliseconds(200),
+                                  std::bind(&talker::run_experiment, this));
     }
   }
 

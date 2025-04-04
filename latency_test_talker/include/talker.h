@@ -31,6 +31,7 @@ public:
 
 private:
   rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::TimerBase::SharedPtr exp_timer_;
 
   // Declare the Publishers
   rclcpp::Publisher<custom_msg::msg::CustomString>::SharedPtr talker_publisher_;
