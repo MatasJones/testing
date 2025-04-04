@@ -47,6 +47,8 @@ void talker::echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg) {
   RCLCPP_INFO(this->get_logger(), "Sync check from listener %d", id);
   // If the listener is synced, set the index of the sync array to 1
   sync_array[id - 1] = 1;
+  RCLCPP_INFO(this->get_logger(), "sync_array[%d] = %d", id - 1,
+              sync_array[id - 1]);
 }
 
 void talker::perform_sync() {
@@ -60,8 +62,16 @@ void talker::perform_sync() {
       message.id = i + 1;
       message.message = "SYNC_CHECK";
       sync_publisher_->publish(message);
+      RCLCPP_INFO(this->get_logger(), "Sync check sent to listener %d", i + 1);
+      sync_status = false;
+    }
+    if (sync_status == true) {
+      RCLCPP_INFO(this->get_logger(), "Sync check done!");
     }
   }
+
+  RCLCPP_INFO(this->get_logger(), "Sync status: holo1: %d, holo2: %d",
+              sync_array[0], sync_array[1]);
 
   // Publish the SyncMsg message
   if (sync_status == true) {

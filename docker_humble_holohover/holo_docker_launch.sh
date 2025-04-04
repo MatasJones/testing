@@ -12,6 +12,8 @@ bash -c "$CMD"
 
 CONTAINER_NAME=holo_testing_container
 
+trap 'echo "Stopping and removing container..."; docker stop "$CONTAINER_NAME" > /dev/null; docker rm "$CONTAINER_NAME" > /dev/null; exit' INT
+
 until [ "$(docker inspect -f '{{.State.Running}}' $CONTAINER_NAME 2>/dev/null)" == "true" ]; do
     echo "Waiting for container '$CONTAINER_NAME' to be running..."
     sleep 1
