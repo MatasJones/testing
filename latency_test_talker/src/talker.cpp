@@ -42,23 +42,36 @@ talker::talker() : Node("talker"), count_(0) {
       std::chrono::milliseconds(200), std::bind(&talker::perform_sync, this));
 }
 
-bool talker::echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg) {
+void talker::echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg) {
   int id = msg->id;
   RCLCPP_INFO(this->get_logger(), "Sync check from listener %d", id);
-  return 0;
+  // If the listener is synced, set the index of the sync array to 1
+  sync_array[id - 1] = 1;
 }
 
-bool talker::perform_sync() {
+void talker::perform_sync() {
   // Create a SyncMsg message
   auto message = custom_msg::msg::SyncMsg();
-  message.id = 0;
-  message.message = "Sync check";
+  bool sync_status = true;
+  // If the index of the sync array is 0, it means that the listener is not
+  // synced yet
+  for (int i = 0; i < NB_LISTENERS; i++) {
+    if (sync_array[i] == 0) {
+      message.id = i + 1;
+      message.message = "SYNC_CHECK";
+      sync_publisher_->publish(message);
+    }
+  }
 
   // Publish the SyncMsg message
-  sync_publisher_->publish(message);
-  RCLCPP_INFO(this->get_logger(), "Sync message sent");
+  if (sync_status == true) {
+    RCLCPP_INFO(this->get_logger(), "Sync check done!");
+    // Stop sync timer
+    this->timer_->cancel();
+    return;
+  }
 
-  return true;
+  return;
 }
 
 void talker::get_response_time(

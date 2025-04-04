@@ -19,6 +19,8 @@
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
+#define NB_LISTENERS 2
+
 using namespace std;
 
 class talker : public rclcpp::Node {
@@ -50,19 +52,21 @@ private:
   // Experiment parameters
   int repetitions;
   std::vector<int> sizes;
+  std::vector<int> ids;
   int current_iteration = 0;
   int current_size = 0;
+  int sync_array[NB_LISTENERS] = {0};
 
   std::filesystem::path cwd = std::filesystem::current_path();
 
   std::string config_file_path = cwd.string() + "/src/config/config.yaml";
 
-  bool perform_sync();
+  void perform_sync();
   void get_response_time(const custom_msg::msg::CustomString::SharedPtr msg);
   void create_logger();
   void setup_experiment();
   void run_experiment();
-  bool echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg);
+  void echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg);
 
   template <typename T> void log(T data);
 };

@@ -33,11 +33,14 @@ listener::listener() : Node("listener"), count_(0) {
 void listener::echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg) {
   RCLCPP_INFO(this->get_logger(), "Sync message received");
   auto message = custom_msg::msg::SyncMsg();
-  message.id = id;
-  message.message = "Sync check response";
-
-  sync_publisher_->publish(message);
-  RCLCPP_INFO(this->get_logger(), "Sync message sent");
+  std::string sync_message = msg->message;
+  if (sync_message == "SYNC_CHECK" && msg->id == id) {
+    RCLCPP_INFO(this->get_logger(), "Sync check received");
+    message.id = id;
+    message.message = "SYNC_CHECK";
+    sync_publisher_->publish(message);
+    RCLCPP_INFO(this->get_logger(), "Sync message sent");
+  }
 }
 
 void listener::sync_response(
