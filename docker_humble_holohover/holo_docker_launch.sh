@@ -36,7 +36,7 @@ docker run -dit --privileged --network host --name "$CONTAINER_NAME" holo_testin
 CONTAINER_PID=$(docker inspect -f '{{.State.Pid}}' "$CONTAINER_NAME")
 
 # Trap Ctrl+C (INT) and clean up
-trap 'echo "Stopping and removing container..."; docker stop "$CONTAINER_NAME" > /dev/null; docker rm "$CONTAINER_NAME" > /dev/null; exit' INT
+trap 'echo "Stopping and removing container..."; docker stop "$CONTAINER_NAME"; docker rm "$CONTAINER_NAME"; exit' INT
 
 # Wait for the container to be running
 until [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME" 2>/dev/null)" == "true" ]; do
