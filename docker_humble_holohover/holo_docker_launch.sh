@@ -32,11 +32,11 @@ CONTAINER_NAME=holo_testing_container
 # Start container in background (detached) with 'tail -f /dev/null' to keep it alive
 docker run -dit --privileged --network host --name "$CONTAINER_NAME" holo_testing_image tail -f /dev/null
 
-# Capture the Docker container's PID (you can use this later for process management)
-CONTAINER_PID=$(docker inspect -f '{{.State.Pid}}' "$CONTAINER_NAME")
+# Capture the Docker container's ID (for cleanup)
+CONTAINER_ID=$(docker ps -q -f name="$CONTAINER_NAME")
 
-# Trap Ctrl+C (INT) and clean up
-trap 'echo "Stopping and removing container..."; docker stop "$CONTAINER_NAME"; docker rm "$CONTAINER_NAME"; exit' INT
+# Trap Ctrl+C (INT) and clean up the container
+trap 'echo "Stopping and removing container..."; docker stop "$CONTAINER_NAME" > /dev/null; docker rm "$CONTAINER_NAME" > /dev/null; exit' INT
 
 # Wait for the container to be running
 until [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME" 2>/dev/null)" == "true" ]; do
@@ -47,5 +47,5 @@ done
 # Exec into the container and launch the node
 docker exec -it "$CONTAINER_NAME" bash -c "source /home/testing/dev_ws/install/setup.bash && ros2 launch latency_test_listener listener_launch.py"
 
-# Wait for the container's process to end (this keeps the script running until you stop it manually)
-wait $CONTAINER_PID
+# Keep the script running so the trap works (you can manually Ctrl+C to exit)
+wait $!
