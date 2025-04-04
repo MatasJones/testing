@@ -6,10 +6,6 @@ current_dir=$(pwd)
 # Use dirname to get the parent directory
 parent_dir=$(dirname "$current_dir")
 
-# CMD="docker run -it --rm --privileged --network host --name holo_testing_container holo_testing_image"
-# CMD="docker run -it --rm --privileged --network host --name holo_testing_container \
-#     holo_testing_image \
-#     bash -c "source /home/testing/dev_ws/install/setup.bash && ros2 launch latency_test_listener listener_launch.py""
 CMD="docker run -dit --privileged --network host --name holo_testing_container holo_testing_image tail -f /dev/null"
 
 bash -c "$CMD"
