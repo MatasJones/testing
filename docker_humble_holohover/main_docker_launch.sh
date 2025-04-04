@@ -1,24 +1,27 @@
 #!/bin/bash
-
 # Get the current working directory
 current_dir=$(pwd)
-
 # Use dirname to get the parent directory
 parent_dir=$(dirname "$current_dir")
+CONTAINER_NAME="main_testing_container"
 
-CMD="docker run -dit --privileged --network host --name main_testing_container main_testing_image tail -f /dev/null"
+# Remove container if it already exists
+docker rm -f "$CONTAINER_NAME" &>/dev/null || true
 
-bash -c "$CMD"
+# Run container in detached mode
+docker run -d --privileged --network host --name "$CONTAINER_NAME" main_testing_image tail -f /dev/null
 
-CONTAINER_NAME=main_testing_container
-
-trap 'echo "Stopping and removing container..."; docker rm "$CONTAINER_NAME" --force > /dev/null; docker rm "$CONTAINER_NAME" > /dev/null; exit' INT
-
-until [ "$(docker inspect -f '{{.State.Running}}' $CONTAINER_NAME 2>/dev/null)" == "true" ]; do
-    echo "Waiting for container '$CONTAINER_NAME' to be running..."
-    sleep 1
+# Wait for the container to be running
+until [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME" 2>/dev/null)" == "true" ]; do
+  echo "Waiting for container '$CONTAINER_NAME' to be running..."
+  sleep 1
 done
 
-CMD="docker exec -it main_testing_container bash -c 'source /home/testing/dev_ws/install/setup.bash && ros2 launch latency_test_talker talker_launch.py'"
+# Execute ROS2 node in interactive mode (not detached)
+echo "Starting ROS2 node..."
+docker exec -it "$CONTAINER_NAME" bash -c "source /home/testing/dev_ws/install/setup.bash && ros2 launch latency_test_talker talker_launch.py"
 
-bash -c "$CMD"
+# This will execute after the ROS2 node exits (either normally or via Ctrl+C)
+echo "Stopping and removing container..."
+docker stop "$CONTAINER_NAME" > /dev/null
+docker rm "$CONTAINER_NAME" > /dev/null
