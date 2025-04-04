@@ -23,9 +23,10 @@ until [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME" 2>/dev/null)
     sleep 1
 done
 
-# Exec into the container and launch the node
-docker exec -it "$CONTAINER_NAME" bash -c "source /home/testing/dev_ws/install/setup.bash && ros2 launch latency_test_listener listener_launch.py"
+# Now, execute everything inside the container directly
+docker exec -d "$CONTAINER_NAME" bash -c "source /home/testing/dev_ws/install/setup.bash && ros2 launch latency_test_listener listener_launch.py"
 
-# Keep the script running to allow Ctrl+C to trigger trap
-wait $!
+# Wait for the container process (this helps with trapping Ctrl+C and ensures cleanup)
+wait
+
 
