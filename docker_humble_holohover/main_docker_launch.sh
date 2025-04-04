@@ -9,7 +9,8 @@ CONTAINER_NAME="main_testing_container"
 docker rm -f "$CONTAINER_NAME" &>/dev/null || true
 
 # Run container in detached mode
-docker run -d --privileged --network host -v $parent_dir:/home/ubuntu/Documents/holohover_latency/testing/testing_logs --name "$CONTAINER_NAME" main_testing_image tail -f /dev/null
+echo $parent_dir
+docker run -d --privileged --network host -v $parent_dir:/home/testing/dev_ws/src/testing_logs --name "$CONTAINER_NAME" main_testing_image tail -f /dev/null
 
 # Wait for the container to be running
 until [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME" 2>/dev/null)" == "true" ]; do
