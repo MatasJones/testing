@@ -6,7 +6,7 @@ current_dir=$(pwd)
 # Use dirname to get the parent directory
 parent_dir=$(dirname "$current_dir")
 
-CMD="docker run -it --privileged --network host --name holo_testing_container holo_testing_image tail -f /dev/null"
+CMD="docker run -it --rm --privileged --network host --name holo_testing_container holo_testing_image tail"
 
 bash -c "$CMD"
 
