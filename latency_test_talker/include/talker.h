@@ -45,6 +45,8 @@ private:
       talker_subscriber_;
   rclcpp::Subscription<custom_msg::msg::SyncMsg>::SharedPtr sync_subscriber_;
 
+  int spacing_ms_;
+
   double msgs_all_sent_time;
   std::ofstream file;
   std::string logger_name = "/home/testing/dev_ws/src/testing_logs/logger.csv";

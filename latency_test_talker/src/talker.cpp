@@ -24,6 +24,9 @@ talker::talker() : Node("talker"), count_(0) {
   this->sync_publisher_ = this->create_publisher<custom_msg::msg::SyncMsg>(
       ("/latency_test_talker/SYNC_TOPIC_OUT"), 10);
 
+  this->declare_parameter("spacing_ms", 400);
+  spacing_ms_ = this->get_parameter("spacing_ms").as_int();
+
   // Set up the experiment parameters from the config file
   talker::setup_experiment();
 
@@ -57,7 +60,7 @@ void talker::perform_sync() {
     RCLCPP_INFO(this->get_logger(), "Sync check done!");
     this->timer_->cancel();
     this->exp_timer_ =
-        this->create_wall_timer(std::chrono::milliseconds(500),
+        this->create_wall_timer(std::chrono::milliseconds(spacing_ms_),
                                 std::bind(&talker::run_experiment, this));
   }
 
