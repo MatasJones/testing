@@ -22,56 +22,36 @@ listener::listener() : Node("listener"), count_(0) {
   this->sync_publisher_ = this->create_publisher<custom_msg::msg::SyncMsg>(
       ("/latency_test_talker/SYNC_TOPIC_IN"), 10);
 
-  this->sync_service_ = this->create_service<sync_service::srv::SyncCheck>(
-      "/latency_test_listener/sync_service",
-      std::bind(&listener::sync_response, this, std::placeholders::_1,
-                std::placeholders::_2));
-
   RCLCPP_INFO(this->get_logger(), "Listener created");
 }
 
 void listener::echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg) {
   RCLCPP_INFO(this->get_logger(), "Sync message received");
+  if (msg->message == "SHUTDOWN") {
+    RCLCPP_INFO(this->get_logger(), "Shutdown message received");
+    rclcpp::shutdown();
+  }
   auto message = custom_msg::msg::SyncMsg();
   std::string sync_message = msg->message;
-  if (sync_message == "SYNC_CHECK" && msg->id == id) {
+  if (sync_message == "SYNC_CHECK") {
     RCLCPP_INFO(this->get_logger(), "Sync check received");
-    message.id = id;
     message.message = "SYNC_CHECK";
     sync_publisher_->publish(message);
     RCLCPP_INFO(this->get_logger(), "Sync message sent");
   }
 }
 
-void listener::sync_response(
-    const std::shared_ptr<sync_service::srv::SyncCheck::Request> request,
-    std::shared_ptr<sync_service::srv::SyncCheck::Response> response) {
-  if (!request) {
-    // Check if request is null
-    RCLCPP_ERROR(this->get_logger(), "Received a null request");
-    return;
-  }
-
-  bool state = request->request;
-  if (state == false) {
-    RCLCPP_INFO(this->get_logger(), "Sync request received");
-    rclcpp::shutdown();
-  }
-  response->response = true;
-  RCLCPP_INFO(this->get_logger(), "Sync request received");
-}
-
 void listener::echo(const custom_msg::msg::CustomString::SharedPtr msg) {
-
   auto message = custom_msg::msg::CustomString();
-  message.id = msg->id;
   std::string test_string(msg->size, 'B');
   message.message = test_string;
   message.size = msg->size;
+  message.msg_nb = msg->msg_nb;
 
   listener_publisher_->publish(message);
   RCLCPP_INFO(this->get_logger(),
-              "Msg received from computer! Sending response..., %d", count_++);
+              "Msg %d of size %d recieved. Sending response...", msg->msg_nb,
+              msg->size);
 }
 
 void listener::get_ip_addr() {

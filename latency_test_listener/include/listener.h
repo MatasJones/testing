@@ -26,9 +26,6 @@ public:
   int count_ = 0;
 
 private:
-  // Declare a service server
-  rclcpp::Service<sync_service::srv::SyncCheck>::SharedPtr sync_service_;
-
   // Declare a Publisher
   rclcpp::Publisher<custom_msg::msg::CustomString>::SharedPtr
       listener_publisher_;
@@ -41,9 +38,6 @@ private:
 
   rclcpp::Subscription<custom_msg::msg::SyncMsg>::SharedPtr sync_subscriber_;
 
-  void sync_response(
-      const std::shared_ptr<sync_service::srv::SyncCheck::Request> request,
-      std::shared_ptr<sync_service::srv::SyncCheck::Response> response);
   void echo(const custom_msg::msg::CustomString::SharedPtr msg);
   void echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg);
   void get_ip_addr();

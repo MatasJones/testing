@@ -13,13 +13,15 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <string>
 #include <thread>
 #include <time.h>
+#include <tuple>
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
-#define NB_LISTENERS 2
+#define NB_LISTENERS 1
 
 using namespace std;
 
@@ -32,23 +34,20 @@ public:
 private:
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::TimerBase::SharedPtr exp_timer_;
+  rclcpp::TimerBase::SharedPtr switch_off_timer_;
 
   // Declare the Publishers
   rclcpp::Publisher<custom_msg::msg::CustomString>::SharedPtr talker_publisher_;
   rclcpp::Publisher<custom_msg::msg::SyncMsg>::SharedPtr sync_publisher_;
-
-  // Declare a service client
-  rclcpp::Client<sync_service::srv::SyncCheck>::SharedPtr sync_client_;
 
   // Declare the Subscribers
   rclcpp::Subscription<custom_msg::msg::CustomString>::SharedPtr
       talker_subscriber_;
   rclcpp::Subscription<custom_msg::msg::SyncMsg>::SharedPtr sync_subscriber_;
 
-  std::chrono::time_point<std::chrono::system_clock> start, end;
+  double msgs_all_sent_time;
   std::ofstream file;
   std::string logger_name = "/home/testing/dev_ws/src/testing_logs/logger.csv";
-  double sending_time, recieving_time;
 
   // Experiment parameters
   int repetitions;
@@ -57,6 +56,9 @@ private:
   int current_iteration = 0;
   int current_size = 0;
   int sync_array[NB_LISTENERS] = {0};
+  bool terminate_set = false;
+
+  map<tuple<int, int>, tuple<int, int, double>> latency_map;
 
   std::filesystem::path cwd = std::filesystem::current_path();
 
@@ -68,6 +70,8 @@ private:
   void setup_experiment();
   void run_experiment();
   void echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg);
+  void map_time(int msg_nb, int size, double time);
+  void terminate_exp();
 
   template <typename T> void log(T data);
 };

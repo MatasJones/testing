@@ -17,10 +17,6 @@ talker::talker() : Node("talker"), count_(0) {
       ("/latency_test_talker/SYNC_TOPIC_IN"), 10,
       std::bind(&talker::echo_sync, this, std::placeholders::_1));
 
-  // Create a service client
-  this->sync_client_ = this->create_client<sync_service::srv::SyncCheck>(
-      "/latency_test_listener/sync_service");
-
   // Create a publisher on a specified topic
   this->talker_publisher_ =
       this->create_publisher<custom_msg::msg::CustomString>(("COMP_TO_PI"), 10);
@@ -31,22 +27,17 @@ talker::talker() : Node("talker"), count_(0) {
   // Set up the experiment parameters from the config file
   talker::setup_experiment();
 
-  // // Perform sync check
-  // if (talker::perform_sync() == false) {
-  //   RCLCPP_INFO(this->get_logger(), "Failed to perform sync check");
-  //   rclcpp::shutdown();
-  // }
-
   // Run the experiment
   this->timer_ = this->create_wall_timer(
       std::chrono::milliseconds(200), std::bind(&talker::perform_sync, this));
+
+  RCLCPP_INFO(this->get_logger(), "Talker created");
 }
 
 void talker::echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg) {
-  int id = msg->id;
-  RCLCPP_INFO(this->get_logger(), "Sync check from listener %d", id);
+  RCLCPP_INFO(this->get_logger(), "Sync check from listener");
   // If the listener is synced, set the index of the sync array to 1
-  sync_array[id - 1] = 1;
+  sync_array[0] = 1;
 }
 
 void talker::perform_sync() {
@@ -55,33 +46,22 @@ void talker::perform_sync() {
   bool sync_status = true;
   // If the index of the sync array is 0, it means that the listener is not
   // synced yet
-  for (int i = 0; i < NB_LISTENERS; i++) {
-    if (sync_array[i] == 0) {
-      message.id = i + 1;
-      message.message = "SYNC_CHECK";
-      sync_publisher_->publish(message);
-      RCLCPP_INFO(this->get_logger(), "Sync check sent to listener %d", i + 1);
-      sync_status = false;
-    }
-    if (sync_status == true) {
-      RCLCPP_INFO(this->get_logger(), "Sync check done!");
-      this->timer_->cancel();
-      this->exp_timer_ =
-          this->create_wall_timer(std::chrono::milliseconds(200),
-                                  std::bind(&talker::run_experiment, this));
-    }
+  if (sync_array[0] == 0) {
+    message.message = "SYNC_CHECK";
+    sync_publisher_->publish(message);
+    RCLCPP_INFO(this->get_logger(), "Sync check sent to listener %d", 1);
+    sync_status = false;
   }
 
-  RCLCPP_INFO(this->get_logger(), "Sync status: holo1: %d, holo2: %d",
-              sync_array[0], sync_array[1]);
-
-  // Publish the SyncMsg message
   if (sync_status == true) {
     RCLCPP_INFO(this->get_logger(), "Sync check done!");
-    // Stop sync timer
     this->timer_->cancel();
-    return;
+    this->exp_timer_ =
+        this->create_wall_timer(std::chrono::milliseconds(500),
+                                std::bind(&talker::run_experiment, this));
   }
+
+  RCLCPP_INFO(this->get_logger(), "Sync status: holo1: %d", sync_array[0]);
 
   return;
 }
@@ -90,21 +70,23 @@ void talker::get_response_time(
     const custom_msg::msg::CustomString::SharedPtr msg) {
 
   // Get the current time in microseconds
-  recieving_time = this->get_clock()->now().nanoseconds() / 1.0e6;
-
-  // substract the recieve and send timestamps to get elapsed time in
+  double recieving_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+  // Extract the sending time from the map
+  auto it = latency_map.find(std::make_tuple(msg->msg_nb, msg->size));
+  // Substract the recieve and send timestamps to get elapsed time in
   // microseconds
-  double elapsed_time = recieving_time - sending_time;
-  std::time_t time = std::time(nullptr);
+  double elapsed_time =
+      recieving_time -
+      std::get<2>(it->second); // it->second gets the value not the key
 
-  std::string timestamp = std::string(std::asctime(std::gmtime(&time)));
-  timestamp.pop_back(); // Remove trailing '\n'
-
-  std::string log = timestamp + " | " + std::to_string(msg->size) + " | " +
+  std::string log = std::to_string(msg->size) + " | " +
+                    std::to_string(msg->msg_nb) + " | " +
                     std::to_string(elapsed_time);
 
   talker::log(log);
   // Log the elapsed time in microseconds
+  RCLCPP_INFO(this->get_logger(), "Msg %d of size %d received", msg->msg_nb,
+              msg->size);
   RCLCPP_INFO(this->get_logger(), "Elapsed time: %f ms", elapsed_time);
 }
 
@@ -146,31 +128,57 @@ void talker::run_experiment() {
   if (current_iteration == repetitions) {
     current_iteration = 0;
     current_size++;
+    RCLCPP_INFO(this->get_logger(), "Curently size %d", sizes[current_size]);
   }
 
   // If the experiment is completed, shutdown the node
   if (static_cast<std::vector<int>::size_type>(current_size) == sizes.size()) {
-    RCLCPP_INFO(this->get_logger(), "Experiment completed");
-    // Tell listener nodes to shutdown
-    auto request = std::make_shared<sync_service::srv::SyncCheck::Request>();
-    request->request = false;
-    auto result = sync_client_->async_send_request(request);
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-    rclcpp::shutdown();
+    if (terminate_set) {
+      double current_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+      if (current_time - msgs_all_sent_time >= 3000.0) {
+        this->exp_timer_->cancel();
+        talker::terminate_exp();
+      }
+      return;
+    }
+    terminate_set = true;
+    msgs_all_sent_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+    RCLCPP_INFO(this->get_logger(), "All messages sent to holos");
+    return;
   }
 
   // Prepare the message to be sent
   std::string test_string(sizes[current_size], 'A');
   auto message = custom_msg::msg::CustomString();
-  message.id = current_iteration;
+
+  message.msg_nb = current_iteration;
   message.size = sizes[current_size];
   message.message = test_string;
 
   // Set the send time and publish the message
-  sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+  double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
   talker_publisher_->publish(message);
+
+  // Map the message msg nb, size and send time to the latency map
+  talker::map_time(message.msg_nb, sizes[current_size], sending_time);
 
   RCLCPP_INFO(this->get_logger(), "Message %d of size %d sent",
               current_iteration, sizes[current_size]);
+
   current_iteration++;
+}
+
+void talker::map_time(int msg_nb, int size, double time) {
+  latency_map.insert(std::make_pair(std::make_tuple(msg_nb, size),
+                                    std::make_tuple(msg_nb, size, time)));
+}
+
+void talker::terminate_exp() {
+  RCLCPP_INFO(this->get_logger(), "Experiment completed");
+  // Tell listener nodes to shutdown
+  auto message = custom_msg::msg::SyncMsg();
+  message.message = "SHUTDOWN";
+  sync_publisher_->publish(message);
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  rclcpp::shutdown();
 }
