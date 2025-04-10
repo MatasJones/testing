@@ -18,7 +18,7 @@ until [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME" 2>/dev/null)
   sleep 1
 done
 
-if [ -z "$1" ]; then
+if [ -z $1 ]; then
   ARG1=100
 else
   ARG1=$1
