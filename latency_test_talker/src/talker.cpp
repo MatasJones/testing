@@ -3,6 +3,10 @@
 talker::talker() : Node("talker"), count_(0) {
 
   RCLCPP_INFO(this->get_logger(), "Creating talker");
+
+  this->declare_parameter("spacing_ms", 400);
+  spacing_ms_ = this->get_parameter("spacing_ms").as_int();
+  RCLCPP_INFO(this->get_logger(), "Spacing time %d ms", spacing_ms_);
   talker::create_logger();
 
   RCLCPP_INFO(this->get_logger(), "cwd %s", cwd.c_str());
@@ -23,9 +27,6 @@ talker::talker() : Node("talker"), count_(0) {
 
   this->sync_publisher_ = this->create_publisher<custom_msg::msg::SyncMsg>(
       ("/latency_test_talker/SYNC_TOPIC_OUT"), 10);
-
-  this->declare_parameter("spacing_ms", 400);
-  spacing_ms_ = this->get_parameter("spacing_ms").as_int();
 
   // Set up the experiment parameters from the config file
   talker::setup_experiment();
@@ -101,6 +102,8 @@ void talker::create_logger() {
     RCLCPP_INFO(this->get_logger(), "Error occurred during file creation!");
     return;
   }
+  string file_name = std::to_string(spacing_ms_) + "ms";
+  this->file << file_name << "\n";
 
   this->file.close();
   RCLCPP_INFO(this->get_logger(), "Logger created");

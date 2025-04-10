@@ -1,11 +1,18 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+
+csv_file_path = sys.argv[1]
 
 def plot_data_from_csv(csv_file_path):
+
+    with open(csv_file_path, 'r') as f:
+        first_line = f.readline().strip()
+
     # Read the CSV into a DataFrame
-    df = pd.read_csv(csv_file_path, delimiter='|', header=None)  # no header row
-    
+    df = pd.read_csv(csv_file_path, delimiter='|', header=None, skiprows=1)  # no header row
+
     # Add column names
     df.columns = ['msg_size', 'msg_nb', 'time']
     
@@ -47,7 +54,7 @@ def plot_data_from_csv(csv_file_path):
 
     ax1.set_xlabel('Message size [bytes]')
     ax1.set_ylabel('Roundtrip time [ms]')
-    ax1.set_title("Latency test main to holohover, 200ms spacing, default QOS")
+    ax1.set_title(f"Latency test main to holohover, {first_line} spacing, default QOS")
     ax1.legend(title="Message size [bytes]", title_fontsize='large', fontsize='small', loc='upper left')
     ax1.grid(True, linestyle='--', alpha=0.6)
 
@@ -81,7 +88,7 @@ def plot_data_from_csv(csv_file_path):
     plt.show()
 
 def count_lost_packets(data_path, expected_messages):
-    df = pd.read_csv(data_path, sep='|', header=None, engine='python')
+    df = pd.read_csv(data_path, sep='|', header=None, engine='python', skiprows=1)
     df.columns = ['package_size', 'message_number', 'time']
 
     # Clean whitespace only on object columns
@@ -104,6 +111,5 @@ def count_lost_packets(data_path, expected_messages):
 
 
 # Path to your CSV file
-csv_file_path = '/Users/matasjones/Documents/Coding_projects/testing/testing_logs/logger1.csv'
 plot_data_from_csv(csv_file_path)
 

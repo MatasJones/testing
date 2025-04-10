@@ -2,7 +2,7 @@
 
 PATH_TO_LOGS="/home/ubuntu/Documents/holohover_latency/testing/testing_logs/logger.csv"
 
-PATH_TO_LOCAL_LOGS="/Users/matasjones/Documents/Coding_projects/testing/testing_logs/logger1.csv"
+PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/holo_tests/1holo_OG_QOS/logger1.csv"
 
 CMD="scp $PATH_TO_LOGS $PATH_TO_LOCAL_LOGS"
 
@@ -21,5 +21,10 @@ else
     echo "Ping to $SERVER_IP failed..."
 
 fi # Used to indicated the end of an if statement block
-
-python3 /Users/matasjones/Documents/Coding_projects/testing/testing_logs/graph_logs.py
+csv_file="/Users/matasjones/Desktop/holo_tests/1holo_OG_QOS/logger1.csv"
+first_line=$(head -n 1 "$csv_file")
+file_name_first_part="1holo_OG_QOS"
+file_name="${file_name_first_part}_${first_line}"
+mv "/Users/matasjones/Desktop/holo_tests/1holo_OG_QOS/logger1.csv" "/Users/matasjones/Desktop/holo_tests/1holo_OG_QOS/$file_name.csv"
+PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/holo_tests/1holo_OG_QOS/$file_name.csv"
+python3 /Users/matasjones/Documents/Coding_projects/testing/testing_logs/graph_logs.py $PATH_TO_LOCAL_LOGS

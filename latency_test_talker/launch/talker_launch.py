@@ -54,9 +54,10 @@ def generate_launch_description():
         description="Logging level",
     ))
     
+    
     ld.add_action(DeclareLaunchArgument(
         "spacing_ms",
-        default_value="400",
+        default_value="100",
         description="Spacing in milliseconds",
     ))
     
@@ -72,7 +73,10 @@ def generate_launch_description():
         arguments=['--ros-args',
                   '--log-level', logger,
                   '--param', 'spacing_ms:=' + str(spacing_ms),
-        ]
+        ],
+        parameters=[
+        {"spacing_ms": spacing_ms}  # Explicitly convert to int
+    ]
     )
     
     ld.add_action(node_mux)
