@@ -26,7 +26,7 @@ fi
 
 # Execute ROS2 node in interactive mode (not detached)
 echo "Starting ROS2 node..."
-docker exec -it "$CONTAINER_NAME" bash -c "source /home/testing/dev_ws/install/setup.bash && ros2 launch latency_test_talker talker_launch.py spacing_ms:=$ARG1"
+docker exec -it "$CONTAINER_NAME" bash -c "source /home/testing/dev_ws/install/setup.bash && ros2 launch latency_test_talker talker_launch.py spacing_ms:='$ARG1'"
 
 # This will execute after the ROS2 node exits (either normally or via Ctrl+C)
 echo "Stopping and removing container..."
