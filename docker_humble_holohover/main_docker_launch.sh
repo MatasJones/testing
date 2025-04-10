@@ -19,9 +19,9 @@ until [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME" 2>/dev/null)
 done
 
 if [ -z "$1" ]; then
-  ARG1="100"
+  ARG1=100
 else
-  ARG1="$1"
+  ARG1=$1
 fi
 
 # Execute ROS2 node in interactive mode (not detached)
