@@ -23,13 +23,12 @@
 
 #define NB_LISTENERS 1
 #define QUEUE_SIZE 100
-#define GRACE_PERIOD 3000
 #define NB_SYNC_CHECKS 10
 #define DEAFULT_SPACING 100
 #define SYNC_CHECK_PERIOD 200
 
 #define NB_MSGS 50
-#define NB_OF_SIZES 6
+#define NB_OF_SIZES 7
 
 using namespace std;
 
@@ -40,7 +39,6 @@ public:
 private:
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::TimerBase::SharedPtr exp_timer_;
-  rclcpp::TimerBase::SharedPtr grace_timer_;
 
   // Declare the Publishers
   rclcpp::Publisher<custom_msg::msg::CustomString>::SharedPtr talker_publisher_;
@@ -82,7 +80,6 @@ private:
   void echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg);
   void terminate_exp();
   void process_data();
-  void terminate_grace_period();
 
   template <typename T> void log(T data);
 };

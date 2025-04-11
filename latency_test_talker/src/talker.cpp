@@ -18,22 +18,29 @@ talker::talker() : Node("talker") {
   RCLCPP_INFO(this->get_logger(), "cwd %s", cwd.c_str());
   // This block creates a subscriber on a specified topic and binds it to a
   // callback
+  // this->talker_subscriber_ =
+  //     this->create_subscription<custom_msg::msg::CustomString>(
+  //         ("/latency_test_listener/PI_TO_COMP"), custom_qos,
+  //         std::bind(&talker::get_response_time, this,
+  //         std::placeholders::_1));
   this->talker_subscriber_ =
       this->create_subscription<custom_msg::msg::CustomString>(
-          ("/latency_test_listener/PI_TO_COMP"), custom_qos,
+          ("/latency_test_listener/PI_TO_COMP"), 10,
           std::bind(&talker::get_response_time, this, std::placeholders::_1));
 
   this->sync_subscriber_ = this->create_subscription<custom_msg::msg::SyncMsg>(
-      ("/latency_test_talker/SYNC_TOPIC_IN"), QUEUE_SIZE,
+      ("/latency_test_talker/SYNC_TOPIC_IN"), 10,
       std::bind(&talker::echo_sync, this, std::placeholders::_1));
 
   // Create a publisher on a specified topic
+  // this->talker_publisher_ =
+  //     this->create_publisher<custom_msg::msg::CustomString>(("COMP_TO_PI"),
+  //                                                           custom_qos);
   this->talker_publisher_ =
-      this->create_publisher<custom_msg::msg::CustomString>(("COMP_TO_PI"),
-                                                            custom_qos);
+      this->create_publisher<custom_msg::msg::CustomString>(("COMP_TO_PI"), 10);
 
   this->sync_publisher_ = this->create_publisher<custom_msg::msg::SyncMsg>(
-      ("/latency_test_talker/SYNC_TOPIC_OUT"), QUEUE_SIZE);
+      ("/latency_test_talker/SYNC_TOPIC_OUT"), 10);
 
   // Set up the experiment parameters from the config file
   talker::setup_experiment();
@@ -66,9 +73,10 @@ void talker::perform_sync() {
       this->timer_->cancel();
       RCLCPP_INFO(this->get_logger(),
                   "Sync check done, starting grace period..");
-      this->grace_timer_ = this->create_wall_timer(
-          std::chrono::milliseconds(GRACE_PERIOD),
-          std::bind(&talker::terminate_grace_period, this));
+      this->exp_timer_ =
+          this->create_wall_timer(std::chrono::milliseconds(spacing_ms_),
+                                  std::bind(&talker::run_experiment, this));
+
       return;
     }
     // Send a message to the listener to check if it is responding on the topic
@@ -86,15 +94,6 @@ void talker::echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg) {
   RCLCPP_INFO(this->get_logger(), "Sync check from listener");
   // If the listener is synced, set the index of the sync array to 1
   sync_array[0] = 1;
-}
-
-void talker::terminate_grace_period() {
-  RCLCPP_INFO(this->get_logger(), "Grace period over");
-  RCLCPP_INFO(this->get_logger(), "Starting experiment!");
-  this->grace_timer_->cancel();
-  this->exp_timer_ =
-      this->create_wall_timer(std::chrono::milliseconds(spacing_ms_),
-                              std::bind(&talker::run_experiment, this));
 }
 
 void talker::get_response_time(
@@ -208,8 +207,8 @@ void talker::run_experiment() {
   std::get<0>(send_receive_time[current_size][current_iteration]) =
       sending_time;
 
-  // RCLCPP_INFO(this->get_logger(), "Message %d of size %d sent",
-  //             current_iteration, sizes[current_size]);
+  RCLCPP_INFO(this->get_logger(), "Message %d of size %d sent",
+              current_iteration, sizes[current_size]);
 
   current_iteration++;
 }

@@ -57,7 +57,8 @@ def plot_data_from_csv(csv_file_path):
 
     ax1.set_xlabel('Message size [bytes]')
     ax1.set_ylabel('Roundtrip time [ms]')
-    ax1.set_title(f"Latency test main to holohover, {first_line} spacing, {plot_name}")
+    ax1.set_title(f"Latency test holohover to holohover, {first_line} spacing, {plot_name}")
+    # ax1.set_title(f"Latency test main to holohover, 100µs spacing, {plot_name}")
     ax1.legend(title="Message size [bytes]", title_fontsize='large', fontsize='small', loc='upper left')
     ax1.grid(True, linestyle='--', alpha=0.6)
 
@@ -108,7 +109,9 @@ def count_lost_packets(data_path, expected_messages):
         received_messages = set(group['message_number'].unique())
         expected = set(range(expected_messages))
         missing = expected - received_messages
-        summary_lines.append(f"Size {size}: Lost {len(missing)} packets")
+        loss_percent = (len(missing) / expected_messages) * 100
+        summary_lines.append(f"Size {size}: Lost {loss_percent:.1f}% packets")
+
 
     return "\n".join(summary_lines)
 

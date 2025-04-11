@@ -3,8 +3,8 @@
 PATH_TO_LOGS="/home/ubuntu/Documents/holohover_latency/testing/testing_logs/logger.csv"
 
 ### Change file location and name
-PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/holo_tests/no_logs_1holo_depth_100_best_effort"
-file_name_first_part="no_logs_1holo_depth_100_best_effort"
+PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/holo_tests/2holo_OG_QOS"
+file_name_first_part="main_holo_depth_OG_QOS"
 ###
 
 CMD="scp $PATH_TO_LOGS $PATH_TO_LOCAL_LOGS"
@@ -32,4 +32,5 @@ echo "First line: $first_line"
 file_name="${file_name_first_part}_${first_line}"
 mv "$PATH_TO_LOCAL_LOGS/logger.csv" "$PATH_TO_LOCAL_LOGS/$file_name.csv"
 PATH_TO_LOCAL_LOGS="$PATH_TO_LOCAL_LOGS/$file_name.csv"
+echo $PATH_TO_LOCAL_LOGS
 python3 /Users/matasjones/Documents/Coding_projects/testing/testing_logs/graph_logs.py $PATH_TO_LOCAL_LOGS "$1"
