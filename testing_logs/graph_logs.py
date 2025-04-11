@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 import sys
 
 csv_file_path = sys.argv[1]
+plot_name =sys.argv[2]
+
+print(plot_name)
 
 def plot_data_from_csv(csv_file_path):
 
@@ -54,7 +57,7 @@ def plot_data_from_csv(csv_file_path):
 
     ax1.set_xlabel('Message size [bytes]')
     ax1.set_ylabel('Roundtrip time [ms]')
-    ax1.set_title(f"Latency test main to holohover, {first_line} spacing, default QOS")
+    ax1.set_title(f"Latency test main to holohover, {first_line} spacing, {plot_name}")
     ax1.legend(title="Message size [bytes]", title_fontsize='large', fontsize='small', loc='upper left')
     ax1.grid(True, linestyle='--', alpha=0.6)
 
@@ -73,7 +76,7 @@ def plot_data_from_csv(csv_file_path):
         height = bar.get_height()
         ax2.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.4f}', ha='center', va='bottom', fontsize=10)
 
-    count_lost_packets(csv_file_path, 30)
+    count_lost_packets(csv_file_path, 50)
     
     # Capture printed output from count_lost_packets
     lost_summary_text = count_lost_packets(csv_file_path, 30)

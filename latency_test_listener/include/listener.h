@@ -4,6 +4,7 @@
 #include "custom_msg/msg/custom_string.hpp"
 #include "custom_msg/msg/int16msg.hpp"
 #include "custom_msg/msg/sync_msg.hpp"
+#include "rclcpp/qos.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 
@@ -18,6 +19,8 @@
 #include <sys/socket.h>
 #include <unistd.h> // gethostname
 #include <yaml-cpp/yaml.h>
+
+#define QUEUE_SIZE 100
 
 class listener : public rclcpp::Node {
 

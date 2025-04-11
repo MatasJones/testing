@@ -9,11 +9,11 @@
 
 #include "sync_service/srv/sync_check.hpp"
 
+#include "rclcpp/qos.hpp"
 #include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <map>
 #include <string>
 #include <thread>
 #include <time.h>
@@ -22,19 +22,25 @@
 #include <yaml-cpp/yaml.h>
 
 #define NB_LISTENERS 1
+#define QUEUE_SIZE 100
+#define GRACE_PERIOD 3000
+#define NB_SYNC_CHECKS 10
+#define DEAFULT_SPACING 100
+#define SYNC_CHECK_PERIOD 200
+
+#define NB_MSGS 50
+#define NB_OF_SIZES 6
 
 using namespace std;
 
 class talker : public rclcpp::Node {
 public:
   talker();
-  double send_time;
-  int count_ = 0;
 
 private:
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::TimerBase::SharedPtr exp_timer_;
-  rclcpp::TimerBase::SharedPtr switch_off_timer_;
+  rclcpp::TimerBase::SharedPtr grace_timer_;
 
   // Declare the Publishers
   rclcpp::Publisher<custom_msg::msg::CustomString>::SharedPtr talker_publisher_;
@@ -59,8 +65,10 @@ private:
   int current_size = 0;
   int sync_array[NB_LISTENERS] = {0};
   bool terminate_set = false;
+  bool sync_check = false;
+  int check_count = 0;
 
-  map<tuple<int, int>, tuple<int, int, double>> latency_map;
+  std::tuple<double, double> send_receive_time[NB_OF_SIZES][NB_MSGS] = {};
 
   std::filesystem::path cwd = std::filesystem::current_path();
 
@@ -72,8 +80,9 @@ private:
   void setup_experiment();
   void run_experiment();
   void echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg);
-  void map_time(int msg_nb, int size, double time);
   void terminate_exp();
+  void process_data();
+  void terminate_grace_period();
 
   template <typename T> void log(T data);
 };
