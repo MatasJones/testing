@@ -18,26 +18,27 @@ talker::talker() : Node("talker") {
   RCLCPP_INFO(this->get_logger(), "cwd %s", cwd.c_str());
   // This block creates a subscriber on a specified topic and binds it to a
   // callback
-  // this->talker_subscriber_ =
-  //     this->create_subscription<custom_msg::msg::CustomString>(
-  //         ("/latency_test_listener/PI_TO_COMP"), custom_qos,
-  //         std::bind(&talker::get_response_time, this,
-  //         std::placeholders::_1));
   this->talker_subscriber_ =
       this->create_subscription<custom_msg::msg::CustomString>(
-          ("/latency_test_listener/PI_TO_COMP"), 10,
+          ("/latency_test_listener/PI_TO_COMP"), custom_qos,
           std::bind(&talker::get_response_time, this, std::placeholders::_1));
+  // this->talker_subscriber_ =
+  //     this->create_subscription<custom_msg::msg::CustomString>(
+  //         ("/latency_test_listener/PI_TO_COMP"), 10,
+  //         std::bind(&talker::get_response_time, this,
+  //         std::placeholders::_1));
 
   this->sync_subscriber_ = this->create_subscription<custom_msg::msg::SyncMsg>(
       ("/latency_test_talker/SYNC_TOPIC_IN"), 10,
       std::bind(&talker::echo_sync, this, std::placeholders::_1));
 
   // Create a publisher on a specified topic
+  this->talker_publisher_ =
+      this->create_publisher<custom_msg::msg::CustomString>(("COMP_TO_PI"),
+                                                            custom_qos);
   // this->talker_publisher_ =
   //     this->create_publisher<custom_msg::msg::CustomString>(("COMP_TO_PI"),
-  //                                                           custom_qos);
-  this->talker_publisher_ =
-      this->create_publisher<custom_msg::msg::CustomString>(("COMP_TO_PI"), 10);
+  //     10);
 
   this->sync_publisher_ = this->create_publisher<custom_msg::msg::SyncMsg>(
       ("/latency_test_talker/SYNC_TOPIC_OUT"), 10);
@@ -207,8 +208,8 @@ void talker::run_experiment() {
   std::get<0>(send_receive_time[current_size][current_iteration]) =
       sending_time;
 
-  RCLCPP_INFO(this->get_logger(), "Message %d of size %d sent",
-              current_iteration, sizes[current_size]);
+  // RCLCPP_INFO(this->get_logger(), "Message %d of size %d sent",
+  //             current_iteration, sizes[current_size]);
 
   current_iteration++;
 }
