@@ -11,6 +11,7 @@
 
 #include "rclcpp/qos.hpp"
 #include <chrono>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -42,6 +43,7 @@
 #define NB_OF_SIZES 7
 #define TOTAL_MSGS (NB_MSGS * NB_OF_SIZES)
 #define DEFAULT_MSG_SIZE 5
+#define SOCKET_BUFFER_SIZE 65490
 
 using namespace std;
 
@@ -88,11 +90,11 @@ private:
   int total_nb_msgs;
 
   int socket_msg_count = 0;
+  int socket_msg_size = 0;
 
   std::tuple<double, double> send_receive_time[NB_OF_SIZES][NB_MSGS] = {};
 
-  std::tuple<double, double> socket_send_receive_time[NB_OF_SIZES * NB_MSGS] =
-      {};
+  std::tuple<double, double> socket_send_receive_time[TOTAL_MSGS] = {};
 
   std::filesystem::path cwd = std::filesystem::current_path();
 

@@ -22,6 +22,7 @@
 #include <yaml-cpp/yaml.h>
 
 #define QUEUE_SIZE 100
+#define SOCKET_BUFFER_SIZE 65490
 
 class listener : public rclcpp::Node {
 

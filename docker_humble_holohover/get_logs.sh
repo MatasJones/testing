@@ -3,7 +3,7 @@
 PATH_TO_LOGS="/home/ubuntu/Documents/holohover_latency/testing/testing_logs/logger.csv"
 
 ### Change file location and name
-PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/holo_tests/2holo_depth_100_best_effort"
+PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/holo_tests/socket_test"
 file_name_first_part="holo_holo_depth_100_best_effort"
 ###
 

@@ -50,14 +50,14 @@ listener::listener() : Node("listener"), count_(0) {
     // 1) Read incoming data from the socket
     if (ret > 0) {
       if (fds.revents & POLLIN) {
-        char buffer[256];
-        bzero(buffer, 256);
-        int n = read(sockfd, buffer, 255);
+        char buffer[SOCKET_BUFFER_SIZE];
+        bzero(buffer, SOCKET_BUFFER_SIZE);
+        int n = read(sockfd, buffer, SOCKET_BUFFER_SIZE);
         if (n < 0) {
           RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
           break;
         }
-        RCLCPP_INFO(this->get_logger(), "%s\n", buffer);
+        // RCLCPP_INFO(this->get_logger(), "%s\n", buffer);
         // Send back data straight away
 
         // Extract msg number from the message

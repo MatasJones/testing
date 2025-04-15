@@ -102,21 +102,22 @@ void talker::socket_exp_launch() {
   pfd.fd = server_sockfd;
   pfd.events = POLLIN; // Monitor for incoming data
 
+  // This while loop take ~60µs to execute
   while (running) {
     int ret = poll(&pfd, 1, 0);
     // 1) Check it there is any data that needs to be read on the server socket
     if (ret > 0) {
       if (pfd.revents & POLLIN) {
         // Read the data from the socket
-        char buffer[256];
-        bzero(buffer, 256);
-        int n = read(server_sockfd, buffer, 255);
+        char buffer[SOCKET_BUFFER_SIZE];
+        bzero(buffer, SOCKET_BUFFER_SIZE);
+        int n = read(server_sockfd, buffer, SOCKET_BUFFER_SIZE - 1);
         if (n < 0) {
           RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
           break;
         }
         double recieving_time = this->get_clock()->now().nanoseconds() / 1.0e6;
-        RCLCPP_INFO(this->get_logger(), "Message from client: %s", buffer);
+        // RCLCPP_INFO(this->get_logger(), "Message from client: %s", buffer);
 
         // Extract msg number from the message
         std::string str_buffer(buffer);
@@ -124,8 +125,8 @@ void talker::socket_exp_launch() {
         size_t second = str_buffer.find('_', first + 1);
         std::string extracted =
             str_buffer.substr(first + 1, second - first - 1);
-        RCLCPP_INFO(this->get_logger(), "Extracted msg number: %s",
-                    extracted.c_str());
+        // RCLCPP_INFO(this->get_logger(), "Extracted msg number: %s",
+        //             extracted.c_str());
 
         // Add the time to the socket_send_receive_time array
         std::get<1>(socket_send_receive_time[atoi(extracted.c_str())]) =
@@ -134,13 +135,26 @@ void talker::socket_exp_launch() {
     }
     // 2) Send the data to the server
     if (write_enable && ret == 0) {
+      if ((socket_msg_count + 1) % NB_MSGS == 0) {
+        socket_msg_size++;
+      }
+      RCLCPP_INFO(this->get_logger(),
+                  "Msg_count %d:  mep: %d, and current size: %d",
+                  socket_msg_count, socket_msg_size, sizes[socket_msg_size]);
       // Write the data to the socket
-      char buffer[256];
-      bzero(buffer, 256);
-      std::string msg = "S_" + std::to_string(socket_msg_count) + "_";
+      char buffer[SOCKET_BUFFER_SIZE];
+      bzero(buffer, SOCKET_BUFFER_SIZE);
+      std::string test_string(sizes[socket_msg_size], 'A');
+      // std::memcpy(buffer, msg.c_str(), msg.size());
+      // buffer[msg.size()] = '\0';
+      std::string msg =
+          "S_" + std::to_string(socket_msg_count) + "_" + test_string;
+      RCLCPP_INFO(this->get_logger(), "Message length: %d", msg.length());
       strncpy(buffer, msg.c_str(), sizeof(buffer));
 
-      int n = write(server_sockfd, buffer, strlen(buffer));
+      int n = write(
+          server_sockfd, buffer,
+          strlen(buffer)); // Send only the msg part of the buffer, until the \0
       if (n < 0) {
         RCLCPP_ERROR(this->get_logger(), "ERROR writing to socket");
         break;
@@ -152,12 +166,12 @@ void talker::socket_exp_launch() {
       write_enable = false; // Disable writing until next timer event
     }
     // If there is no data to be read nor to write, terminate session
-    if (socket_msg_count > total_nb_msgs - 1) {
+    if (socket_msg_count > total_nb_msgs) {
       RCLCPP_INFO(this->get_logger(), "Socket session terminated");
       running = false;
       break;
     }
-    std::this_thread::sleep_for(std::chrono::microseconds(100));
+    std::this_thread::sleep_for(std::chrono::microseconds(10));
   }
 
   // Close the socket
@@ -368,7 +382,8 @@ void talker::process_data() {
 
   int size = 1;
   int msg_nb = 0;
-  for (int i = 0; i < TOTAL_MSGS; i++) {
+
+  for (int i = 0; i < msg_size * NB_MSGS; i++) {
     if (std::get<0>(socket_send_receive_time[i]) == 0 &&
         std::get<1>(socket_send_receive_time[i]) == 0) {
       continue;
@@ -384,7 +399,7 @@ void talker::process_data() {
     msg_nb++;
 
     this->file << size << " | " << msg_nb << " | " << elapsed_time << "\n";
-    if (i % 49 == 0) {
+    if ((i + 1) % 50 == 0) {
       size *= 10;
       msg_nb = 0;
     }
@@ -406,6 +421,11 @@ bool talker::socket_setup() { // Return 1 if socket communication was correctly
 
   /// Create a socket and bind it to the server port and ip
   sockfd = socket(AF_INET, SOCK_STREAM, 0); // Create a socket
+
+  // !!!!!!
+  // STOCK_STREAM means that we are using TCP
+  // SOCK_DGRAM means that we are using UDP
+  // !!!!!!
 
   // Verify that a socket was created
   if (sockfd < 0)

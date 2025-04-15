@@ -76,11 +76,9 @@ def plot_data_from_csv(csv_file_path):
     for bar in bars:
         height = bar.get_height()
         ax2.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.4f}', ha='center', va='bottom', fontsize=10)
-
-    count_lost_packets(csv_file_path, 50)
     
     # Capture printed output from count_lost_packets
-    lost_summary_text = count_lost_packets(csv_file_path, 30)
+    lost_summary_text = count_lost_packets(csv_file_path, 50)
     # Add the summary as a textbox at the bottom of the figure
     fig.text(0.3, 0.75, lost_summary_text, ha='center', va='bottom',
          fontsize=9, wrap=True, family='monospace',
@@ -108,8 +106,12 @@ def count_lost_packets(data_path, expected_messages):
     for size, group in df.groupby('package_size'):
         received_messages = set(group['message_number'].unique())
         expected = set(range(expected_messages))
-        missing = expected - received_messages
-        loss_percent = (len(missing) / expected_messages) * 100
+        missing = expected_messages - len(received_messages)
+        print(f"missing messages: {missing}")
+        print(f"received messages: {len(received_messages)}")
+        print(f"expected messages: {expected_messages}")
+        loss_percent = (missing / expected_messages) * 100
+        print(f"lost percent: {loss_percent}")
         summary_lines.append(f"Size {size}: Lost {loss_percent:.1f}% packets")
 
 
