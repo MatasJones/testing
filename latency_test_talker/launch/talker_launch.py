@@ -47,7 +47,6 @@ def generate_launch_description():
     logger = LaunchConfiguration("log_level")
     spacing_ms = LaunchConfiguration("spacing_ms")
     msg_size = LaunchConfiguration("msg_size")
-    
     ns = 'latency_test_talker'
     
     ld.add_action(DeclareLaunchArgument(
@@ -82,7 +81,7 @@ def generate_launch_description():
                   '--param', 'spacing_ms:=' + str(spacing_ms), 'msg_size:=' + str(msg_size),
         ],
         parameters=[
-        {"spacing_ms": spacing_ms}  # Explicitly convert to int
+        {"spacing_ms": spacing_ms, "msg_size": msg_size}  # Explicitly convert to int
     ]
     )
     
