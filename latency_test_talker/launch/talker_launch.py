@@ -78,7 +78,7 @@ def generate_launch_description():
         output='screen',
         arguments=['--ros-args',
                   '--log-level', logger,
-                  '--param', 'spacing_ms:=' + str(spacing_ms), 'msg_size:=' + str(msg_size),
+                  '--param',
         ],
         parameters=[
         {"spacing_ms": spacing_ms, "msg_size": msg_size}  # Explicitly convert to int
