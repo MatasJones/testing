@@ -23,7 +23,7 @@ talker::talker() : Node("talker") {
 
   RCLCPP_INFO(this->get_logger(), "Spacing time %d ms", spacing_ms_);
 
-  RCLCPP_INFO(this->get_logger(), "Msg size %d ms", msg_size);
+  RCLCPP_INFO(this->get_logger(), "Msg size %d", msg_size);
 
   // Setup the logger for later use
   talker::create_logger();
