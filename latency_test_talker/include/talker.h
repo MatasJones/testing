@@ -21,6 +21,17 @@
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
+// Socket includes
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <poll.h>
+
 #define NB_LISTENERS 1
 #define QUEUE_SIZE 100
 #define NB_SYNC_CHECKS 10
@@ -29,6 +40,8 @@
 
 #define NB_MSGS 50
 #define NB_OF_SIZES 7
+#define TOTAL_MSGS (NB_MSGS * NB_OF_SIZES)
+#define DEFAULT_MSG_SIZE 5
 
 using namespace std;
 
@@ -39,6 +52,7 @@ public:
 private:
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::TimerBase::SharedPtr exp_timer_;
+  rclcpp::TimerBase::SharedPtr socket_timer_;
 
   // Declare the Publishers
   rclcpp::Publisher<custom_msg::msg::CustomString>::SharedPtr talker_publisher_;
@@ -50,6 +64,7 @@ private:
   rclcpp::Subscription<custom_msg::msg::SyncMsg>::SharedPtr sync_subscriber_;
 
   int spacing_ms_;
+  int msg_size;
 
   double msgs_all_sent_time;
   std::ofstream file;
@@ -65,8 +80,19 @@ private:
   bool terminate_set = false;
   bool sync_check = false;
   int check_count = 0;
+  bool running = true;
+
+  int port = 5000;
+  int server_sockfd;
+  bool write_enable = true;
+  int total_nb_msgs;
+
+  int socket_msg_count = 0;
 
   std::tuple<double, double> send_receive_time[NB_OF_SIZES][NB_MSGS] = {};
+
+  std::tuple<double, double> socket_send_receive_time[NB_OF_SIZES * NB_MSGS] =
+      {};
 
   std::filesystem::path cwd = std::filesystem::current_path();
 
@@ -80,6 +106,9 @@ private:
   void echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg);
   void terminate_exp();
   void process_data();
+  bool socket_setup();
+  void enable_socket_write();
+  void socket_exp_launch();
 
   template <typename T> void log(T data);
 };

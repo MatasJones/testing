@@ -46,6 +46,8 @@ def generate_launch_description():
     
     logger = LaunchConfiguration("log_level")
     spacing_ms = LaunchConfiguration("spacing_ms")
+    msg_size = LaunchConfiguration("msg_size")
+    
     ns = 'latency_test_talker'
     
     ld.add_action(DeclareLaunchArgument(
@@ -60,6 +62,11 @@ def generate_launch_description():
         default_value="100",
         description="Spacing in milliseconds",
     ))
+
+    ld.add_action(DeclareLaunchArgument(
+        "msg_size",
+        default_value="5",
+    ))
     
     package_name = 'latency_test_talker'
     executable_name = 'latency_test_talker'
@@ -72,7 +79,7 @@ def generate_launch_description():
         output='screen',
         arguments=['--ros-args',
                   '--log-level', logger,
-                  '--param', 'spacing_ms:=' + str(spacing_ms),
+                  '--param', 'spacing_ms:=' + str(spacing_ms), 'msg_size:=' + str(msg_size),
         ],
         parameters=[
         {"spacing_ms": spacing_ms}  # Explicitly convert to int

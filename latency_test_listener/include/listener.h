@@ -15,6 +15,7 @@
 #include <filesystem>
 #include <iostream>
 #include <netdb.h>
+#include <poll.h>
 #include <string>
 #include <sys/socket.h>
 #include <unistd.h> // gethostname
@@ -44,12 +45,18 @@ private:
   void echo(const custom_msg::msg::CustomString::SharedPtr msg);
   void echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg);
   void get_ip_addr();
+  bool socket_setup();
 
   std::string ip_addr;
   std::filesystem::path cwd = std::filesystem::current_path();
   std::string config_file_path = cwd.string() + "/src/config/config.yaml";
 
   int id;
+  int port = 5000;
+  char server_ip[13] = "192.168.0.72";
+  int sockfd;
+
+  bool running = true;
 };
 
 #endif

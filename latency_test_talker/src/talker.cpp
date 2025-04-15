@@ -1,5 +1,7 @@
 #include "talker.h"
 
+#define SOCKET_MODE
+
 talker::talker() : Node("talker") {
 
   RCLCPP_INFO(this->get_logger(), "Creating talker");
@@ -7,26 +9,31 @@ talker::talker() : Node("talker") {
   auto custom_qos = rclcpp::QoS(rclcpp::KeepLast(QUEUE_SIZE))
                         .reliability(rclcpp::ReliabilityPolicy::BestEffort);
 
+  // Declare variables from the given ones during the launch
   this->declare_parameter("spacing_ms",
                           DEAFULT_SPACING); // Default value of 400ms
   spacing_ms_ = this->get_parameter("spacing_ms")
                     .as_int(); // Set the spacing as the value passed or as the
                                // default value
+
+  this->declare_parameter("msg_size", DEFAULT_MSG_SIZE);
+  msg_size = this->get_parameter("msg_size").as_int();
+
+  total_nb_msgs = msg_size * NB_MSGS;
+
   RCLCPP_INFO(this->get_logger(), "Spacing time %d ms", spacing_ms_);
+
+  RCLCPP_INFO(this->get_logger(), "Msg size %d ms", msg_size);
+
+  // Setup the logger for later use
   talker::create_logger();
 
-  RCLCPP_INFO(this->get_logger(), "cwd %s", cwd.c_str());
   // This block creates a subscriber on a specified topic and binds it to a
   // callback
   this->talker_subscriber_ =
       this->create_subscription<custom_msg::msg::CustomString>(
           ("/latency_test_listener/PI_TO_COMP"), custom_qos,
           std::bind(&talker::get_response_time, this, std::placeholders::_1));
-  // this->talker_subscriber_ =
-  //     this->create_subscription<custom_msg::msg::CustomString>(
-  //         ("/latency_test_listener/PI_TO_COMP"), 10,
-  //         std::bind(&talker::get_response_time, this,
-  //         std::placeholders::_1));
 
   this->sync_subscriber_ = this->create_subscription<custom_msg::msg::SyncMsg>(
       ("/latency_test_talker/SYNC_TOPIC_IN"), 10,
@@ -36,9 +43,6 @@ talker::talker() : Node("talker") {
   this->talker_publisher_ =
       this->create_publisher<custom_msg::msg::CustomString>(("COMP_TO_PI"),
                                                             custom_qos);
-  // this->talker_publisher_ =
-  //     this->create_publisher<custom_msg::msg::CustomString>(("COMP_TO_PI"),
-  //     10);
 
   this->sync_publisher_ = this->create_publisher<custom_msg::msg::SyncMsg>(
       ("/latency_test_talker/SYNC_TOPIC_OUT"), 10);
@@ -46,12 +50,119 @@ talker::talker() : Node("talker") {
   // Set up the experiment parameters from the config file
   talker::setup_experiment();
 
+#ifdef SOCKET_MODE
+  // Create a socket and bind it to the server port and ip
+  RCLCPP_INFO(this->get_logger(), "Creating socket...");
+  if (!talker::socket_setup()) {
+    RCLCPP_INFO(this->get_logger(), "Socket setup failed");
+    rclcpp::shutdown();
+
+  } else {
+    RCLCPP_INFO(this->get_logger(), "Socket setup done");
+  }
+
+  RCLCPP_INFO(this->get_logger(), "Let's rumble!");
+
+  std::thread timer_thread(std::bind(&talker::enable_socket_write, this));
+
+  // Start experiment thread
+  std::thread exp_thread(std::bind(&talker::socket_exp_launch, this));
+
+  exp_thread.join();
+  timer_thread.join();
+
+#endif
+
+#ifdef ROS_MODE
   // Perform synchronization with the listener
   this->timer_ =
       this->create_wall_timer(std::chrono::milliseconds(SYNC_CHECK_PERIOD),
                               std::bind(&talker::perform_sync, this));
 
-  RCLCPP_INFO(this->get_logger(), "Talker created");
+#endif
+}
+
+void talker::enable_socket_write() {
+  while (running) {
+    write_enable = true;
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(spacing_ms_)); // Sleep for the spacing time
+  }
+  return;
+}
+
+void talker::socket_exp_launch() {
+  // Create a timer to enable writing to socket periodically
+  this->socket_timer_ =
+      this->create_wall_timer(std::chrono::milliseconds(spacing_ms_),
+                              std::bind(&talker::enable_socket_write, this));
+
+  // Create a poll to monitor the socket
+  struct pollfd pfd;
+  pfd.fd = server_sockfd;
+  pfd.events = POLLIN; // Monitor for incoming data
+
+  while (running) {
+    int ret = poll(&pfd, 1, 0);
+    // 1) Check it there is any data that needs to be read on the server socket
+    if (ret > 0) {
+      if (pfd.revents & POLLIN) {
+        // Read the data from the socket
+        char buffer[256];
+        bzero(buffer, 256);
+        int n = read(server_sockfd, buffer, 255);
+        if (n < 0) {
+          RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
+          break;
+        }
+        double recieving_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+        RCLCPP_INFO(this->get_logger(), "Message from client: %s", buffer);
+
+        // Extract msg number from the message
+        std::string str_buffer(buffer);
+        size_t first = str_buffer.find('_');
+        size_t second = str_buffer.find('_', first + 1);
+        std::string extracted =
+            str_buffer.substr(first + 1, second - first - 1);
+        RCLCPP_INFO(this->get_logger(), "Extracted msg number: %s",
+                    extracted.c_str());
+
+        // Add the time to the socket_send_receive_time array
+        std::get<1>(socket_send_receive_time[atoi(extracted.c_str())]) =
+            recieving_time;
+      }
+    }
+    // 2) Send the data to the server
+    if (write_enable && ret == 0) {
+      // Write the data to the socket
+      char buffer[256];
+      bzero(buffer, 256);
+      std::string msg = "S_" + std::to_string(socket_msg_count) + "_";
+      strncpy(buffer, msg.c_str(), sizeof(buffer));
+
+      int n = write(server_sockfd, buffer, strlen(buffer));
+      if (n < 0) {
+        RCLCPP_ERROR(this->get_logger(), "ERROR writing to socket");
+        break;
+      }
+
+      double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+      std::get<0>(socket_send_receive_time[socket_msg_count]) = sending_time;
+      socket_msg_count++;
+      write_enable = false; // Disable writing until next timer event
+    }
+    // If there is no data to be read nor to write, terminate session
+    if (socket_msg_count > total_nb_msgs - 1) {
+      RCLCPP_INFO(this->get_logger(), "Socket session terminated");
+      running = false;
+      break;
+    }
+    std::this_thread::sleep_for(std::chrono::microseconds(100));
+  }
+
+  // Close the socket
+  close(server_sockfd);
+  talker::terminate_exp();
 }
 
 void talker::perform_sync() {
@@ -232,6 +343,7 @@ void talker::process_data() {
     RCLCPP_INFO(this->get_logger(), "Error occurred during file writing!");
     return;
   }
+#ifdef ROS_MODE
   int size = 1;
   for (int i = 0; i < NB_OF_SIZES; i++) {
     for (int j = 0; j < NB_MSGS; j++) {
@@ -250,5 +362,121 @@ void talker::process_data() {
     }
     size *= 10;
   }
+#endif
+
+#ifdef SOCKET_MODE
+
+  int size = 1;
+  int msg_nb = 0;
+  for (int i = 0; i < TOTAL_MSGS; i++) {
+    if (std::get<0>(socket_send_receive_time[i]) == 0 &&
+        std::get<1>(socket_send_receive_time[i]) == 0) {
+      continue;
+    }
+    double elapsed_time =
+        std::get<1>(socket_send_receive_time[i]) -
+        std::get<0>(socket_send_receive_time[i]); // Elapsed time in ms
+
+    if (elapsed_time < 0) {
+      continue;
+    }
+
+    msg_nb++;
+
+    this->file << size << " | " << msg_nb << " | " << elapsed_time << "\n";
+    if (i % 49 == 0) {
+      size *= 10;
+      msg_nb = 0;
+    }
+  }
+
+#endif
+
   this->file.close();
+}
+
+bool talker::socket_setup() { // Return 1 if socket communication was correctly
+                              // setup
+  // Socket setup
+  int sockfd;
+  socklen_t clilen;
+  char buffer[256];
+  struct sockaddr_in serv_addr, cli_addr; // This creates a socket address
+  int n;
+
+  /// Create a socket and bind it to the server port and ip
+  sockfd = socket(AF_INET, SOCK_STREAM, 0); // Create a socket
+
+  // Verify that a socket was created
+  if (sockfd < 0)
+    RCLCPP_ERROR(this->get_logger(), "ERROR opening socket");
+
+  // Reset all the serv_addr values to zero
+  bzero((char *)&serv_addr, sizeof(serv_addr)); // The function bzero() sets all
+                                                // values in a buffer to zero
+
+  // Set the serv_addr parameters
+  serv_addr.sin_family = AF_INET;         // Means that we are using IPv4
+  serv_addr.sin_addr.s_addr = INADDR_ANY; // Tells the kernel to bind the
+                                          // socket to all available interfaces
+  serv_addr.sin_port =
+      htons(port); // This sets the port number the server will listen on,
+                   // converting it from host byte order to network byte order
+
+  // Bind the socket to the server port and ip
+  if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR on binding");
+    return 0;
+  }
+
+  // Listen for incoming connections
+  listen(sockfd, 5); // arg1: socket file descriptor, arg2: max number of
+                     // pending connections
+
+  clilen = sizeof(cli_addr);
+
+  /*
+  The accept system call is blocking until a connection is made. It creates a
+  new socket file descriptor which should be used for all futher communiqué
+  */
+
+  /// Accept a connection from a client and create a new socket file descriptor
+  server_sockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
+
+  if (server_sockfd < 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR on accept");
+    return 0;
+  }
+
+  bzero(buffer, 256);
+  /// Read the message from the client
+  /*
+  Note that the read function is blocking until a message is received on the
+  socket (until the client write a msg)
+  */
+  n = read(server_sockfd, buffer, 255); // n is the number of bytes read
+
+  if (n < 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
+    return 0;
+  }
+
+  // If there is a pb with the socket, kill the process
+  if (strcmp(buffer, "CLIENT_ACK") != 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR, from client ACK");
+    return 0;
+  }
+  RCLCPP_INFO(this->get_logger(), "Message from client: %s", buffer);
+
+  /// Write a response to the client
+  n = write(server_sockfd, "SERVER_ACK", 10);
+
+  if (n < 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR writing to socket");
+    return 0;
+  }
+
+  // Close the socket
+  close(sockfd);
+  return 1;
 }
