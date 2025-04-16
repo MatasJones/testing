@@ -25,6 +25,8 @@ talker::talker() : Node("talker") {
 
   RCLCPP_INFO(this->get_logger(), "Msg size %d", msg_size);
 
+  RCLCPP_INFO(this->get_logger(), "Total size %d", total_nb_msgs);
+
   // Setup the logger for later use
   talker::create_logger();
 
@@ -80,6 +82,10 @@ talker::talker() : Node("talker") {
                               std::bind(&talker::perform_sync, this));
 
 #endif
+
+  // Finish the experiment
+  std::this_thread::sleep_for(std::chrono::seconds(3));
+  talker::terminate_exp();
 }
 
 void talker::enable_socket_write() {
@@ -113,7 +119,7 @@ void talker::socket_exp_launch() {
         bzero(buffer, SOCKET_BUFFER_SIZE);
         int n = read(server_sockfd, buffer, SOCKET_BUFFER_SIZE - 1);
         if (n < 0) {
-          RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
+          // RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
           break;
         }
         double recieving_time = this->get_clock()->now().nanoseconds() / 1.0e6;
@@ -123,10 +129,23 @@ void talker::socket_exp_launch() {
         std::string str_buffer(buffer);
         size_t first = str_buffer.find('_');
         size_t second = str_buffer.find('_', first + 1);
+        // Verify that the msg id is extractable
+        if (!(first != std::string::npos && second != std::string::npos &&
+              second > first)) {
+          // RCLCPP_ERROR(this->get_logger(), "ERROR: invalid message format");
+          continue;
+        }
+
         std::string extracted =
             str_buffer.substr(first + 1, second - first - 1);
         // RCLCPP_INFO(this->get_logger(), "Extracted msg number: %s",
         //             extracted.c_str());
+
+        // Grace period counter
+        if (std::stoi(extracted.c_str()) == 131313) {
+          grace_counter_read++;
+          continue;
+        }
 
         // Add the time to the socket_send_receive_time array
         std::get<1>(socket_send_receive_time[atoi(extracted.c_str())]) =
@@ -138,45 +157,68 @@ void talker::socket_exp_launch() {
       if ((socket_msg_count + 1) % NB_MSGS == 0) {
         socket_msg_size++;
       }
-      RCLCPP_INFO(this->get_logger(),
-                  "Msg_count %d:  mep: %d, and current size: %d",
-                  socket_msg_count, socket_msg_size, sizes[socket_msg_size]);
+
       // Write the data to the socket
       char buffer[SOCKET_BUFFER_SIZE];
       bzero(buffer, SOCKET_BUFFER_SIZE);
       std::string test_string(sizes[socket_msg_size], 'A');
-      // std::memcpy(buffer, msg.c_str(), msg.size());
-      // buffer[msg.size()] = '\0';
-      std::string msg =
-          "S_" + std::to_string(socket_msg_count) + "_" + test_string;
-      RCLCPP_INFO(this->get_logger(), "Message length: %d", msg.length());
+
+      // If grace period
+      if (grace == true) {
+        if (grace_counter_write > GRACE_COUNTER_MAX &&
+            grace_counter_read > GRACE_COUNTER_MAX) {
+          grace = false;
+          RCLCPP_INFO(this->get_logger(),
+                      "Grace period ended, starting experiment");
+          continue;
+        }
+        std::string msg = "S_131313_";
+        strncpy(buffer, msg.c_str(), sizeof(buffer));
+        grace_counter_write++;
+        int n = write(
+            server_sockfd, buffer,
+            strlen(
+                buffer)); // Send only the msg part of the buffer, until the \0
+        if (n < 0) {
+          // RCLCPP_ERROR(this->get_logger(), "ERROR writing to socket");
+          break;
+        }
+        write_enable = false;
+        continue;
+      }
+
+      // If not grace period
+      std::string msg = "S_" + std::to_string(socket_msg_count) + "_";
+      //   +test_string;
       strncpy(buffer, msg.c_str(), sizeof(buffer));
 
       int n = write(
           server_sockfd, buffer,
           strlen(buffer)); // Send only the msg part of the buffer, until the \0
       if (n < 0) {
-        RCLCPP_ERROR(this->get_logger(), "ERROR writing to socket");
+        // RCLCPP_ERROR(this->get_logger(), "ERROR writing to socket");
         break;
       }
 
       double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
       std::get<0>(socket_send_receive_time[socket_msg_count]) = sending_time;
+
       socket_msg_count++;
+
+      // RCLCPP_INFO(this->get_logger(), "Message %d of size %d sent",
+      //             socket_msg_count, sizes[socket_msg_size]);
+      // If there is no data to be read nor to write, terminate session
+      if (socket_msg_count > total_nb_msgs) {
+        RCLCPP_INFO(this->get_logger(), "Socket session terminated");
+        running = false;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+      }
+
       write_enable = false; // Disable writing until next timer event
     }
-    // If there is no data to be read nor to write, terminate session
-    if (socket_msg_count > total_nb_msgs) {
-      RCLCPP_INFO(this->get_logger(), "Socket session terminated");
-      running = false;
-      break;
-    }
+
     std::this_thread::sleep_for(std::chrono::microseconds(10));
   }
-
-  // Close the socket
-  close(server_sockfd);
-  talker::terminate_exp();
 }
 
 void talker::perform_sync() {
@@ -341,12 +383,26 @@ void talker::run_experiment() {
 
 void talker::terminate_exp() {
   RCLCPP_INFO(this->get_logger(), "Experiment completed");
-  // Tell listener nodes to shutdown
+// Tell listener nodes to shutdown
+#ifdef ROS_MODE
   auto message = custom_msg::msg::SyncMsg();
   message.message = "SHUTDOWN";
   sync_publisher_->publish(message);
+#endif
+
+#ifdef SOCKET_MODE
+  char buffer[256];
+  std::string terminate_str = "SHUTDOWN";
+  strncpy(buffer, terminate_str.c_str(), sizeof(buffer));
+  int n = write(server_sockfd, buffer, strlen(buffer));
+
+  // Close the socket
+  close(server_sockfd);
+#endif
+
   process_data();
   std::this_thread::sleep_for(std::chrono::seconds(1));
+  RCLCPP_INFO(this->get_logger(), "Shutting down node");
   rclcpp::shutdown();
 }
 

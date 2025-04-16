@@ -54,7 +54,7 @@ listener::listener() : Node("listener"), count_(0) {
         bzero(buffer, SOCKET_BUFFER_SIZE);
         int n = read(sockfd, buffer, SOCKET_BUFFER_SIZE);
         if (n < 0) {
-          RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
+          // RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
           break;
         }
         // RCLCPP_INFO(this->get_logger(), "%s\n", buffer);
@@ -62,20 +62,42 @@ listener::listener() : Node("listener"), count_(0) {
 
         // Extract msg number from the message
         std::string str_buffer(buffer);
+        if (str_buffer == "SHUTDOWN") {
+          RCLCPP_INFO(this->get_logger(), "Shutdown message received");
+          running = false;
+          break;
+        }
         size_t first = str_buffer.find('_');
         size_t second = str_buffer.find('_', first + 1);
         std::string extracted =
             str_buffer.substr(first + 1, second - first - 1);
 
+        // Verify that the msg id is extractable
+        if (!(first != std::string::npos && second != std::string::npos &&
+              second > first)) {
+          // RCLCPP_ERROR(this->get_logger(), "ERROR: invalid message format");
+          continue;
+        }
+        // RCLCPP_INFO(this->get_logger(), "Extracted msg number: %s",
+        //             extracted.c_str());
+        power =
+            ((std::stoi(extracted.c_str()) + 1) % 50) == 0 ? power + 1 : power;
+        std::string test_string(std::pow(10, power), 'B');
         // Send the data back to the server
-        std::string msg = "C_" + extracted + "_";
+        std::string msg = "C_" + extracted + "_" + test_string;
         strncpy(buffer, msg.c_str(), sizeof(buffer));
         n = write(sockfd, buffer, strlen(buffer));
       }
     }
+    std::this_thread::sleep_for(std::chrono::microseconds(1));
   }
+
   // Close the socket
   close(sockfd);
+
+  RCLCPP_INFO(this->get_logger(), "Socket closed");
+  // Shutdown the node
+  rclcpp::shutdown();
 
 #endif
 }

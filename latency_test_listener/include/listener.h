@@ -12,6 +12,7 @@
 
 #include <arpa/inet.h>
 #include <chrono>
+#include <cmath>
 #include <filesystem>
 #include <iostream>
 #include <netdb.h>
@@ -56,6 +57,7 @@ private:
   int port = 5000;
   char server_ip[13] = "192.168.0.72";
   int sockfd;
+  int power = 0;
 
   bool running = true;
 };

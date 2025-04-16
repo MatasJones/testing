@@ -44,6 +44,7 @@
 #define TOTAL_MSGS (NB_MSGS * NB_OF_SIZES)
 #define DEFAULT_MSG_SIZE 5
 #define SOCKET_BUFFER_SIZE 65490
+#define GRACE_COUNTER_MAX 20
 
 using namespace std;
 
@@ -88,6 +89,9 @@ private:
   int server_sockfd;
   bool write_enable = true;
   int total_nb_msgs;
+  bool grace = true;
+  int grace_counter_write = 0;
+  int grace_counter_read = 0;
 
   int socket_msg_count = 0;
   int socket_msg_size = 0;
