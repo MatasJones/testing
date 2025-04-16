@@ -57,8 +57,8 @@ def plot_data_from_csv(csv_file_path):
 
     ax1.set_xlabel('Message size [bytes]')
     ax1.set_ylabel('Roundtrip time [ms]')
-    ax1.set_title(f"Latency test holohover to holohover, {first_line} spacing, {plot_name}")
-    # ax1.set_title(f"Latency test main to holohover, 100µs spacing, {plot_name}")
+    ax1.set_title(f"Latency test holo to holo, {first_line} spacing, {plot_name}")
+    #ax1.set_title(f"Latency test main to holohover, 100µs spacing, {plot_name}")
     ax1.legend(title="Message size [bytes]", title_fontsize='large', fontsize='small', loc='upper left')
     ax1.grid(True, linestyle='--', alpha=0.6)
 

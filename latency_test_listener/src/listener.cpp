@@ -1,5 +1,9 @@
 #include "listener.h"
 
+// #define OG_QOS_MODE
+#define CUSTOM_QOS_MODE
+// #define LOG_MODE
+
 listener::listener() : Node("listener"), count_(0) {
 
   RCLCPP_INFO(this->get_logger(), "Creating listener");
@@ -8,29 +12,35 @@ listener::listener() : Node("listener"), count_(0) {
   auto custom_qos = rclcpp::QoS(rclcpp::KeepLast(QUEUE_SIZE))
                         .reliability(rclcpp::ReliabilityPolicy::BestEffort);
 
-  // This block creates a subscriber on a specified topic and binds it to a
-  // callback
+// This block creates a subscriber on a specified topic and binds it to a
+// callback
+#ifdef CUSTOM_QOS_MODE
   this->listener_subscriber_ =
       this->create_subscription<custom_msg::msg::CustomString>(
           ("/latency_test_talker/COMP_TO_PI"), custom_qos,
           std::bind(&listener::echo, this, std::placeholders::_1));
 
-  // this->listener_subscriber_ =
-  //     this->create_subscription<custom_msg::msg::CustomString>(
-  //         ("/latency_test_talker/COMP_TO_PI"), 10,
-  //         std::bind(&listener::echo, this, std::placeholders::_1));
-
-  this->sync_subscriber_ = this->create_subscription<custom_msg::msg::SyncMsg>(
-      ("/latency_test_talker/SYNC_TOPIC_OUT"), QUEUE_SIZE,
-      std::bind(&listener::echo_sync, this, std::placeholders::_1));
-
   this->listener_publisher_ =
       this->create_publisher<custom_msg::msg::CustomString>(("PI_TO_COMP"),
                                                             custom_qos);
 
-  // this->listener_publisher_ =
-  //     this->create_publisher<custom_msg::msg::CustomString>(("PI_TO_COMP"),
-  //     10);
+#endif
+
+#ifdef OG_QOS_MODE
+
+  this->listener_subscriber_ =
+      this->create_subscription<custom_msg::msg::CustomString>(
+          ("/latency_test_talker/COMP_TO_PI"), 10,
+          std::bind(&listener::echo, this, std::placeholders::_1));
+
+  this->listener_publisher_ =
+      this->create_publisher<custom_msg::msg::CustomString>(("PI_TO_COMP"), 10);
+
+#endif
+
+  this->sync_subscriber_ = this->create_subscription<custom_msg::msg::SyncMsg>(
+      ("/latency_test_talker/SYNC_TOPIC_OUT"), QUEUE_SIZE,
+      std::bind(&listener::echo_sync, this, std::placeholders::_1));
 
   this->sync_publisher_ = this->create_publisher<custom_msg::msg::SyncMsg>(
       ("/latency_test_talker/SYNC_TOPIC_IN"), QUEUE_SIZE);
@@ -62,9 +72,11 @@ void listener::echo(const custom_msg::msg::CustomString::SharedPtr msg) {
   message.msg_nb = msg->msg_nb;
 
   listener_publisher_->publish(message);
-  // RCLCPP_INFO(this->get_logger(),
-  //             "Msg %d of size %d recieved. Sending response...", msg->msg_nb,
-  //             msg->size);
+#ifdef LOG_MODE
+  RCLCPP_INFO(this->get_logger(),
+              "Msg %d of size %d recieved. Sending response...", msg->msg_nb,
+              msg->size);
+#endif
 }
 
 void listener::get_ip_addr() {

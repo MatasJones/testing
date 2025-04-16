@@ -3,7 +3,7 @@
 PATH_TO_LOGS="/home/ubuntu/testing/testing_logs/logger.csv"
 
 ### Change file location and name
-PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/holo_tests/2holo_no_logs_100_best_effort"
+PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/holo_tests/100_50_5_1ms_demo/holo_2_holo_custom_QOS"
 file_name_first_part="holo_holo_no_logs_100_best_effort"
 ###
 
