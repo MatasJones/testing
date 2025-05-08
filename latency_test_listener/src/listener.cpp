@@ -1,7 +1,7 @@
 #include "listener.h"
 
 #define OG_QOS_MODE
-//#define CUSTOM_QOS_MODE
+// #define CUSTOM_QOS_MODE
 #define LOG_MODE
 
 listener::listener() : Node("listener"), count_(0) {
@@ -70,12 +70,12 @@ void listener::echo(const custom_msg::msg::CustomString::SharedPtr msg) {
   // std::string test_string(msg->size, 'B');
   message.message = test_string;
   message.size = msg->size;
-  message.msg_nb = msg->msg_nb;
+  message.msg_id = msg->msg_id;
 
   listener_publisher_->publish(message);
 #ifdef LOG_MODE
   RCLCPP_INFO(this->get_logger(),
-              "Msg %d of size %d recieved. Sending response...", msg->msg_nb,
+              "Msg %d of size %d recieved. Sending response...", msg->msg_id,
               msg->size);
 #endif
 }

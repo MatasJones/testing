@@ -28,6 +28,7 @@ def plot_data_from_csv(csv_file_path):
 
     # Get unique powers of 10 for coloring
     unique_powers = sorted(df['log10_msg_size'].unique())
+    print(f"Unique powers of 10 in msg_size: {unique_powers}")
     
     # Create a colormap for both scatter plot and histogram
     colormap = plt.get_cmap('rainbow')
@@ -91,29 +92,35 @@ def plot_data_from_csv(csv_file_path):
     plt.tight_layout()
     plt.show()
 
-def count_lost_packets(data_path, expected_messages):
-    df = pd.read_csv(data_path, sep='|', header=None, engine='python', skiprows=1)
-    df.columns = ['package_size', 'message_number', 'time']
+def count_lost_packets(data_path, expected_messages, initial_size = 1):
 
-    # Clean whitespace only on object columns
+    df = pd.read_csv(data_path, sep='|', header=None, engine='python', skiprows=1)
+    df.columns = ['raw_size', 'message_number', 'time']
+
+    # Clean and convert
     df_obj = df.select_dtypes(['object'])
     df[df_obj.columns] = df_obj.apply(lambda x: x.str.strip())
 
-    # Convert columns to numeric
-    df['package_size'] = df['package_size'].astype(int)
     df['message_number'] = df['message_number'].astype(int)
+
+    # Infer actual size based on message_number
+    df['package_size'] = df['message_number'].apply(lambda x: initial_size * (10 ** (x // 50)))
 
     summary_lines = []
 
+    # Group by inferred size
     for size, group in df.groupby('package_size'):
-        received_messages = set(group['message_number'].unique())
-        expected = set(range(expected_messages))
-        missing = expected - received_messages
-        loss_percent = (len(missing) / expected_messages) * 100
+        # Calculate message ID range for this size group
+        size_index = group['message_number'].min() // 50
+        start_id = size_index * 50
+        expected_ids = set(range(start_id, start_id + 50))
+        received_ids = set(group['message_number'])
+        missing = expected_ids - received_ids
+        loss_percent = (len(missing) / 50) * 100
         summary_lines.append(f"Size {size}: Lost {loss_percent:.1f}% packets")
 
-
     return "\n".join(summary_lines)
+
 
 
 # Path to your CSV file

@@ -28,7 +28,7 @@
 #define SYNC_CHECK_PERIOD 200
 
 #define NB_MSGS 50
-#define NB_OF_SIZES 7
+#define NB_OF_SIZES 6
 
 using namespace std;
 
@@ -67,11 +67,13 @@ private:
   bool sync_check = false;
   int check_count = 0;
   bool test_continue = true;
-  uint8_t msg_id = 0;
+  uint16_t msg_id = 0;
   int mistach_counter = 0;
+  int lost_packes_counter = 0;
+  int sync_counter = 0;
 
-  std::tuple<double, double, int, int> send_receive_time[NB_OF_SIZES][NB_MSGS] =
-      {};
+  std::tuple<double, double, uint16_t, uint16_t>
+      send_receive_time[NB_OF_SIZES * NB_MSGS] = {};
 
   std::filesystem::path cwd = std::filesystem::current_path();
 

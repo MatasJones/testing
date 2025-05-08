@@ -1,4 +1,4 @@
 #CustomString
-uint32 msg_nb
+uint16 msg_id
 int32 size
 string message
