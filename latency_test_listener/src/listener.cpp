@@ -2,6 +2,9 @@
 
 #define SOCKET_MODE
 
+#define UDP
+// #define TCP
+
 listener::listener() : Node("listener"), count_(0) {
 
   RCLCPP_INFO(this->get_logger(), "Creating listener");
@@ -39,7 +42,7 @@ listener::listener() : Node("listener"), count_(0) {
     RCLCPP_INFO(this->get_logger(), "Socket setup done");
   }
   RCLCPP_INFO(this->get_logger(), "Let's rumble!");
-
+#ifdef TCP
   // Create a poll to verify if the socket is ready to read
   struct pollfd fds;
   fds.fd = sockfd;
@@ -91,8 +94,10 @@ listener::listener() : Node("listener"), count_(0) {
     }
     std::this_thread::sleep_for(std::chrono::microseconds(1));
   }
-
+#endif
   // Close the socket
+  free(serv_addr);
+  serv_addr = NULL;
   close(sockfd);
 
   RCLCPP_INFO(this->get_logger(), "Socket closed");
@@ -176,6 +181,7 @@ bool listener::socket_setup() {
   struct hostent *server;
   char buffer[256];
 
+#ifdef TCP
   // Create a socket
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0) {
@@ -223,5 +229,65 @@ bool listener::socket_setup() {
     RCLCPP_ERROR(this->get_logger(), "ERROR: server did not acknowledge");
     return 0;
   }
+#endif
+
+#ifdef UDP
+  // Setup UDP socket
+  sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+  if (sockfd < 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR opening socket");
+    return 0;
+  }
+
+  // Reset all the serv_addr values to zero
+  bzero((char *)&serv_addr, sizeof(serv_addr)); // The function bzero() sets all
+                                                // values in a buffer to zero
+
+  // Set the serv_addr parameters
+  serv_addr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
+  if (serv_addr == NULL) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR allocating memory for serv_addr");
+    return 0;
+  }
+  serv_addr.sin_family = AF_INET; // Means that we are using IPv4
+  // Tell the socket to accept any of the host machines IPs
+  serv_addr.sin_addr.s_addr = INADDR_ANY; // Tells the kernel to bind the
+                                          // socket to all available interfaces
+  serv_addr.sin_port =
+      htons(port); // This sets the port number the server will listen on,
+                   // converting it from host byte order to network byte order
+
+  // UDP client does not need to know its own port, it is handled by the OS as
+  // there is no full connection like TCP
+
+  // Send a message to the server
+  int sync_msg =
+      sendto(sockfd, "First msg", 10, 0, serv_addr, sizeof(struct sockaddr_in));
+  if (sync_msg < 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR sending message");
+    return 0;
+  }
+
+  // Wait for a response from the server
+  sync_msg = recvfrom(sockfd, buffer, 255, 0, (struct sockaddr *)&serv_addr,
+                      sizeof(serv_addr)); // n is the number of bytes read
+  buffer[sync_msg] = '\0';
+
+  if (sync_msg < 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
+    return 0;
+  }
+  if (strncmp(buffer, "SERVER_ACK", 10) != 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR: server did not acknowledge");
+    return 0;
+  }
+  RCLCPP_INFO(this->get_logger(), "Message from server: %s", buffer);
+  // Send acknowledgment to the server
+  sync_msg = sendto(sockfd, "CLIENT_ACK", 10, 0, serv_addr,
+                    sizeof(struct sockaddr_in));
+
+  RCLCPP_INFO(this->get_logger(), "UDP socket setup done");
+
+#endif
   return 1;
 }

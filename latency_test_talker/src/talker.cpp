@@ -2,6 +2,9 @@
 
 #define SOCKET_MODE
 
+// #define TCP
+#define UDP
+
 talker::talker() : Node("talker") {
 
   RCLCPP_INFO(this->get_logger(), "Creating talker");
@@ -102,7 +105,7 @@ void talker::socket_exp_launch() {
   this->socket_timer_ =
       this->create_wall_timer(std::chrono::milliseconds(spacing_ms_),
                               std::bind(&talker::enable_socket_write, this));
-
+#ifdef TCP
   // Create a poll to monitor the socket
   struct pollfd pfd;
   pfd.fd = server_sockfd;
@@ -150,6 +153,10 @@ void talker::socket_exp_launch() {
         // Add the time to the socket_send_receive_time array
         std::get<1>(socket_send_receive_time[atoi(extracted.c_str())]) =
             recieving_time;
+
+        // Add msg id to the socket_send_receive_time array
+        std::get<3>(socket_send_receive_time[atoi(extracted.c_str())]) =
+            atoi(extracted.c_str());
       }
     }
     // 2) Send the data to the server
@@ -201,7 +208,11 @@ void talker::socket_exp_launch() {
       }
 
       double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+      // Add the time to the socket_send_receive_time array
       std::get<0>(socket_send_receive_time[socket_msg_count]) = sending_time;
+      // Add msg id to the socket_send_receive_time array
+      std::get<2>(socket_send_receive_time[socket_msg_count]) =
+          socket_msg_count;
 
       socket_msg_count++;
 
@@ -211,13 +222,20 @@ void talker::socket_exp_launch() {
       if (socket_msg_count > total_nb_msgs) {
         RCLCPP_INFO(this->get_logger(), "Socket session terminated");
         running = false;
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::seconds(3));
       }
 
       write_enable = false; // Disable writing until next timer event
     }
 
     std::this_thread::sleep_for(std::chrono::microseconds(10));
+#endif
+
+#ifdef UDP
+
+    talker::terminate_exp()
+
+#endif
   }
 }
 
@@ -390,7 +408,7 @@ void talker::terminate_exp() {
   sync_publisher_->publish(message);
 #endif
 
-#ifdef SOCKET_MODE
+#ifdef TCP
   char buffer[256];
   std::string terminate_str = "SHUTDOWN";
   strncpy(buffer, terminate_str.c_str(), sizeof(buffer));
@@ -398,6 +416,11 @@ void talker::terminate_exp() {
 
   // Close the socket
   close(server_sockfd);
+#endif
+
+#ifdef UDP
+  free(dest_addr);
+  dest_addr = NULL;
 #endif
 
   process_data();
@@ -437,13 +460,37 @@ void talker::process_data() {
 #ifdef SOCKET_MODE
 
   int size = 1;
-  int msg_nb = 0;
 
   for (int i = 0; i < msg_size * NB_MSGS; i++) {
+
+    if ((i + 1) % 50 == 0) {
+      size *= 10;
+    }
+
+    // Check if the message did a round trip
     if (std::get<0>(socket_send_receive_time[i]) == 0 &&
         std::get<1>(socket_send_receive_time[i]) == 0) {
+      RCLCPP_WARN(this->get_logger(), "Message %d not received or sent", i);
+      lost_packes_counter++;
       continue;
     }
+
+    // Check if the message ID matches
+    if (std::get<2>(socket_send_receive_time[i]) !=
+        std::get<3>(socket_send_receive_time[i])) {
+      RCLCPP_WARN(this->get_logger(),
+                  "Message ID mismatch: sent %d, received %d",
+                  std::get<2>(socket_send_receive_time[i]),
+                  std::get<3>(socket_send_receive_time[i]));
+      mistach_counter++;
+      continue;
+    } else {
+      RCLCPP_INFO(this->get_logger(), "Message ID match: sent %d, received %d",
+                  std::get<2>(socket_send_receive_time[i]),
+                  std::get<3>(socket_send_receive_time[i]));
+    }
+
+    // Calculate the elapsed time
     double elapsed_time =
         std::get<1>(socket_send_receive_time[i]) -
         std::get<0>(socket_send_receive_time[i]); // Elapsed time in ms
@@ -452,18 +499,17 @@ void talker::process_data() {
       continue;
     }
 
-    msg_nb++;
-
-    this->file << size << " | " << msg_nb << " | " << elapsed_time << "\n";
-    if ((i + 1) % 50 == 0) {
-      size *= 10;
-      msg_nb = 0;
-    }
+    // Write the data to the file
+    this->file << size << " | " << i << " | " << elapsed_time << "\n";
   }
 
 #endif
 
   this->file.close();
+  RCLCPP_INFO(this->get_logger(), "Number of mistaches | lost packets: %d",
+              mistach_counter);
+  RCLCPP_INFO(this->get_logger(), "Number of lost packets: %d",
+              lost_packes_counter);
 }
 
 bool talker::socket_setup() { // Return 1 if socket communication was correctly
@@ -475,9 +521,17 @@ bool talker::socket_setup() { // Return 1 if socket communication was correctly
   struct sockaddr_in serv_addr, cli_addr; // This creates a socket address
   int n;
 
-  /// Create a socket and bind it to the server port and ip
-  sockfd = socket(AF_INET, SOCK_STREAM, 0); // Create a socket
+  clilen = sizeof(cli_addr);
+  bzero(buffer, 256);
 
+/// Create a socket and bind it to the server port and ip
+#ifdef TCP
+  sockfd = socket(AF_INET, SOCK_STREAM, 0); // Create a socket
+#endif
+
+#ifdef UDP
+  sockfd = socket(AF_INET, SOCK_DGRAM, 0); // Create a socket
+#endif
   // !!!!!!
   // STOCK_STREAM means that we are using TCP
   // SOCK_DGRAM means that we are using UDP
@@ -492,7 +546,8 @@ bool talker::socket_setup() { // Return 1 if socket communication was correctly
                                                 // values in a buffer to zero
 
   // Set the serv_addr parameters
-  serv_addr.sin_family = AF_INET;         // Means that we are using IPv4
+  serv_addr.sin_family = AF_INET; // Means that we are using IPv4
+  // Tell the socket to accept any of the host machines IPs
   serv_addr.sin_addr.s_addr = INADDR_ANY; // Tells the kernel to bind the
                                           // socket to all available interfaces
   serv_addr.sin_port =
@@ -505,11 +560,10 @@ bool talker::socket_setup() { // Return 1 if socket communication was correctly
     return 0;
   }
 
+#ifdef TCP
   // Listen for incoming connections
   listen(sockfd, 5); // arg1: socket file descriptor, arg2: max number of
                      // pending connections
-
-  clilen = sizeof(cli_addr);
 
   /*
   The accept system call is blocking until a connection is made. It creates a
@@ -524,7 +578,6 @@ bool talker::socket_setup() { // Return 1 if socket communication was correctly
     return 0;
   }
 
-  bzero(buffer, 256);
   /// Read the message from the client
   /*
   Note that the read function is blocking until a message is received on the
@@ -554,5 +607,63 @@ bool talker::socket_setup() { // Return 1 if socket communication was correctly
 
   // Close the socket
   close(sockfd);
+
+#endif
+
+#ifdef UDP
+  int sync_msg = recvfrom(sockfd, buffer, 255, 0, (struct sockaddr *)&cli_addr,
+                          &clilen); // n is the number of bytes read
+  if (sync_msg < 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
+    return 0;
+  }
+  buffer[sync_msg] = '\0';
+  // UDP is sensionless, so we don't need to accept a connection
+  // This means that for every message received, there is also the clients
+  // socket info
+  /*
+  Which consists a struct: struct sockaddr_in cli_addr
+  1) cli_add.sin_family = AF_INET (IPv4)
+  2) cli_addr.sin_port : the client's port number
+  3) cli_addr.sin_addr : the client's IP address
+  */
+  // So we need to extract the client's IP address and port number from the
+  // first clent message
+  // Allocate memory for dest_addr
+  dest_addr = malloc(sizeof(struct sockaddr_in));
+  if (dest_addr == NULL) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR allocating memory for dest_addr");
+    return 0;
+  }
+
+  // Copy the client's address info into dest_addr
+  memcpy(dest_addr, &cli_addr, sizeof(struct sockaddr_in));
+
+  // Print the client's address info
+  RCLCPP_INFO(this->get_logger(), "Client %s:%d", inet_ntoa(cli_addr.sin_addr),
+              ntohs(cli_addr.sin_port));
+
+  // Send a response to the client
+  sync_msg = sendto(sockfd, "SERVER_ACK", 10, 0, dest_addr,
+                    sizeof(struct sockaddr_in));
+
+  // Wait for sync message from the client
+  sync_msg = recvfrom(sockfd, buffer, 255, 0, (struct sockaddr *)&cli_addr,
+                      &clilen); // n is the number of bytes read
+  if (sync_msg < 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
+    return 0;
+  }
+  buffer[sync_msg] = '\0';
+
+  if (strncmp(buffer, "CLIENT_ACK", 10) != 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR: client did not acknowledge");
+    return 0;
+  }
+  RCLCPP_INFO(this->get_logger(), "Message from client: %s", buffer);
+
+  RCLCPP_INFO(this->get_logger(), "UDP socket setup done");
+#endif
+
   return 1;
 }

@@ -28,6 +28,7 @@ def plot_data_from_csv(csv_file_path):
 
     # Get unique powers of 10 for coloring
     unique_powers = sorted(df['log10_msg_size'].unique())
+    print(f"Unique powers of 10 in msg_size: {unique_powers}")
     
     # Create a colormap for both scatter plot and histogram
     colormap = plt.get_cmap('rainbow')
@@ -57,8 +58,8 @@ def plot_data_from_csv(csv_file_path):
 
     ax1.set_xlabel('Message size [bytes]')
     ax1.set_ylabel('Roundtrip time [ms]')
-    ax1.set_title(f"Latency test main to holohover, {first_line} spacing, {plot_name}")
-    # ax1.set_title(f"Latency test main to holohover, 100µs spacing, {plot_name}")
+    ax1.set_title(f"Latency test holo to holo, {first_line} spacing, {plot_name}")
+    #ax1.set_title(f"Latency test main to holohover, 100µs spacing, {plot_name}")
     ax1.legend(title="Message size [bytes]", title_fontsize='large', fontsize='small', loc='upper left')
     ax1.grid(True, linestyle='--', alpha=0.6)
 
@@ -76,9 +77,11 @@ def plot_data_from_csv(csv_file_path):
     for bar in bars:
         height = bar.get_height()
         ax2.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.4f}', ha='center', va='bottom', fontsize=10)
+
+    count_lost_packets(csv_file_path, 50)
     
     # Capture printed output from count_lost_packets
-    lost_summary_text = count_lost_packets(csv_file_path, 50)
+    lost_summary_text = count_lost_packets(csv_file_path, 30)
     # Add the summary as a textbox at the bottom of the figure
     fig.text(0.3, 0.75, lost_summary_text, ha='center', va='bottom',
          fontsize=9, wrap=True, family='monospace',
@@ -89,35 +92,36 @@ def plot_data_from_csv(csv_file_path):
     plt.tight_layout()
     plt.show()
 
-def count_lost_packets(data_path, expected_messages):
-    df = pd.read_csv(data_path, sep='|', header=None, engine='python', skiprows=1)
-    df.columns = ['package_size', 'message_number', 'time']
+def count_lost_packets(data_path, expected_messages, initial_size = 1):
 
-    # Clean whitespace only on object columns
+    df = pd.read_csv(data_path, sep='|', header=None, engine='python', skiprows=1)
+    df.columns = ['raw_size', 'message_number', 'time']
+
+    # Clean and convert
     df_obj = df.select_dtypes(['object'])
     df[df_obj.columns] = df_obj.apply(lambda x: x.str.strip())
 
-    # Convert columns to numeric
-    df['package_size'] = df['package_size'].astype(int)
     df['message_number'] = df['message_number'].astype(int)
+
+    # Infer actual size based on message_number
+    df['package_size'] = df['message_number'].apply(lambda x: initial_size * (10 ** (x // 50)))
 
     summary_lines = []
 
+    # Group by inferred size
     for size, group in df.groupby('package_size'):
-        received_messages = set(group['message_number'].unique())
-        expected = set(range(expected_messages))
-        missing = expected_messages - len(received_messages)
-        print(f"missing messages: {missing}")
-        print(f"received messages: {len(received_messages)}")
-        print(f"expected messages: {expected_messages}")
-        loss_percent = (missing / expected_messages) * 100
-        print(f"lost percent: {loss_percent}")
+        # Calculate message ID range for this size group
+        size_index = group['message_number'].min() // 50
+        start_id = size_index * 50
+        expected_ids = set(range(start_id, start_id + 50))
+        received_ids = set(group['message_number'])
+        missing = expected_ids - received_ids
+        loss_percent = (len(missing) / 50) * 100
         summary_lines.append(f"Size {size}: Lost {loss_percent:.1f}% packets")
-
 
     return "\n".join(summary_lines)
 
 
+
 # Path to your CSV file
 plot_data_from_csv(csv_file_path)
-

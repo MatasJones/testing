@@ -93,12 +93,21 @@ private:
   int grace_counter_write = 0;
   int grace_counter_read = 0;
 
+  // Experiment variables
   int socket_msg_count = 0;
   int socket_msg_size = 0;
 
+  // Logging variables
+  int lost_packes_counter = 0;
+  int mistach_counter = 0;
+
+  // UDP
+  struct sockaddr_in *dest_addr;
+
   std::tuple<double, double> send_receive_time[NB_OF_SIZES][NB_MSGS] = {};
 
-  std::tuple<double, double> socket_send_receive_time[TOTAL_MSGS] = {};
+  std::tuple<double, double, uint16_t, uint16_t>
+      socket_send_receive_time[TOTAL_MSGS] = {};
 
   std::filesystem::path cwd = std::filesystem::current_path();
 
