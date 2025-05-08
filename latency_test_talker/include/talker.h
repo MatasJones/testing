@@ -39,6 +39,7 @@ public:
 private:
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::TimerBase::SharedPtr exp_timer_;
+  rclcpp::TimerBase::SharedPtr test_timer_;
 
   // Declare the Publishers
   rclcpp::Publisher<custom_msg::msg::CustomString>::SharedPtr talker_publisher_;
@@ -65,8 +66,12 @@ private:
   bool terminate_set = false;
   bool sync_check = false;
   int check_count = 0;
+  bool test_continue = true;
+  uint8_t msg_id = 0;
+  int mistach_counter = 0;
 
-  std::tuple<double, double> send_receive_time[NB_OF_SIZES][NB_MSGS] = {};
+  std::tuple<double, double, int, int> send_receive_time[NB_OF_SIZES][NB_MSGS] =
+      {};
 
   std::filesystem::path cwd = std::filesystem::current_path();
 
@@ -80,6 +85,7 @@ private:
   void echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg);
   void terminate_exp();
   void process_data();
+  void test_timer();
 
   template <typename T> void log(T data);
 };

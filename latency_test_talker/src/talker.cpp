@@ -1,8 +1,8 @@
 #include "talker.h"
 
-// #define OG_QOS_MODE
-#define CUSTOM_QOS_MODE
-// #define LOG_MODE
+#define OG_QOS_MODE
+// #define CUSTOM_QOS_MODE
+#define LOG_MODE
 
 talker::talker() : Node("talker") {
 
@@ -84,6 +84,8 @@ void talker::perform_sync() {
       this->timer_->cancel();
       RCLCPP_INFO(this->get_logger(),
                   "Sync check done, starting grace period..");
+      // Wait for 5 seconds before starting the experiment
+      std::this_thread::sleep_for(std::chrono::seconds(5));
       this->exp_timer_ =
           this->create_wall_timer(std::chrono::milliseconds(spacing_ms_),
                                   std::bind(&talker::run_experiment, this));
@@ -93,6 +95,7 @@ void talker::perform_sync() {
     // Send a message to the listener to check if it is responding on the topic
     auto message = custom_msg::msg::CustomString();
     message.size = 404;
+    message.message = "PING";
     talker_publisher_->publish(message);
   }
 
@@ -145,6 +148,7 @@ void talker::get_response_time(
     break;
   }
   std::get<1>(send_receive_time[index][msg->msg_nb]) = recieving_time;
+  std::get<3>(send_receive_time[index][msg->msg_nb]) = msg->msg_nb;
 #ifdef LOG_MODE
   RCLCPP_INFO(this->get_logger(), "Msg %d of size %d received", msg->msg_nb,
               msg->size);
@@ -184,49 +188,67 @@ void talker::setup_experiment() {
   sizes = config["sizes"].as<std::vector<int>>();
 }
 
-void talker::run_experiment() {
-  // If the number of iterations for this size is greater than the number of
-  // repetitions, increase the size
-  if (current_iteration == repetitions) {
-    current_iteration = 0;
-    current_size++;
-  }
+void talker::test_timer() {
+  test_timer_->cancel();
+  test_timer_ = nullptr;
+  test_continue = true;
+}
 
-  // If the experiment is completed, shutdown the node
-  if (static_cast<std::vector<int>::size_type>(current_size) == sizes.size()) {
-    if (terminate_set) {
-      double current_time = this->get_clock()->now().nanoseconds() / 1.0e6;
-      if (current_time - msgs_all_sent_time >= 3000.0) {
-        this->exp_timer_->cancel();
-        talker::terminate_exp();
+void talker::run_experiment() {
+  if (test_continue) {
+    // If the number of iterations for this size is greater than the number of
+    // repetitions, increase the size
+    if (current_iteration == repetitions) {
+      current_iteration = 0;
+      current_size++;
+      // Start test timer
+      // test_continue = false;
+      // test_timer_ =
+      //     this->create_wall_timer(std::chrono::milliseconds(2000),
+      //                             std::bind(&talker::test_timer, this));
+    }
+
+    // If the experiment is completed, shutdown the node
+    if (static_cast<std::vector<int>::size_type>(current_size) ==
+        sizes.size()) {
+      if (terminate_set) {
+        double current_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+        if (current_time - msgs_all_sent_time >= 3000.0) {
+          this->exp_timer_->cancel();
+          talker::terminate_exp();
+        }
+        return;
       }
+      terminate_set = true;
+      msgs_all_sent_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+      RCLCPP_INFO(this->get_logger(), "All messages sent to holos");
       return;
     }
-    terminate_set = true;
-    msgs_all_sent_time = this->get_clock()->now().nanoseconds() / 1.0e6;
-    RCLCPP_INFO(this->get_logger(), "All messages sent to holos");
-    return;
-  }
 
-  // Prepare the message to be sent
-  std::string test_string(sizes[current_size], 'A');
-  auto message = custom_msg::msg::CustomString();
+    // Prepare the message to be sent
+    std::string test_string(sizes[1], 'A');
+    // std::string test_string(sizes[current_size], 'A');
+    auto message = custom_msg::msg::CustomString();
 
-  message.msg_nb = current_iteration;
-  message.size = sizes[current_size];
-  message.message = test_string;
+    message.msg_nb = msg_id;
+    message.size = sizes[current_size];
+    message.message = test_string;
 
-  // Set the send time and publish the message
-  double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
-  talker_publisher_->publish(message);
-  std::get<0>(send_receive_time[current_size][current_iteration]) =
-      sending_time;
+    // Set the send time and publish the message
+    double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+    talker_publisher_->publish(message);
+    std::get<0>(send_receive_time[current_size][current_iteration]) =
+        sending_time;
+
+    std::get<2>(send_receive_time[current_size][current_iteration]) = msg_id;
+    msg_id++;
 
 #ifdef LOG_MODE
-  RCLCPP_INFO(this->get_logger(), "Message %d of size %d sent",
-              current_iteration, sizes[current_size]);
+    RCLCPP_INFO(this->get_logger(), "Message %d of size %d sent",
+                current_iteration, sizes[current_size]);
 #endif
-  current_iteration++;
+    current_iteration++;
+  }
 }
 
 void talker::terminate_exp() {
@@ -250,9 +272,23 @@ void talker::process_data() {
   int size = 1;
   for (int i = 0; i < NB_OF_SIZES; i++) {
     for (int j = 0; j < NB_MSGS; j++) {
-      if (std::get<0>(send_receive_time[i][j]) == 0 &&
+      if (std::get<0>(send_receive_time[i][j]) == 0 ||
           std::get<1>(send_receive_time[i][j]) == 0) {
         continue;
+      }
+      if (std::get<2>(send_receive_time[i][j]) !=
+          std::get<3>(send_receive_time[i][j])) {
+        RCLCPP_WARN(this->get_logger(),
+                    "Message ID mismatch: sent %d, received %d",
+                    std::get<2>(send_receive_time[i][j]),
+                    std::get<3>(send_receive_time[i][j]));
+        mistach_counter++;
+        continue;
+      } else {
+        RCLCPP_INFO(this->get_logger(),
+                    "Message ID match: sent %d, received %d",
+                    std::get<2>(send_receive_time[i][j]),
+                    std::get<3>(send_receive_time[i][j]));
       }
       double elapsed_time =
           std::get<1>(send_receive_time[i][j]) -
@@ -266,4 +302,5 @@ void talker::process_data() {
     size *= 10;
   }
   this->file.close();
+  RCLCPP_INFO(this->get_logger(), "Number of mistaches: %d", mistach_counter);
 }

@@ -1,8 +1,8 @@
 #include "listener.h"
 
-// #define OG_QOS_MODE
-#define CUSTOM_QOS_MODE
-// #define LOG_MODE
+#define OG_QOS_MODE
+//#define CUSTOM_QOS_MODE
+#define LOG_MODE
 
 listener::listener() : Node("listener"), count_(0) {
 
@@ -66,7 +66,8 @@ void listener::echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg) {
 
 void listener::echo(const custom_msg::msg::CustomString::SharedPtr msg) {
   auto message = custom_msg::msg::CustomString();
-  std::string test_string(msg->size, 'B');
+  std::string test_string(1, 'B');
+  // std::string test_string(msg->size, 'B');
   message.message = test_string;
   message.size = msg->size;
   message.msg_nb = msg->msg_nb;
