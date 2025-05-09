@@ -13,6 +13,11 @@
 #include <unistd.h>
 
 #include <poll.h>
+#include <string>
+#include <tuple>
+
+#define BUFFER_SIZE 65490
+#define GRACE_COUNTER_MAX 20
 
 class socket_tcp {
 
@@ -24,6 +29,11 @@ public:
                                   socklen_t *clilen);
 
   static bool sync_check(int sockfd);
+
+  static std::string extract_message(char buffer[BUFFER_SIZE]);
+
+  static bool grace_writer(int sockfd, int *grace_counter_write,
+                           int grace_counter_read, bool *grace_status);
 
 private:
 };

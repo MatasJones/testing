@@ -86,3 +86,51 @@ bool socket_tcp::sync_check(int sockfd) {
   // Sync check done
   return 1;
 }
+
+/**
+ * @brief This function extracts the message id from the buffer
+ *
+ * @param buffer
+ * @return std::string
+ */
+std::string socket_tcp::extract_message(char buffer[BUFFER_SIZE]) {
+  std::string str_buffer(buffer);
+  size_t first = str_buffer.find('_');
+  size_t second = str_buffer.find('_', first + 1);
+  // Verify that the msg id is extractable
+  if (!(first != std::string::npos && second != std::string::npos &&
+        second > first)) {
+    return "";
+  }
+
+  std::string extracted = str_buffer.substr(first + 1, second - first - 1);
+  return extracted;
+}
+
+/**
+ * @brief This function sends a grace message to the client and counts the
+ * number of grace messages sent and received back, if that number is greater
+ * than MAX, grace period is over
+ *
+ * @param sockfd is the socket file descriptor
+ * @param grace_counter_write is the number of grace messages sent
+ * @param grace_counter_read is the number of grace messages received
+ * @param grace_status is the status of the grace period
+ * @return true if the grace message was sent successfully
+ * @return false otherwise
+ */
+bool socket_tcp::grace_writer(int sockfd, int *grace_counter_write,
+                              int grace_counter_read, bool *grace_status) {
+
+  if (*grace_counter_write > GRACE_COUNTER_MAX &&
+      grace_counter_read > GRACE_COUNTER_MAX) {
+    *grace_status = false;
+  }
+  std::string msg = "S_131313_";
+  (*grace_counter_write)++;
+  int n = write(sockfd, msg.c_str(), msg.size());
+  if (n < 0) {
+    return 0;
+  }
+  return 1;
+}

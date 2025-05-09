@@ -81,88 +81,66 @@ void talker::socket_exp_launch() {
   pfd.fd = server_sockfd;
   pfd.events = POLLIN; // Monitor for incoming data
 
+  char buffer[SOCKET_BUFFER_SIZE];
+
   // This while loop take ~60µs to execute
   while (running) {
     int ret = poll(&pfd, 1, 0);
     // 1) Check it there is any data that needs to be read on the server socket
     if (ret > 0) {
       if (pfd.revents & POLLIN) {
+
         // Read the data from the socket
-        char buffer[SOCKET_BUFFER_SIZE];
         bzero(buffer, SOCKET_BUFFER_SIZE);
         int n = read(server_sockfd, buffer, SOCKET_BUFFER_SIZE - 1);
         if (n < 0) {
           // RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
           break;
         }
-        double recieving_time = this->get_clock()->now().nanoseconds() / 1.0e6;
-        // RCLCPP_INFO(this->get_logger(), "Message from client: %s", buffer);
 
-        // Extract msg number from the message
-        std::string str_buffer(buffer);
-        size_t first = str_buffer.find('_');
-        size_t second = str_buffer.find('_', first + 1);
-        // Verify that the msg id is extractable
-        if (!(first != std::string::npos && second != std::string::npos &&
-              second > first)) {
-          // RCLCPP_ERROR(this->get_logger(), "ERROR: invalid message format");
+        // Set timestamp
+        double recieving_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+
+        // Verify message is valid
+        std::string message_id = socket_tcp::extract_message(buffer);
+        if (message_id == "") {
           continue;
         }
 
-        std::string extracted =
-            str_buffer.substr(first + 1, second - first - 1);
-        // RCLCPP_INFO(this->get_logger(), "Extracted msg number: %s",
-        //             extracted.c_str());
-
         // Grace period counter
-        if (std::stoi(extracted.c_str()) == 131313) {
+        if (std::stoi(message_id.c_str()) == 131313) {
           grace_counter_read++;
           continue;
         }
 
         // Add the time to the socket_send_receive_time array
-        std::get<1>(socket_send_receive_time[atoi(extracted.c_str())]) =
+        std::get<1>(socket_send_receive_time[atoi(message_id.c_str())]) =
             recieving_time;
 
         // Add msg id to the socket_send_receive_time array
-        std::get<3>(socket_send_receive_time[atoi(extracted.c_str())]) =
-            atoi(extracted.c_str());
+        std::get<3>(socket_send_receive_time[atoi(message_id.c_str())]) =
+            atoi(message_id.c_str());
       }
     }
     // 2) Send the data to the server
     if (write_enable && ret == 0) {
+      // If package size is reached, increase the size
       if ((socket_msg_count + 1) % NB_MSGS == 0) {
         socket_msg_size++;
       }
 
-      // Write the data to the socket
-      char buffer[SOCKET_BUFFER_SIZE];
-      bzero(buffer, SOCKET_BUFFER_SIZE);
-      std::string test_string(sizes[socket_msg_size], 'A');
-
       // If grace period
       if (grace == true) {
-        if (grace_counter_write > GRACE_COUNTER_MAX &&
-            grace_counter_read > GRACE_COUNTER_MAX) {
-          grace = false;
-          RCLCPP_INFO(this->get_logger(),
-                      "Grace period ended, starting experiment");
-          continue;
-        }
-        std::string msg = "S_131313_";
-        strncpy(buffer, msg.c_str(), sizeof(buffer));
-        grace_counter_write++;
-        int n = write(
-            server_sockfd, buffer,
-            strlen(
-                buffer)); // Send only the msg part of the buffer, until the \0
-        if (n < 0) {
-          // RCLCPP_ERROR(this->get_logger(), "ERROR writing to socket");
-          break;
-        }
+        // Send grace message and count the number of messages sent
+        socket_tcp::grace_writer(server_sockfd, &grace_counter_write,
+                                 grace_counter_read, &grace);
         write_enable = false;
         continue;
       }
+
+      // Write the data to the socket
+      bzero(buffer, SOCKET_BUFFER_SIZE);
+      std::string test_string(sizes[socket_msg_size], 'A');
 
       // If not grace period
       std::string msg = "S_" + std::to_string(socket_msg_count) + "_";
