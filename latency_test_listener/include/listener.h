@@ -1,8 +1,8 @@
 #ifndef LISTENER_H
 #define LISTENER_H
 
-#define UDP
-// #define TCP
+// #define UDP
+#define TCP
 
 #include "custom_msg/msg/custom_string.hpp"
 #include "custom_msg/msg/int16msg.hpp"

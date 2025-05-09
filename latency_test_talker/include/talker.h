@@ -34,6 +34,8 @@
 
 #include <poll.h>
 
+#include "talker_TCP.h"
+
 #define NB_LISTENERS 1
 #define QUEUE_SIZE 100
 #define NB_SYNC_CHECKS 10
@@ -102,7 +104,6 @@ private:
   int lost_packes_counter = 0;
   int mistach_counter = 0;
 
-  // UDP
   int sockfd;
   struct sockaddr_in *dest_addr;
   socklen_t clilen;

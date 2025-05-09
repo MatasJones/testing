@@ -2,8 +2,8 @@
 
 #define SOCKET_MODE
 
-#define UDP
-// #define TCP
+// #define UDP
+#define TCP
 
 listener::listener() : Node("listener"), count_(0) {
 
@@ -260,10 +260,14 @@ bool listener::socket_setup() {
   serv_addr.sin_port = htons(port);
 
   /// Attempt connection to server
+  // RCLCPP_INFO(this->get_logger(), "Connecting to server %s on port %d...",
+  //             server_ip, port);
   if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
     RCLCPP_ERROR(this->get_logger(), "ERROR connecting");
     return 0;
   }
+  RCLCPP_INFO(this->get_logger(), "Connected to server %s on port %d",
+              server_ip, port);
 
   // Generate the data to be sent
   bzero(buffer, 256);
@@ -275,6 +279,7 @@ bool listener::socket_setup() {
   }
 
   // Read the response from the server
+  RCLCPP_INFO(this->get_logger(), "Waiting for server acknowledgment...");
   bzero(buffer, 256);
   n = read(sockfd, buffer, 255);
   if (n < 0) {
