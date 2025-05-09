@@ -23,6 +23,7 @@
 #include <yaml-cpp/yaml.h>
 
 // Socket includes
+#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -102,7 +103,10 @@ private:
   int mistach_counter = 0;
 
   // UDP
+  int sockfd;
   struct sockaddr_in *dest_addr;
+  socklen_t clilen;
+  struct sockaddr_in serv_addr, cli_addr; // This creates a socket address
 
   std::tuple<double, double> send_receive_time[NB_OF_SIZES][NB_MSGS] = {};
 

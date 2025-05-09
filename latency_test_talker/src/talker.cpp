@@ -229,14 +229,151 @@ void talker::socket_exp_launch() {
     }
 
     std::this_thread::sleep_for(std::chrono::microseconds(10));
+  }
 #endif
 
 #ifdef UDP
 
-    talker::terminate_exp()
+  // Create a poll to monitor the socket
+  struct pollfd pfd;
+  pfd.fd = sockfd;
+  pfd.events = POLLIN; // Monitor for incoming data
 
-#endif
+  // This while loop take ~60µs to execute
+  while (running) {
+    int ret = poll(&pfd, 1, 0);
+    // 1) Check it there is any data that needs to be read on the server socket
+    if (ret > 0) {
+      if (pfd.revents & POLLIN) {
+        // Read the data from the socket
+        RCLCPP_INFO(this->get_logger(), "Reading from socket");
+        char buffer[SOCKET_BUFFER_SIZE];
+        bzero(buffer, SOCKET_BUFFER_SIZE);
+        int n = recvfrom(sockfd, buffer, 255, 0, (struct sockaddr *)&cli_addr,
+                         &clilen);
+
+        buffer[-1] = '\0';
+        if (n < 0) {
+          // RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
+          break;
+        }
+        double recieving_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+        RCLCPP_INFO(this->get_logger(), "Message from client: %s", buffer);
+
+        // Extract msg number from the message
+        std::string str_buffer(buffer);
+        size_t first = str_buffer.find('_');
+        size_t second = str_buffer.find('_', first + 1);
+        // Verify that the msg id is extractable
+        if (!(first != std::string::npos && second != std::string::npos &&
+              second > first)) {
+          // RCLCPP_ERROR(this->get_logger(), "ERROR: invalid message format");
+          continue;
+        }
+
+        std::string extracted =
+            str_buffer.substr(first + 1, second - first - 1);
+        // RCLCPP_INFO(this->get_logger(), "Extracted msg number: %s",
+        //             extracted.c_str());
+
+        // Grace period counter
+        if (std::stoi(extracted.c_str()) == 131313) {
+          grace_counter_read++;
+          continue;
+        }
+
+        // Add the time to the socket_send_receive_time array
+        std::get<1>(socket_send_receive_time[atoi(extracted.c_str())]) =
+            recieving_time;
+
+        // Add msg id to the socket_send_receive_time array
+        std::get<3>(socket_send_receive_time[atoi(extracted.c_str())]) =
+            atoi(extracted.c_str());
+      }
+    }
+    // 2) Send the data to the server
+    if (write_enable && ret == 0) {
+      if ((socket_msg_count + 1) % NB_MSGS == 0) {
+        socket_msg_size++;
+      }
+
+      // Write the data to the socket
+      char buffer[SOCKET_BUFFER_SIZE];
+      bzero(buffer, SOCKET_BUFFER_SIZE);
+      std::string test_string(sizes[socket_msg_size], 'A');
+
+      // If grace period
+      if (grace == true) {
+        if (grace_counter_write > GRACE_COUNTER_MAX &&
+            grace_counter_read > GRACE_COUNTER_MAX) {
+          grace = false;
+          RCLCPP_INFO(this->get_logger(),
+                      "Grace period ended, starting experiment");
+          continue;
+        }
+        std::string msg = "S_131313_";
+        strncpy(buffer, msg.c_str(), sizeof(buffer));
+        grace_counter_write++;
+        int n = sendto(sockfd, buffer, sizeof(buffer), 0,
+                       (struct sockaddr *)&dest_addr,
+                       sizeof(struct sockaddr_in)); // Send only the msg part of
+                                                    // the buffer, until the \0
+        if (n < 0) {
+          // RCLCPP_ERROR(this->get_logger(), "ERROR writing to socket");
+          break;
+        }
+        write_enable = false;
+        continue;
+      }
+
+      // If not grace period
+      std::string msg = "S_" + std::to_string(socket_msg_count) + "_";
+      //   +test_string;
+      strncpy(buffer, msg.c_str(), sizeof(buffer));
+
+      int n = sendto(sockfd, buffer, sizeof(buffer), 0,
+                     (struct sockaddr *)&dest_addr,
+                     sizeof(struct sockaddr_in)); // Send only the msg part of
+                                                  // the buffer, until the \0
+      if (n < 0) {
+        // RCLCPP_ERROR(this->get_logger(), "ERROR writing to socket");
+        break;
+      }
+
+      double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+      // Add the time to the socket_send_receive_time array
+      std::get<0>(socket_send_receive_time[socket_msg_count]) = sending_time;
+      // Add msg id to the socket_send_receive_time array
+      std::get<2>(socket_send_receive_time[socket_msg_count]) =
+          socket_msg_count;
+
+      socket_msg_count++;
+
+      // RCLCPP_INFO(this->get_logger(), "Message %d of size %d sent",
+      //             socket_msg_count, sizes[socket_msg_size]);
+      // If there is no data to be read nor to write, terminate session
+      if (socket_msg_count > total_nb_msgs) {
+        RCLCPP_INFO(this->get_logger(), "Socket session terminated");
+        running = false;
+        // Tell the client to shutdown
+        for (int i = 0; i < 10; i++) {
+          std::string msg = "S_SHUTDOWN_";
+          strncpy(buffer, msg.c_str(), sizeof(buffer));
+          int n =
+              sendto(sockfd, buffer, sizeof(buffer), 0,
+                     (struct sockaddr *)&dest_addr, sizeof(struct sockaddr_in));
+          std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+      }
+
+      write_enable = false; // Disable writing until next timer event
+    }
+
+    std::this_thread::sleep_for(std::chrono::microseconds(10));
   }
+#endif
 }
 
 void talker::perform_sync() {
@@ -418,11 +555,6 @@ void talker::terminate_exp() {
   close(server_sockfd);
 #endif
 
-#ifdef UDP
-  free(dest_addr);
-  dest_addr = NULL;
-#endif
-
   process_data();
   std::this_thread::sleep_for(std::chrono::seconds(1));
   RCLCPP_INFO(this->get_logger(), "Shutting down node");
@@ -515,10 +647,7 @@ void talker::process_data() {
 bool talker::socket_setup() { // Return 1 if socket communication was correctly
                               // setup
   // Socket setup
-  int sockfd;
-  socklen_t clilen;
   char buffer[256];
-  struct sockaddr_in serv_addr, cli_addr; // This creates a socket address
   int n;
 
   clilen = sizeof(cli_addr);
@@ -559,6 +688,7 @@ bool talker::socket_setup() { // Return 1 if socket communication was correctly
     RCLCPP_ERROR(this->get_logger(), "ERROR on binding");
     return 0;
   }
+  RCLCPP_INFO(this->get_logger(), "Socket created, waiting for client...");
 
 #ifdef TCP
   // Listen for incoming connections
@@ -618,6 +748,7 @@ bool talker::socket_setup() { // Return 1 if socket communication was correctly
     return 0;
   }
   buffer[sync_msg] = '\0';
+  RCLCPP_INFO(this->get_logger(), "Message from client: %s", buffer);
   // UDP is sensionless, so we don't need to accept a connection
   // This means that for every message received, there is also the clients
   // socket info
@@ -630,21 +761,17 @@ bool talker::socket_setup() { // Return 1 if socket communication was correctly
   // So we need to extract the client's IP address and port number from the
   // first clent message
   // Allocate memory for dest_addr
-  dest_addr = malloc(sizeof(struct sockaddr_in));
-  if (dest_addr == NULL) {
-    RCLCPP_ERROR(this->get_logger(), "ERROR allocating memory for dest_addr");
-    return 0;
-  }
 
   // Copy the client's address info into dest_addr
-  memcpy(dest_addr, &cli_addr, sizeof(struct sockaddr_in));
+  RCLCPP_INFO(this->get_logger(), "Sending response to client...");
+  memcpy(&dest_addr, &cli_addr, sizeof(struct sockaddr_in));
 
   // Print the client's address info
   RCLCPP_INFO(this->get_logger(), "Client %s:%d", inet_ntoa(cli_addr.sin_addr),
               ntohs(cli_addr.sin_port));
 
   // Send a response to the client
-  sync_msg = sendto(sockfd, "SERVER_ACK", 10, 0, dest_addr,
+  sync_msg = sendto(sockfd, "SERVER_ACK", 10, 0, (struct sockaddr *)&dest_addr,
                     sizeof(struct sockaddr_in));
 
   // Wait for sync message from the client
