@@ -101,7 +101,7 @@ void talker::socket_exp_launch() {
         // Verify message is valid
         std::string message_id = socket_tcp::extract_message(buffer);
         if (message_id == "") {
-          break;
+          continue;
         }
 
         // Grace period counter
