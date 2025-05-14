@@ -3,14 +3,9 @@
 #define TCP
 // #define UDP
 
-#define TCP_CLEAN
-
 talker::talker() : Node("talker") {
 
   RCLCPP_INFO(this->get_logger(), "Creating talker");
-
-  auto custom_qos = rclcpp::QoS(rclcpp::KeepLast(QUEUE_SIZE))
-                        .reliability(rclcpp::ReliabilityPolicy::BestEffort);
 
   // Declare variables from the given ones during the launch
   this->declare_parameter("spacing_ms",
@@ -48,6 +43,8 @@ talker::talker() : Node("talker") {
 
   RCLCPP_INFO(this->get_logger(), "Let's rumble!");
 
+  // This thread is called perdiodically to enable writing to the socket every
+  // spacing_ms
   std::thread timer_thread(std::bind(&talker::enable_socket_write, this));
 
   // Start experiment thread
@@ -93,8 +90,8 @@ void talker::socket_exp_launch() {
         // Read the data from the socket
         bzero(buffer, SOCKET_BUFFER_SIZE);
         int n = read(server_sockfd, buffer, SOCKET_BUFFER_SIZE - 1);
+        // If there was an issue when reading the socket, skip the iteration
         if (n < 0) {
-          // RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
           break;
         }
 
@@ -104,7 +101,7 @@ void talker::socket_exp_launch() {
         // Verify message is valid
         std::string message_id = socket_tcp::extract_message(buffer);
         if (message_id == "") {
-          continue;
+          break;
         }
 
         // Grace period counter
@@ -143,15 +140,12 @@ void talker::socket_exp_launch() {
       std::string test_string(sizes[socket_msg_size], 'A');
 
       // If not grace period
-      std::string msg = "S_" + std::to_string(socket_msg_count) + "_";
-      //   +test_string;
+      std::string msg =
+          "S_" + std::to_string(socket_msg_count) + "_" + test_string;
       strncpy(buffer, msg.c_str(), sizeof(buffer));
 
-      int n = write(
-          server_sockfd, buffer,
-          strlen(buffer)); // Send only the msg part of the buffer, until the \0
+      int n = write(server_sockfd, buffer, strlen(buffer));
       if (n < 0) {
-        // RCLCPP_ERROR(this->get_logger(), "ERROR writing to socket");
         break;
       }
 
@@ -162,10 +156,9 @@ void talker::socket_exp_launch() {
       std::get<2>(socket_send_receive_time[socket_msg_count]) =
           socket_msg_count;
 
+      // Increment the message count
       socket_msg_count++;
 
-      // RCLCPP_INFO(this->get_logger(), "Message %d of size %d sent",
-      //             socket_msg_count, sizes[socket_msg_size]);
       // If there is no data to be read nor to write, terminate session
       if (socket_msg_count > total_nb_msgs) {
         RCLCPP_INFO(this->get_logger(), "Socket session terminated");
@@ -457,12 +450,13 @@ bool talker::socket_setup() { // Return 1 if socket communication was correctly
   // !!!!!!
 
 #ifdef TCP
+  // Create the socket and bind it to the server port and ip
   if (!socket_tcp::setup_server_socket(&server_sockfd, &serv_addr, port,
                                        &cli_addr, &clilen)) {
     RCLCPP_INFO(this->get_logger(), "Socket setup failed");
     return 0;
   }
-
+  // Check if the sockets were created successfully
   if (!socket_tcp::sync_check(server_sockfd)) {
     RCLCPP_ERROR(this->get_logger(), "ERROR: sync check failed");
     return 0;
