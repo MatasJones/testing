@@ -43,6 +43,7 @@ add_executable(latency_test_talker
   src/talker.cpp
   src/talker_main.cpp
   src/talker_TCP.cpp
+  src/talker_UDP.cpp
 )
 
 target_link_libraries(latency_test_talker yaml-cpp)

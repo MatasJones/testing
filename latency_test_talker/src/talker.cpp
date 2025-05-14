@@ -428,28 +428,11 @@ void talker::process_data() {
               lost_packes_counter);
 }
 
-bool talker::socket_setup() { // Return 1 if socket communication was correctly
-                              // setup
-  // Socket setup
-  char buffer[256];
-  int n;
+bool talker::socket_setup() {
 
-  clilen = sizeof(cli_addr);
-  bzero(buffer, 256);
-/// Create a socket and bind it to the server port and ip
 #ifdef TCP
-  sockfd = socket(AF_INET, SOCK_STREAM, 0); // Create a socket
-#endif
-
-#ifdef UDP
-  sockfd = socket(AF_INET, SOCK_DGRAM, 0); // Create a socket
-#endif
-  // !!!!!!
   // STOCK_STREAM means that we are using TCP
-  // SOCK_DGRAM means that we are using UDP
-  // !!!!!!
-
-#ifdef TCP
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
   // Create the socket and bind it to the server port and ip
   if (!socket_tcp::setup_server_socket(&server_sockfd, &serv_addr, port,
                                        &cli_addr, &clilen)) {
@@ -465,55 +448,12 @@ bool talker::socket_setup() { // Return 1 if socket communication was correctly
 #endif
 
 #ifdef UDP
-  int sync_msg = recvfrom(sockfd, buffer, 255, 0, (struct sockaddr *)&cli_addr,
-                          &clilen); // n is the number of bytes read
-  if (sync_msg < 0) {
-    RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
+  // SOCK_DGRAM means that we are using UDP
+  sockfd = socket(AF_INET, SOCK_DGRAM, 0); // Create a socket
+  if (!socket_udp::sync_check(sockfd, &dest_addr, &clilen)) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR: sync check failed");
     return 0;
   }
-  buffer[sync_msg] = '\0';
-  RCLCPP_INFO(this->get_logger(), "Message from client: %s", buffer);
-  // UDP is sensionless, so we don't need to accept a connection
-  // This means that for every message received, there is also the clients
-  // socket info
-  /*
-  Which consists a struct: struct sockaddr_in cli_addr
-  1) cli_add.sin_family = AF_INET (IPv4)
-  2) cli_addr.sin_port : the client's port number
-  3) cli_addr.sin_addr : the client's IP address
-  */
-  // So we need to extract the client's IP address and port number from the
-  // first clent message
-  // Allocate memory for dest_addr
-
-  // Copy the client's address info into dest_addr
-  RCLCPP_INFO(this->get_logger(), "Sending response to client...");
-  memcpy(&dest_addr, &cli_addr, sizeof(struct sockaddr_in));
-
-  // Print the client's address info
-  RCLCPP_INFO(this->get_logger(), "Client %s:%d", inet_ntoa(cli_addr.sin_addr),
-              ntohs(cli_addr.sin_port));
-
-  // Send a response to the client
-  sync_msg = sendto(sockfd, "SERVER_ACK", 10, 0, (struct sockaddr *)&dest_addr,
-                    sizeof(struct sockaddr_in));
-
-  // Wait for sync message from the client
-  sync_msg = recvfrom(sockfd, buffer, 255, 0, (struct sockaddr *)&cli_addr,
-                      &clilen); // n is the number of bytes read
-  if (sync_msg < 0) {
-    RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
-    return 0;
-  }
-  buffer[sync_msg] = '\0';
-
-  if (strncmp(buffer, "CLIENT_ACK", 10) != 0) {
-    RCLCPP_ERROR(this->get_logger(), "ERROR: client did not acknowledge");
-    return 0;
-  }
-  RCLCPP_INFO(this->get_logger(), "Message from client: %s", buffer);
-
-  RCLCPP_INFO(this->get_logger(), "UDP socket setup done");
 #endif
 
   return 1;

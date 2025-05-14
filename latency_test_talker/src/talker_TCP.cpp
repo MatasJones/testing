@@ -23,6 +23,8 @@ bool socket_tcp::setup_server_socket(int *sockfd, struct sockaddr_in *serv_addr,
     return 0;
   }
 
+  *clilen = sizeof(*cli_addr);
+
   // Reset all the serv_addr values to zero
   bzero((char *)serv_addr, sizeof(serv_addr));
 
