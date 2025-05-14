@@ -1,7 +1,7 @@
 #include "listener.h"
 
-// #define UDP
-#define TCP
+#define UDP
+// #define TCP
 
 listener::listener() : Node("listener"), count_(0) {
 

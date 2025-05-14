@@ -31,6 +31,7 @@
 #include <poll.h>
 
 #include "talker_TCP.h"
+#include "talker_UDP.h"
 
 #define NB_LISTENERS 1
 #define QUEUE_SIZE 100
@@ -92,7 +93,7 @@ private:
   int mistach_counter = 0;
 
   int sockfd;
-  struct sockaddr_in *dest_addr;
+  struct sockaddr_in dest_addr;
   socklen_t clilen;
   struct sockaddr_in serv_addr, cli_addr; // This creates a socket address
 
@@ -105,12 +106,8 @@ private:
 
   std::string config_file_path = cwd.string() + "/src/config/config.yaml";
 
-  void perform_sync();
-  void get_response_time(const custom_msg::msg::CustomString::SharedPtr msg);
   void create_logger();
   void setup_experiment();
-  void run_experiment();
-  void echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg);
   void terminate_exp();
   void process_data();
   bool socket_setup();
