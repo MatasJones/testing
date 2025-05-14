@@ -97,8 +97,6 @@ private:
   socklen_t clilen;
   struct sockaddr_in serv_addr, cli_addr; // This creates a socket address
 
-  std::tuple<double, double> send_receive_time[NB_OF_SIZES][NB_MSGS] = {};
-
   std::tuple<double, double, uint16_t, uint16_t>
       socket_send_receive_time[TOTAL_MSGS] = {};
 

@@ -41,7 +41,7 @@ private:
 
   bool running = true;
 
-  struct sockaddr_in serv_addr;
+  struct sockaddr_in serv_addr, cli_addr;
   socklen_t addr_len = sizeof(serv_addr);
 };
 #endif // LISTENER_H

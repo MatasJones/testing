@@ -24,8 +24,8 @@ class socket_udp {
 public:
   socket_udp();
 
-  static bool sync_check(int sockfd, struct sockaddr_in *dest_addr,
-                         socklen_t *clilen);
+  static bool sync_check(int sockfd, struct sockaddr_in *serv_addr,
+                         struct sockaddr_in *cli_addr, socklen_t *clilen, int port);
 
 private:
 };

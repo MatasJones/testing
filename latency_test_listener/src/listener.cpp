@@ -89,11 +89,11 @@ listener::listener() : Node("listener"), count_(0) {
         char buffer[SOCKET_BUFFER_SIZE];
         bzero(buffer, SOCKET_BUFFER_SIZE);
         int n = recvfrom(sockfd, buffer, sizeof(buffer), 0,
-                         (struct sockaddr *)&serv_addr, &addr_len);
+                         (struct sockaddr *)&cli_addr, &addr_len);
         buffer[-1] = '\0';
         if (n < 0) {
           // RCLCPP_ERROR(this->get_logger(), "ERROR reading from socket");
-          break;
+          continue;
         }
         // RCLCPP_INFO(this->get_logger(), "%s\n", buffer);
         //  Send back data straight away
@@ -126,8 +126,9 @@ listener::listener() : Node("listener"), count_(0) {
         std::string msg = "C_" + extracted + "_" + test_string;
         RCLCPP_INFO(this->get_logger(), "Sending response: %s", msg.c_str());
         strncpy(buffer, msg.c_str(), sizeof(buffer));
-        n = sendto(sockfd, buffer, sizeof(buffer), 0,
-                   (struct sockaddr *)&serv_addr, addr_len);
+        int msg_len = msg.size();
+        n = sendto(sockfd, buffer, msg_len, 0, (struct sockaddr *)&serv_addr,
+                   addr_len);
       }
     }
     std::this_thread::sleep_for(std::chrono::microseconds(1));
@@ -183,6 +184,16 @@ bool listener::socket_setup() {
       htons(port); // This sets the port number the server will listen on,
                    // converting it from host byte order to network byte order
 
+  bzero(&cli_addr, sizeof(cli_addr));
+  cli_addr.sin_family = AF_INET;
+  cli_addr.sin_addr.s_addr =
+      INADDR_ANY; // This means bind to any available network interface
+  cli_addr.sin_port = htons(port);
+
+  if (bind(sockfd, (struct sockaddr *)&cli_addr, sizeof(cli_addr)) < 0) {
+    RCLCPP_INFO(this->get_logger(), "ERROR on binding");
+  }
+
   // UDP client does not need to know its own port, it is handled by the OS as
   // there is no full connection like TCP
   RCLCPP_INFO(this->get_logger(),
@@ -203,7 +214,7 @@ bool listener::socket_setup() {
   */
 
   // Wait for a response from the server
-  sync_msg = recvfrom(sockfd, buffer, 255, 0, (struct sockaddr *)&serv_addr,
+  sync_msg = recvfrom(sockfd, buffer, 255, 0, (struct sockaddr *)&cli_addr,
                       &addr_len); // n is the number of bytes read
   buffer[sync_msg] = '\0';
 
@@ -217,7 +228,7 @@ bool listener::socket_setup() {
   }
   RCLCPP_INFO(this->get_logger(), "Message from server: %s", buffer);
   // Send acknowledgment to the server
-  sync_msg = sendto(sockfd, "CLIENT_ACK", 10, 0, (struct sockaddr *)&serv_addr,
+  sync_msg = sendto(sockfd, "CLIENT_ACK", 10, 0, (struct sockaddr *)&cli_addr,
                     addr_len);
 
   RCLCPP_INFO(this->get_logger(), "UDP socket setup done");
