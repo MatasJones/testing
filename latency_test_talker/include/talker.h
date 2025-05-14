@@ -1,11 +1,7 @@
 #ifndef TALKER_H
 #define TALKER_H
 
-#include "custom_msg/msg/custom_string.hpp"
-#include "custom_msg/msg/int16msg.hpp"
-#include "custom_msg/msg/sync_msg.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/string.hpp"
 
 #include "sync_service/srv/sync_check.hpp"
 
@@ -59,15 +55,6 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::TimerBase::SharedPtr exp_timer_;
   rclcpp::TimerBase::SharedPtr socket_timer_;
-
-  // Declare the Publishers
-  rclcpp::Publisher<custom_msg::msg::CustomString>::SharedPtr talker_publisher_;
-  rclcpp::Publisher<custom_msg::msg::SyncMsg>::SharedPtr sync_publisher_;
-
-  // Declare the Subscribers
-  rclcpp::Subscription<custom_msg::msg::CustomString>::SharedPtr
-      talker_subscriber_;
-  rclcpp::Subscription<custom_msg::msg::SyncMsg>::SharedPtr sync_subscriber_;
 
   int spacing_ms_;
   int msg_size;

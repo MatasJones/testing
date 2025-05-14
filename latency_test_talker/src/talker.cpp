@@ -1,7 +1,7 @@
 #include "talker.h"
 
 #define TCP
-// #define UDP
+//#define UDP
 
 talker::talker() : Node("talker") {
 
@@ -444,7 +444,6 @@ bool talker::socket_setup() {
     RCLCPP_ERROR(this->get_logger(), "ERROR: sync check failed");
     return 0;
   }
-
 #endif
 
 #ifdef UDP
