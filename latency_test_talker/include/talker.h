@@ -94,7 +94,7 @@ private:
 
   int sockfd;
   struct sockaddr_in dest_addr;
-  socklen_t clilen;
+  socklen_t clilen = sizeof(cli_addr);
   struct sockaddr_in serv_addr, cli_addr; // This creates a socket address
 
   std::tuple<double, double, uint16_t, uint16_t>

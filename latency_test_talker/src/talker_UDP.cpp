@@ -3,8 +3,7 @@
 socket_udp::socket_udp() {}
 
 bool socket_udp::sync_check(int sockfd, struct sockaddr_in *serv_addr,
-                            struct sockaddr_in *cli_addr, socklen_t *clilen,
-                            int port) {
+                            struct sockaddr_in *cli_addr, int port) {
   // UDP is sessionless, so we don't need to accept a connection
   // This means that for every message received, there is also the clients
   // socket info
@@ -17,7 +16,7 @@ bool socket_udp::sync_check(int sockfd, struct sockaddr_in *serv_addr,
   char buffer[256];
   bzero(buffer, 256);
 
-  *clilen = sizeof(*cli_addr);
+  socklen_t clilen = sizeof(*cli_addr);
   // Reset all the serv_addr values to zero
   bzero((char *)serv_addr, sizeof(*serv_addr)); // The function bzero() sets all
                                                 // values in a buffer to zero
@@ -42,7 +41,7 @@ bool socket_udp::sync_check(int sockfd, struct sockaddr_in *serv_addr,
 
   // recvfrom: clilen needs a vlaue of type socklen_t, NOT a ptr!
   int sync_msg =
-      recvfrom(sockfd, buffer, 255, 0, (struct sockaddr *)cli_addr, clilen);
+      recvfrom(sockfd, buffer, 255, 0, (struct sockaddr *)cli_addr, &clilen);
 
   if (sync_msg < 0) {
     return 0;
@@ -53,11 +52,11 @@ bool socket_udp::sync_check(int sockfd, struct sockaddr_in *serv_addr,
   // Send a server sync to the client
   // sendto: clilen needs to be a pointer to a socklen_t
   sync_msg =
-      sendto(sockfd, "SERVER_ACK", 10, 0, (struct sockaddr *)cli_addr, *clilen);
+      sendto(sockfd, "SERVER_ACK", 10, 0, (struct sockaddr *)cli_addr, clilen);
 
   // Wait for sync message from the client
   sync_msg =
-      recvfrom(sockfd, buffer, 255, 0, (struct sockaddr *)cli_addr, clilen);
+      recvfrom(sockfd, buffer, 255, 0, (struct sockaddr *)cli_addr, &clilen);
 
   if (sync_msg < 0) {
     return 0;

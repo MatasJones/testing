@@ -43,6 +43,7 @@ add_executable(latency_test_listener
     src/listener.cpp
     src/listener_main.cpp
     src/listener_TCP.cpp
+    src/listener_UDP.cpp
 )
 
 target_link_libraries(latency_test_listener yaml-cpp)

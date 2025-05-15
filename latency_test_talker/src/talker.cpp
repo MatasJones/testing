@@ -230,7 +230,6 @@ void talker::socket_exp_launch() {
       if ((socket_msg_count + 1) % NB_MSGS == 0) {
         socket_msg_size++;
       }
-      RCLCPP_INFO(this->get_logger(), "In writing loop");
 
       // If grace period
       if (grace == true) {
@@ -273,17 +272,13 @@ void talker::socket_exp_launch() {
       int msg_len = msg.size();
       strncpy(buffer, msg.c_str(), sizeof(buffer));
 
-      RCLCPP_INFO(this->get_logger(), "Sending msg: %s", buffer);
       int n = sendto(sockfd, buffer, msg_len, 0, (struct sockaddr *)&dest_addr,
                      sizeof(struct sockaddr_in)); // Send only the msg part of
                                                   // the buffer, until the \0
-      RCLCPP_INFO(this->get_logger(), "Checking if msg %s was sent",
-                  std::to_string(socket_msg_count).c_str());
       if (n < 0) {
         continue;
       }
-      RCLCPP_INFO(this->get_logger(), "Msg sent: %s",
-                  std::to_string(socket_msg_count).c_str());
+
       double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
       // Add the time to the socket_send_receive_time array
       std::get<0>(socket_send_receive_time[socket_msg_count]) = sending_time;
@@ -291,7 +286,6 @@ void talker::socket_exp_launch() {
       std::get<2>(socket_send_receive_time[socket_msg_count]) =
           socket_msg_count;
 
-      RCLCPP_INFO(this->get_logger(), "Incrementing msg nb..");
       socket_msg_count++;
 
       write_enable = false; // Disable writing until next timer event
@@ -446,7 +440,7 @@ bool talker::socket_setup() {
 #ifdef UDP
   // SOCK_DGRAM means that we are using UDP
   sockfd = socket(AF_INET, SOCK_DGRAM, 0); // Create a socket
-  if (!socket_udp::sync_check(sockfd, &serv_addr, &dest_addr, &clilen, port)) {
+  if (!socket_udp::sync_check(sockfd, &serv_addr, &dest_addr, port)) {
     RCLCPP_ERROR(this->get_logger(), "ERROR: sync check failed");
     return 0;
   }

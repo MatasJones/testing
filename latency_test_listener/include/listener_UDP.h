@@ -1,6 +1,6 @@
 
-#ifndef TALKER_UDP_H
-#define TALKER_UDP_H
+#ifndef LISTENER_UDP_H
+#define LISTENER_UDP_H
 
 // Socket includes
 #include <arpa/inet.h>
