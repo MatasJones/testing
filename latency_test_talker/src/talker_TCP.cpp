@@ -122,17 +122,42 @@ std::string socket_tcp::extract_message(char buffer[BUFFER_SIZE]) {
  * @return false otherwise
  */
 bool socket_tcp::grace_writer(int sockfd, int *grace_counter_write,
-                              int grace_counter_read, bool *grace_status) {
+                              int grace_counter_read, bool *grace_status,
+                              bool custom_ser) {
 
   if (*grace_counter_write > GRACE_COUNTER_MAX &&
       grace_counter_read > GRACE_COUNTER_MAX) {
     *grace_status = false;
   }
-  std::string msg = "S_131313_";
+
   (*grace_counter_write)++;
-  int n = write(sockfd, msg.c_str(), msg.size());
+
+  // Perform manual ser grace message
+  if (custom_ser == false) {
+    std::string msg = "S_131313_";
+    int n = write(sockfd, msg.c_str(), msg.size());
+    if (n < 0) {
+      return 0;
+    }
+    return 1;
+  }
+
+  /*
+  Not the most efficient way of doing this, but it works and is only used for
+  setup
+  */
+
+  // Perform flatbuffer grace message
+  flatbuffers::FlatBufferBuilder builder{1024};
+  char buf[1024];
+  uint32_t size;
+  custom_ser::ser_msg("GRACE", *grace_counter_write, 404, &builder,
+                      (uint8_t *)buf, &size);
+
+  int n = write(sockfd, buf, size);
   if (n < 0) {
     return 0;
   }
+
   return 1;
 }

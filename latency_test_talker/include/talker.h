@@ -33,6 +33,12 @@
 #include "talker_TCP.h"
 #include "talker_UDP.h"
 
+// Serialization includes
+// #include "../../custom_msg/flatbuff/custom_ser.h" // defined in talker_tcp.h
+#include "../../custom_msg/flatbuff/message_generated.h"
+#include "flatbuffers/flatbuffers.h"
+using TestProtocol::message;
+
 #define NB_LISTENERS 1
 #define QUEUE_SIZE 100
 #define NB_SYNC_CHECKS 10
@@ -45,6 +51,8 @@
 #define DEFAULT_MSG_SIZE 5
 #define SOCKET_BUFFER_SIZE 65490
 #define GRACE_COUNTER_MAX 20
+
+#define MAX_FAIL_COUNT 100
 
 using namespace std;
 
@@ -96,6 +104,16 @@ private:
   struct sockaddr_in dest_addr;
   socklen_t clilen = sizeof(cli_addr);
   struct sockaddr_in serv_addr, cli_addr; // This creates a socket address
+
+  // Flatbuffer variables
+  flatbuffers::FlatBufferBuilder builder{1024};
+  uint8_t *buf;
+  uint32_t size;
+  bool custom_seri = false;
+  std::string msg;
+  uint8_t id;
+  int32_t value;
+  int failure_counter = 0;
 
   std::tuple<double, double, uint16_t, uint16_t>
       socket_send_receive_time[TOTAL_MSGS] = {};

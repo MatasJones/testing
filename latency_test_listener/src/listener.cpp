@@ -1,7 +1,10 @@
 #include "listener.h"
 
-#define UDP
-// #define TCP
+// #define UDP
+#define TCP
+
+// #define MANUAL_SER
+#define FLATBUFF_SER
 
 listener::listener() : Node("listener"), count_(0) {
 
@@ -16,6 +19,32 @@ listener::listener() : Node("listener"), count_(0) {
   } else {
     RCLCPP_INFO(this->get_logger(), "Socket setup done");
   }
+
+#ifdef FLATBUFF_SER
+  RCLCPP_INFO(this->get_logger(), "Setting up flatbuffers...");
+  // Create the flatbuffer builder
+  flatbuffers::FlatBufferBuilder builder(1024);
+
+  char test_buffer[SOCKET_BUFFER_SIZE];
+  uint32_t size;
+  // Create the flatbuffer message
+  custom_ser::ser_msg("TEST", 1, 42, &builder, (uint8_t *)&test_buffer, &size);
+  // Deserialize the flatbuffer message
+  std::string msg;
+  uint8_t id;
+  int32_t value;
+  if (!custom_ser::deser_msg((uint8_t *)&test_buffer, msg, id, value)) {
+    RCLCPP_ERROR(this->get_logger(), "Error deserializing flatbuffer message");
+  } else {
+    if (msg == "TEST" && id == 1 && value == 42) {
+      RCLCPP_INFO(this->get_logger(), "Flatbuffer working");
+    } else {
+      RCLCPP_ERROR(this->get_logger(),
+                   "ERROR DURING FLATBUFFER INITIALIZATION");
+    }
+  }
+#endif
+
   RCLCPP_INFO(this->get_logger(), "Let's rumble!");
 
 #ifdef TCP
@@ -25,6 +54,7 @@ listener::listener() : Node("listener"), count_(0) {
   fds.events = POLLIN; // Check for incoming data
 
   char buffer[SOCKET_BUFFER_SIZE];
+  char custom_buffer[1000000];
 
   while (running) {
     int ret = poll(&fds, 1, 0); // Determine the state of the socket
@@ -32,13 +62,13 @@ listener::listener() : Node("listener"), count_(0) {
     if (ret > 0) {
       if (fds.revents & POLLIN) {
 
+#ifdef MANUAL_SER
         bzero(buffer, SOCKET_BUFFER_SIZE);
         // Read the data from the socket
         int n = read(sockfd, buffer, SOCKET_BUFFER_SIZE);
         if (n < 0) {
           break;
         }
-
         // Extract msg number from the message
         // If msg = "SHUTDOWN", shutdown the node
         std::string str_buffer(buffer);
@@ -66,9 +96,61 @@ listener::listener() : Node("listener"), count_(0) {
         // Send the data back to the server
         std::string msg = "C_" + extracted + "_" + test_string;
         strncpy(buffer, msg.c_str(), sizeof(buffer));
-
         // Wirte msg to the server
         n = write(sockfd, buffer, strlen(buffer));
+#endif
+
+#ifdef FLATBUFF_SER
+
+        // Read the data from the socket
+        int n = read(sockfd, buffer, SOCKET_BUFFER_SIZE);
+        if (n < 0) {
+          break;
+        }
+
+        // for (int i = 0; i < 48; i++) {
+        //   RCLCPP_INFO(this->get_logger(), "%d", buffer[i]);
+        // }
+        RCLCPP_INFO(this->get_logger(), "received message: %s", buffer);
+        continue;
+
+
+        // Send response to server
+        if (!custom_ser::deser_msg((uint8_t *)custom_buffer, msg, id, value)) {
+          RCLCPP_ERROR(this->get_logger(),
+                       "Error deserializing flatbuffer message!");
+          if (failure_counter++ > MAX_FAIL_COUNT) {
+            RCLCPP_ERROR(this->get_logger(),
+                         "Too many failures, shutting down");
+            running = false;
+          }
+          continue;
+        }
+        failure_counter = 0;
+
+        RCLCPP_INFO(this->get_logger(), "Received buffer: ");
+
+        if (msg == "SHUTDOWN") {
+          RCLCPP_INFO(this->get_logger(), "Shutdown message received");
+          running = false;
+          std::this_thread::sleep_for(std::chrono::seconds(5));
+          continue;
+
+        } else if (msg == "GRACE") {
+          RCLCPP_INFO(this->get_logger(), "Grace message received");
+          msg = "GRACE_ACK";
+        }
+
+        else {
+          std::string test_string(std::pow(10, value), 'B');
+          msg = test_string;
+        }
+
+        custom_ser::ser_msg(msg, id, value, &builder, (uint8_t *)custom_buffer,
+                            &size);
+        n = write(sockfd, custom_buffer, size);
+
+#endif
       }
     }
     std::this_thread::sleep_for(std::chrono::microseconds(1));

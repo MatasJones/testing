@@ -1,7 +1,10 @@
 #include "talker.h"
 
-// #define TCP
-#define UDP
+#define TCP
+// #define UDP
+
+// #define MANUAL_SER
+#define FLATBUFF_SER
 
 talker::talker() : Node("talker") {
 
@@ -45,6 +48,27 @@ talker::talker() : Node("talker") {
               inet_ntoa(cli_addr.sin_addr));
   RCLCPP_INFO(this->get_logger(), "Client Port: %d", ntohs(cli_addr.sin_port));
 
+#ifdef FLATBUFF_SER
+  RCLCPP_INFO(this->get_logger(), "Setting up flatbuffers...");
+  // Create the flatbuffer message
+  char test_buffer[SOCKET_BUFFER_SIZE];
+  custom_ser::ser_msg("TEST", 1, 42, &builder, (uint8_t *)test_buffer, &size);
+  // Deserialize the flatbuffer message
+  if (!custom_ser::deser_msg((uint8_t *)test_buffer, msg, id, value)) {
+    RCLCPP_ERROR(this->get_logger(), "Error deserializing flatbuffer message");
+  } else {
+    if (msg == "TEST" && id == 1 && value == 42) {
+      RCLCPP_INFO(this->get_logger(), "Flatbuffer working");
+    } else {
+      RCLCPP_ERROR(this->get_logger(),
+                   "ERROR DURING FLATBUFFER INITIALIZATION");
+    }
+  }
+
+  custom_seri = true;
+
+#endif
+
   RCLCPP_INFO(this->get_logger(), "Let's rumble!");
 
   // This thread is called perdiodically to enable writing to the socket every
@@ -83,6 +107,7 @@ void talker::socket_exp_launch() {
   pfd.events = POLLIN; // Monitor for incoming data
 
   char buffer[SOCKET_BUFFER_SIZE];
+  char custom_buffer[1000000];
 
   // This while loop take ~60µs to execute
   while (running) {
@@ -92,8 +117,8 @@ void talker::socket_exp_launch() {
       if (pfd.revents & POLLIN) {
 
         // Read the data from the socket
-        bzero(buffer, SOCKET_BUFFER_SIZE);
-        int n = read(server_sockfd, buffer, SOCKET_BUFFER_SIZE - 1);
+        bzero(custom_buffer, SOCKET_BUFFER_SIZE);
+        int n = read(server_sockfd, custom_buffer, SOCKET_BUFFER_SIZE - 1);
         // If there was an issue when reading the socket, skip the iteration
         if (n < 0) {
           break;
@@ -102,8 +127,10 @@ void talker::socket_exp_launch() {
         // Set timestamp
         double recieving_time = this->get_clock()->now().nanoseconds() / 1.0e6;
 
+// MANUAL SERIALIZATION
+#ifdef MANUAL_SER
         // Verify message is valid
-        std::string message_id = socket_tcp::extract_message(buffer);
+        std::string message_id = socket_tcp::extract_message(custom_buffer);
         if (message_id == "") {
           continue;
         }
@@ -121,6 +148,34 @@ void talker::socket_exp_launch() {
         // Add msg id to the socket_send_receive_time array
         std::get<3>(socket_send_receive_time[atoi(message_id.c_str())]) =
             atoi(message_id.c_str());
+#endif
+
+#ifdef FLATBUFF_SER
+        if (!custom_ser::deser_msg((uint8_t *)custom_buffer, msg, id, value)) {
+          RCLCPP_ERROR(this->get_logger(),
+                       "Error deserializing flatbuffer message!");
+          if (failure_counter > MAX_FAIL_COUNT) {
+            RCLCPP_ERROR(this->get_logger(),
+                         "Too many failures, shutting down");
+            running = false;
+          }
+          continue;
+        }
+        if (msg == "GRACE_ACK") {
+          RCLCPP_INFO(this->get_logger(), "Grace message received");
+          grace_counter_read++;
+          continue;
+        }
+
+        RCLCPP_INFO(this->get_logger(), "Flatbuffer reading, msg: %s, id: %d",
+                    msg.c_str(), id);
+
+        // Add the time to the socket_send_receive_time array
+        std::get<1>(socket_send_receive_time[id]) = recieving_time;
+
+        // Add msg id to the socket_send_receive_time array
+        std::get<3>(socket_send_receive_time[id]) = id;
+#endif
       }
     }
     // 2) Send the data to the server
@@ -129,15 +184,37 @@ void talker::socket_exp_launch() {
       if ((socket_msg_count + 1) % NB_MSGS == 0) {
         socket_msg_size++;
       }
-
+      RCLCPP_INFO(this->get_logger(), "Serializing grace");
       // If grace period
       if (grace == true) {
         // Send grace message and count the number of messages sent
-        socket_tcp::grace_writer(server_sockfd, &grace_counter_write,
-                                 grace_counter_read, &grace);
+        // socket_tcp::grace_writer(server_sockfd, &grace_counter_write,
+        // grace_counter_read, &grace, custom_seri);
+        char dbuf[1024];
+        custom_ser::ser_msg("GRACE", 3, 404, &builder, dbuf, &size);
+        RCLCPP_INFO(this->get_logger(), "Grace message prepared, count: %d", 3);
+        RCLCPP_INFO(this->get_logger(), "Grace message size: %d", size);
+        for (int i = 0; i < size; i++) {
+          RCLCPP_INFO(this->get_logger(), "Byte %d: %d", i, dbuf[i]);
+        }
+
+        // int n = write(sockfd, dbuf, size);
+        // if (n < 0) {
+        //   RCLCPP_ERROR(this->get_logger(), "Error writing to socket!");
+        //   continue;
+        // }
+        continue;
+        RCLCPP_INFO(this->get_logger(), "Grace message sent: %s, id: %d",
+                    msg.c_str(), id);
+        custom_ser::deser_msg((uint8_t *)dbuf, msg, id, value);
+        RCLCPP_INFO(this->get_logger(), "Grace message sent: %s, id: %d",
+                    msg.c_str(), id);
         write_enable = false;
+
         continue;
       }
+
+#ifdef MANUAL_SER
 
       // Write the data to the socket
       bzero(buffer, SOCKET_BUFFER_SIZE);
@@ -150,8 +227,22 @@ void talker::socket_exp_launch() {
 
       int n = write(server_sockfd, buffer, strlen(buffer));
       if (n < 0) {
-        break;
+        continue;
       }
+#endif
+
+#ifdef FLATBUFF_SER
+      std::string test_string(sizes[socket_msg_size], 'A');
+      custom_ser::ser_msg(test_string, socket_msg_count, socket_msg_size,
+                          &builder, (uint8_t *)&custom_buffer, &size);
+
+      // Write the data to the socket
+      int n = write(server_sockfd, custom_buffer, size);
+      if (n < 0) {
+        RCLCPP_ERROR(this->get_logger(), "Error writing to socket!");
+        continue;
+      }
+#endif
 
       double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
       // Add the time to the socket_send_receive_time array
@@ -334,9 +425,18 @@ void talker::terminate_exp() {
   // Tell listener nodes to shutdown
   char buffer[256];
 #ifdef TCP
+
+#ifdef MANUAL_SER
   std::string terminate_str = "SHUTDOWN";
   strncpy(buffer, terminate_str.c_str(), sizeof(buffer));
   int n = write(server_sockfd, buffer, strlen(buffer));
+#endif
+
+#ifdef FLATBUFF_SER
+  RCLCPP_INFO(this->get_logger(), "Sending shutdown message");
+  custom_ser::ser_msg("SHUTDOWN", 13, 404, &builder, buf, &size);
+  std::this_thread::sleep_for(std::chrono::seconds(5));
+#endif
 
   // Close the socket
   close(server_sockfd);

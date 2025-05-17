@@ -16,6 +16,8 @@
 #include <string>
 #include <tuple>
 
+#include "../../custom_msg/flatbuff/custom_ser.h"
+
 #define BUFFER_SIZE 65490
 #define GRACE_COUNTER_MAX 20
 
@@ -33,7 +35,8 @@ public:
   static std::string extract_message(char buffer[BUFFER_SIZE]);
 
   static bool grace_writer(int sockfd, int *grace_counter_write,
-                           int grace_counter_read, bool *grace_status);
+                           int grace_counter_read, bool *grace_status,
+                           bool custom_ser);
 
 private:
 };

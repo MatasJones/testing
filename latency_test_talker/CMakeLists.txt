@@ -25,6 +25,7 @@ find_package(sync_service REQUIRED)
 
 include_directories(
   include
+  ../../custom_msg/flatbuff
 )
 
 if(BUILD_TESTING)
@@ -46,7 +47,7 @@ add_executable(latency_test_talker
   src/talker_UDP.cpp
 )
 
-target_link_libraries(latency_test_talker yaml-cpp)
+target_link_libraries(latency_test_talker yaml-cpp flatbuffers)
 
 ament_target_dependencies(
   latency_test_talker

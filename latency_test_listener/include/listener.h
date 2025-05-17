@@ -18,8 +18,15 @@
 #include "listener_TCP.h"
 #include "listener_UDP.h"
 
+// Serialization includes
+#include "../../custom_msg/flatbuff/custom_ser.h"
+#include "../../custom_msg/flatbuff/message_generated.h"
+#include "flatbuffers/flatbuffers.h"
+using TestProtocol::message;
+
 #define QUEUE_SIZE 100
 #define SOCKET_BUFFER_SIZE 65490
+#define MAX_FAIL_COUNT 100
 
 class listener : public rclcpp::Node {
 
@@ -44,5 +51,11 @@ private:
 
   struct sockaddr_in serv_addr, cli_addr;
   socklen_t addr_len = sizeof(serv_addr);
+
+  // Flatbuffer variables
+  flatbuffers::FlatBufferBuilder builder{1024};
+  uint8_t *buf;
+  uint32_t size;
+  int failure_counter = 0;
 };
 #endif // LISTENER_H

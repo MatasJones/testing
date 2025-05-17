@@ -19,12 +19,20 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     libgpiod-dev \
     libyaml-cpp-dev \
     ros-humble-rosbag2-storage-mcap \
-    && apt-get clean autoclean \
-    && apt-get autoremove --yes \
-    && rm -rf /var/lib/{apt,dpkg,cache,log}/ \
-    && echo "source /opt/ros/humble/setup.bash; source /home/${USERNAME}/dev_ws/install/local_setup.sh" > /root/source.sh \
-    && echo "source /$root/source.sh" >> /root/.bashrc \
-    && echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+    cmake \
+    g++ \
+    git \
+ && apt-get clean autoclean \
+ && apt-get autoremove --yes \
+ && rm -rf /var/lib/apt/lists/* /var/lib/dpkg/* /var/cache/* /var/log/* \
+ && echo "source /opt/ros/humble/setup.bash; source /home/${USERNAME}/dev_ws/install/local_setup.sh" > /root/source.sh \
+ && echo "source /root/source.sh" >> /root/.bashrc \
+ && echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc \
+ && git clone https://github.com/google/flatbuffers.git /opt/flatbuffers \
+ && cd /opt/flatbuffers \
+ && cmake -B build -DCMAKE_BUILD_TYPE=Release \
+ && cmake --build build --target install
+
 
 # Set the working directory for the user
 WORKDIR /home/${USERNAME}/dev_ws/src
