@@ -69,6 +69,7 @@ listener::listener() : Node("listener"), count_(0) {
         if (n < 0) {
           break;
         }
+        RCLCPP_INFO(this->get_logger(), "received message: %s", buffer);
         // Extract msg number from the message
         // If msg = "SHUTDOWN", shutdown the node
         std::string str_buffer(buffer);
@@ -108,17 +109,10 @@ listener::listener() : Node("listener"), count_(0) {
           break;
         }
 
-        // for (int i = 0; i < 48; i++) {
-        //   RCLCPP_INFO(this->get_logger(), "%d", buffer[i]);
-        // }
-        RCLCPP_INFO(this->get_logger(), "received message: %s", buffer);
-        continue;
-
-
         // Send response to server
-        if (!custom_ser::deser_msg((uint8_t *)custom_buffer, msg, id, value)) {
-          RCLCPP_ERROR(this->get_logger(),
-                       "Error deserializing flatbuffer message!");
+        if (!custom_ser::deser_msg((uint8_t *)buffer, msg, id, value)) {
+          // RCLCPP_ERROR(this->get_logger(),
+          //              "Error deserializing flatbuffer message!");
           if (failure_counter++ > MAX_FAIL_COUNT) {
             RCLCPP_ERROR(this->get_logger(),
                          "Too many failures, shutting down");
@@ -127,8 +121,6 @@ listener::listener() : Node("listener"), count_(0) {
           continue;
         }
         failure_counter = 0;
-
-        RCLCPP_INFO(this->get_logger(), "Received buffer: ");
 
         if (msg == "SHUTDOWN") {
           RCLCPP_INFO(this->get_logger(), "Shutdown message received");

@@ -65,7 +65,7 @@ talker::talker() : Node("talker") {
     }
   }
 
-  custom_seri = true;
+  // custom_seri = true;
 
 #endif
 
@@ -152,12 +152,13 @@ void talker::socket_exp_launch() {
 
 #ifdef FLATBUFF_SER
         if (!custom_ser::deser_msg((uint8_t *)custom_buffer, msg, id, value)) {
-          RCLCPP_ERROR(this->get_logger(),
-                       "Error deserializing flatbuffer message!");
+          // RCLCPP_ERROR(this->get_logger(),
+          //              "Error deserializing flatbuffer message!");
           if (failure_counter > MAX_FAIL_COUNT) {
             RCLCPP_ERROR(this->get_logger(),
                          "Too many failures, shutting down");
             running = false;
+            break;
           }
           continue;
         }
@@ -167,8 +168,8 @@ void talker::socket_exp_launch() {
           continue;
         }
 
-        RCLCPP_INFO(this->get_logger(), "Flatbuffer reading, msg: %s, id: %d",
-                    msg.c_str(), id);
+        // RCLCPP_INFO(this->get_logger(), "Flatbuffer reading, msg: %s, id: %d",
+        //             msg.c_str(), id);
 
         // Add the time to the socket_send_receive_time array
         std::get<1>(socket_send_receive_time[id]) = recieving_time;
@@ -184,37 +185,34 @@ void talker::socket_exp_launch() {
       if ((socket_msg_count + 1) % NB_MSGS == 0) {
         socket_msg_size++;
       }
-      RCLCPP_INFO(this->get_logger(), "Serializing grace");
+#ifdef FLATBUFF_SER
+      
       // If grace period
       if (grace == true) {
         // Send grace message and count the number of messages sent
-        // socket_tcp::grace_writer(server_sockfd, &grace_counter_write,
-        // grace_counter_read, &grace, custom_seri);
-        char dbuf[1024];
-        custom_ser::ser_msg("GRACE", 3, 404, &builder, dbuf, &size);
-        RCLCPP_INFO(this->get_logger(), "Grace message prepared, count: %d", 3);
-        RCLCPP_INFO(this->get_logger(), "Grace message size: %d", size);
-        for (int i = 0; i < size; i++) {
-          RCLCPP_INFO(this->get_logger(), "Byte %d: %d", i, dbuf[i]);
+        if (!socket_tcp::grace_writer(server_sockfd, &grace_counter_write,
+                                      grace_counter_read, &grace, true)) {
+          RCLCPP_ERROR(this->get_logger(), "Error writing grace message!");
         }
 
-        // int n = write(sockfd, dbuf, size);
-        // if (n < 0) {
-        //   RCLCPP_ERROR(this->get_logger(), "Error writing to socket!");
-        //   continue;
-        // }
-        continue;
-        RCLCPP_INFO(this->get_logger(), "Grace message sent: %s, id: %d",
-                    msg.c_str(), id);
-        custom_ser::deser_msg((uint8_t *)dbuf, msg, id, value);
-        RCLCPP_INFO(this->get_logger(), "Grace message sent: %s, id: %d",
-                    msg.c_str(), id);
-        write_enable = false;
+        // custom_ser::ser_msg("GRACE", 3, 404, &builder, (uint8_t *)buffer,
+        //                     &size);
 
+        write_enable = false;
         continue;
       }
+#endif
 
 #ifdef MANUAL_SER
+
+      // If grace period
+      if (grace == true) {
+        // Send grace message and count the number of messages sent
+        socket_tcp::grace_writer(server_sockfd, &grace_counter_write,
+                                 grace_counter_read, &grace, false);
+        write_enable = false;
+        continue;
+      }
 
       // Write the data to the socket
       bzero(buffer, SOCKET_BUFFER_SIZE);
@@ -434,12 +432,17 @@ void talker::terminate_exp() {
 
 #ifdef FLATBUFF_SER
   RCLCPP_INFO(this->get_logger(), "Sending shutdown message");
-  custom_ser::ser_msg("SHUTDOWN", 13, 404, &builder, buf, &size);
-  std::this_thread::sleep_for(std::chrono::seconds(5));
+  custom_ser::ser_msg("SHUTDOWN", 13, 404, &builder, (uint8_t *)buffer, &size);
+  int n = write(server_sockfd, buffer, size);
+  std::this_thread::sleep_for(std::chrono::seconds(1));
 #endif
 
   // Close the socket
-  close(server_sockfd);
+  if (close(server_sockfd) == -1) {
+    RCLCPP_ERROR(this->get_logger(), "Error closing socket");
+  } else {
+    RCLCPP_INFO(this->get_logger(), "Socket closed");
+  }
 #endif
 
 #ifdef UDP
@@ -453,7 +456,7 @@ void talker::terminate_exp() {
 
   close(sockfd);
 #endif
-
+  RCLCPP_INFO(this->get_logger(), "Processing data...");
   process_data();
   std::this_thread::sleep_for(std::chrono::seconds(1));
   RCLCPP_INFO(this->get_logger(), "Shutting down node");
