@@ -474,7 +474,7 @@ void talker::socket_exp_launch() {
         if (sent > 0) {
           grace_counter_write++;
         }
-        
+
         write_enable = false;
         continue;
       }
