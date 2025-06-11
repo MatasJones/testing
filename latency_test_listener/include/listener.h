@@ -17,6 +17,7 @@
 
 #include "listener_TCP.h"
 #include "listener_UDP.h"
+#include "listener_RAW.h"
 
 // Serialization includes
 #include "../../custom_msg/flatbuff/custom_ser.h"

@@ -1,7 +1,8 @@
 #include "talker.h"
 
-#define TCP
-// #define UDP
+// #define TCP
+//  #define UDP
+#define RAW
 
 // #define MANUAL_SER
 #define FLATBUFF_SER
@@ -168,7 +169,8 @@ void talker::socket_exp_launch() {
           continue;
         }
 
-        // RCLCPP_INFO(this->get_logger(), "Flatbuffer reading, msg: %s, id: %d",
+        // RCLCPP_INFO(this->get_logger(), "Flatbuffer reading, msg: %s, id:
+        // %d",
         //             msg.c_str(), id);
 
         // Add the time to the socket_send_receive_time array
@@ -186,7 +188,7 @@ void talker::socket_exp_launch() {
         socket_msg_size++;
       }
 #ifdef FLATBUFF_SER
-      
+
       // If grace period
       if (grace == true) {
         // Send grace message and count the number of messages sent
@@ -547,6 +549,28 @@ bool talker::socket_setup() {
     RCLCPP_ERROR(this->get_logger(), "ERROR: sync check failed");
     return 0;
   }
+#endif
+
+#ifdef RAW
+  // Create a socket
+  /*
+  AF_PACKET: data link layer
+  SOCK_RAW: raw socket
+  htons(ETH_P_ALL): allows us to craft our own header
+  */
+  sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+
+  // Bind the socket to the WIFI card interface
+  struct sockaddr_ll sll;
+  if (setup_raw_socket(&sockfd, &sll, MAC_122) == 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR: socket setup failed");
+    return 0;
+  }
+
+  // Perform sync check
+  raw_sync_check(sockfd, sll, MAC_122, MAC_131);
+  RCLCPP_INFO(this->get_logger(), "Sync done");
+
 #endif
 
   return 1;

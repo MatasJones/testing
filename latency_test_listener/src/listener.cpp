@@ -1,7 +1,9 @@
 #include "listener.h"
 
 // #define UDP
-#define TCP
+// #define TCP
+#define RAW
+#define CUSTOM_ETHERTYPE 0x88B5
 
 // #define MANUAL_SER
 #define FLATBUFF_SER
@@ -239,6 +241,28 @@ bool listener::socket_setup() {
     RCLCPP_ERROR(this->get_logger(), "ERROR: socket setup failed");
     return 0;
   }
+#endif
+
+#ifdef RAW
+  // Create a socket
+  /*
+  AF_PACKET: data link layer
+  SOCK_RAW: raw socket
+  htons(ETH_P_ALL): allows us to craft our own header
+  */
+  sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+
+  // // Bind the socket to the WIFI card interface
+  struct sockaddr_ll sll;
+  if (setup_raw_socket(&sockfd, &sll, MAC_131) == 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR: socket setup failed");
+    return 0;
+  }
+
+  // Check RAW sync
+  raw_sync_check(sockfd, sll, MAC_131, MAC_122);
+  RCLCPP_INFO(this->get_logger(), "Sync done");
+
 #endif
   return 1;
 }

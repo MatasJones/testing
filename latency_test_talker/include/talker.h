@@ -3,8 +3,6 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "sync_service/srv/sync_check.hpp"
-
 #include "rclcpp/qos.hpp"
 #include <chrono>
 #include <cmath>
@@ -30,6 +28,7 @@
 
 #include <poll.h>
 
+#include "talker_RAW.h"
 #include "talker_TCP.h"
 #include "talker_UDP.h"
 
