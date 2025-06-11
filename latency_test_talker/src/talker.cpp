@@ -280,7 +280,15 @@ void talker::socket_exp_launch() {
   struct ethhdr *eth_read = (struct ethhdr *)raw_buffer;
   int n;
 
+  char frame[1524];
+  struct ethhdr *eth_write = (struct ethhdr *)frame;
+  memcpy(eth_write->h_dest, MAC_122, 6);
+  memcpy(eth_write->h_source, MAC_131, 6);
+  eth_write->h_proto = htons(CUSTOM_ETHERTYPE);
+
+  size_t frame_len, sent;
   int grace_counter_write, grace_counter_read;
+
   RCLCPP_INFO(this->get_logger(), "Starting exp");
 
   // This while loop take ~60µs to execute
@@ -445,24 +453,15 @@ void talker::socket_exp_launch() {
           RCLCPP_INFO(this->get_logger(),
                       "Grace period ended, starting experiment");
           continue;
-        }
-        RCLCPP_INFO(this->get_logger(), "Sending grace msg");
-        flatbuffers::FlatBufferBuilder builder{1024};
-        char raw_buf[1024];
-        char frame[1524];
-        uint32_t size;
-        custom_ser::ser_msg("GRACE", grace_counter_write, 404, &builder,
-                            (uint8_t *)raw_buf, &size);
+        };
 
-        struct ethhdr *eth = (struct ethhdr *)frame;
-        memcpy(eth->h_dest, MAC_122, 6);
-        memcpy(eth->h_source, MAC_131, 6);
-        eth->h_proto = htons(CUSTOM_ETHERTYPE);
+        custom_ser::ser_msg("GRACE", grace_counter_write, 404, &builder,
+                            (uint8_t *)raw_buffer, &size);
 
         // Add payload after ethernet header
-        memcpy(frame + sizeof(struct ethhdr), raw_buf, size);
+        memcpy(frame + sizeof(struct ethhdr), raw_buffer, size);
 
-        size_t frame_len = sizeof(struct ethhdr) + size;
+        frame_len = sizeof(struct ethhdr) + size;
         // Ensure minimum frame size (64 bytes total)
         // Minimum size for ethernet frames is 64 bytes
         if (frame_len < 64) {
@@ -470,12 +469,12 @@ void talker::socket_exp_launch() {
           frame_len = 64;
         }
 
-        ssize_t sent = sendto(sockfd, frame, frame_len, 0,
-                              (struct sockaddr *)&sll, sizeof(sll));
+        sent = sendto(sockfd, frame, frame_len, 0, (struct sockaddr *)&sll,
+                      sizeof(sll));
         if (sent > 0) {
           grace_counter_write++;
         }
-
+        
         write_enable = false;
         continue;
       }
