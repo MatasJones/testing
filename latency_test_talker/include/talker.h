@@ -104,6 +104,9 @@ private:
   socklen_t clilen = sizeof(cli_addr);
   struct sockaddr_in serv_addr, cli_addr; // This creates a socket address
 
+  // RAW socket
+  struct sockaddr_ll sll;
+
   // Flatbuffer variables
   flatbuffers::FlatBufferBuilder builder{1024};
   uint8_t *buf;

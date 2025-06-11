@@ -268,7 +268,7 @@ void talker::socket_exp_launch() {
   }
 #endif
 
-#ifdef UDP
+#ifndef TCP
 
   // Create a poll to monitor the socket
   struct pollfd pfd;
@@ -276,6 +276,12 @@ void talker::socket_exp_launch() {
   pfd.events = POLLIN; // Monitor for incoming data
 
   char buffer[SOCKET_BUFFER_SIZE];
+  char raw_buffer[1514];
+  struct ethhdr *eth_read = (struct ethhdr *)raw_buffer;
+  int n;
+
+  int grace_counter_write, grace_counter_read;
+  RCLCPP_INFO(this->get_logger(), "Starting exp");
 
   // This while loop take ~60µs to execute
   while (running) {
@@ -284,6 +290,7 @@ void talker::socket_exp_launch() {
     if (ret > 0) {
       if (pfd.revents & POLLIN) {
         // Read the data from the socket
+#ifdef UDP
         bzero(buffer, SOCKET_BUFFER_SIZE);
         int n = recvfrom(sockfd, buffer, 255, 0, (struct sockaddr *)&serv_addr,
                          &clilen);
@@ -306,22 +313,69 @@ void talker::socket_exp_launch() {
           grace_counter_read++;
           continue;
         }
+#endif
 
-        // Add the time to the socket_send_receive_time array
-        std::get<1>(socket_send_receive_time[atoi(message_id.c_str())]) =
-            recieving_time;
+#ifdef RAW
+        // Read interface and verfy that msg is for us
+        n = recv(sockfd, raw_buffer, sizeof(raw_buffer), 0);
+        if (n < 1) {
+          continue;
+        }
+        // Set timestamp
+        double recieving_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+        // Check if frame is large enough to contain Ethernet header
+        if (n < sizeof(struct ethhdr)) {
+          continue;
+        }
+        if (ntohs(eth_read->h_proto) != CUSTOM_ETHERTYPE) {
+          continue; // Skip non-custom frames
+        }
+        // Correct MAC address comparison using memcmp()
+        if (memcmp(eth_read->h_dest, MAC_131, 6) != 0 ||
+            memcmp(eth_read->h_source, MAC_122, 6) != 0) {
+          // RCLCPP_INFO(this->get_logger(), "Frame not for us - MAC mismatch");
+          continue; // Skip frames not intended for us
+        }
+        // If we got this far, means message is for us, read payload
+        // Read payload
+        char *payload = raw_buffer + sizeof(struct ethhdr);
+        if (!custom_ser::deser_msg((uint8_t *)payload, msg, id, value)) {
+          // RCLCPP_ERROR(this->get_logger(),
+          //              "Error deserializing flatbuffer message!");
+          if (failure_counter++ > MAX_FAIL_COUNT) {
+            RCLCPP_ERROR(this->get_logger(),
+                         "Too many failures, shutting down");
+            running = false;
+            break;
+          }
+          continue;
+        }
+        if (msg == "GRACE_ACK" && grace == true) {
+          RCLCPP_INFO(this->get_logger(), "Grace message nb: %d", id);
+          grace_counter_read++;
+          continue;
+        }
 
-        // Add msg id to the socket_send_receive_time array
-        std::get<3>(socket_send_receive_time[atoi(message_id.c_str())]) =
-            atoi(message_id.c_str());
+#endif
+
+        //     // Add the time to the socket_send_receive_time array
+        //     std::get<1>(socket_send_receive_time[atoi(message_id.c_str())]) =
+        //         recieving_time;
+
+        //     // Add msg id to the socket_send_receive_time array
+        //     std::get<3>(socket_send_receive_time[atoi(message_id.c_str())]) =
+        //         atoi(message_id.c_str());
+        //   }
+        // }
       }
     }
-    // 2) Send the data to the server
+    // 2) Send the data
     if (write_enable && ret == 0) {
       if ((socket_msg_count + 1) % NB_MSGS == 0) {
         socket_msg_size++;
       }
 
+#ifdef UDP
       // If grace period
       if (grace == true) {
         if (grace_counter_write > GRACE_COUNTER_MAX &&
@@ -380,11 +434,57 @@ void talker::socket_exp_launch() {
       socket_msg_count++;
 
       write_enable = false; // Disable writing until next timer event
+
+#endif
+
+#ifdef RAW
+      if (grace == true) {
+        if (grace_counter_write > GRACE_COUNTER_MAX &&
+            grace_counter_read > GRACE_COUNTER_MAX) {
+          grace = false;
+          RCLCPP_INFO(this->get_logger(),
+                      "Grace period ended, starting experiment");
+          continue;
+        }
+        RCLCPP_INFO(this->get_logger(), "Sending grace msg");
+        flatbuffers::FlatBufferBuilder builder{1024};
+        char raw_buf[1024];
+        char frame[1524];
+        uint32_t size;
+        custom_ser::ser_msg("GRACE", grace_counter_write, 404, &builder,
+                            (uint8_t *)raw_buf, &size);
+
+        struct ethhdr *eth = (struct ethhdr *)frame;
+        memcpy(eth->h_dest, MAC_122, 6);
+        memcpy(eth->h_source, MAC_131, 6);
+        eth->h_proto = htons(CUSTOM_ETHERTYPE);
+
+        // Add payload after ethernet header
+        memcpy(frame + sizeof(struct ethhdr), raw_buf, size);
+
+        size_t frame_len = sizeof(struct ethhdr) + size;
+        // Ensure minimum frame size (64 bytes total)
+        // Minimum size for ethernet frames is 64 bytes
+        if (frame_len < 64) {
+          memset(frame + sizeof(struct ethhdr) + size, 0, 64 - frame_len);
+          frame_len = 64;
+        }
+
+        ssize_t sent = sendto(sockfd, frame, frame_len, 0,
+                              (struct sockaddr *)&sll, sizeof(sll));
+        if (sent > 0) {
+          grace_counter_write++;
+        }
+
+        write_enable = false;
+        continue;
+      }
+#endif
     }
 
     std::this_thread::sleep_for(std::chrono::microseconds(10));
-  }
 #endif
+  }
 }
 
 void talker::create_logger() {
@@ -561,7 +661,6 @@ bool talker::socket_setup() {
   sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 
   // Bind the socket to the WIFI card interface
-  struct sockaddr_ll sll;
   if (setup_raw_socket(&sockfd, &sll, MAC_122) == 0) {
     RCLCPP_ERROR(this->get_logger(), "ERROR: socket setup failed");
     return 0;

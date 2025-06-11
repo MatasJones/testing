@@ -15,9 +15,9 @@
 #include <unistd.h>
 #include <yaml-cpp/yaml.h>
 
+#include "listener_RAW.h"
 #include "listener_TCP.h"
 #include "listener_UDP.h"
-#include "listener_RAW.h"
 
 // Serialization includes
 #include "../../custom_msg/flatbuff/custom_ser.h"
@@ -52,6 +52,9 @@ private:
 
   struct sockaddr_in serv_addr, cli_addr;
   socklen_t addr_len = sizeof(serv_addr);
+
+  // RAW socket
+  struct sockaddr_ll sll;
 
   // Flatbuffer variables
   flatbuffers::FlatBufferBuilder builder{1024};

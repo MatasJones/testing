@@ -205,6 +205,104 @@ listener::listener() : Node("listener"), count_(0) {
   }
 #endif
 
+#ifdef RAW
+
+  // Create a poll to verify if the socket is ready to read
+  struct pollfd fds;
+  fds.fd = sockfd;
+  fds.events = POLLIN; // Check for incoming data
+
+  char raw_buffer[1524];
+  struct ethhdr *eth_read = (struct ethhdr *)raw_buffer;
+  int n;
+
+  while (running) {
+    int ret = poll(&fds, 1, 0); // Determine the state of the socket
+    // 1) Read incoming data from the socket
+    if (ret > 0) {
+      if (fds.revents & POLLIN) {
+
+        // Read the data from the socket
+        n = recv(sockfd, raw_buffer, sizeof(raw_buffer), 0);
+
+        if (n < sizeof(struct ethhdr)) {
+          continue;
+        }
+        if (ntohs(eth_read->h_proto) != CUSTOM_ETHERTYPE) {
+          continue; // Skip non-custom frames
+        }
+        // Correct MAC address comparison using memcmp()
+        if (memcmp(eth_read->h_dest, MAC_122, 6) != 0 ||
+            memcmp(eth_read->h_source, MAC_131, 6) != 0) {
+          // RCLCPP_INFO(this->get_logger(), "Frame not for us - MAC mismatch");
+          continue; // Skip frames not intended for us
+        }
+
+        if (raw_buffer[14] == 0x53) {
+          continue;
+        }
+
+        char *payload = raw_buffer + sizeof(struct ethhdr);
+        if (!custom_ser::deser_msg((uint8_t *)payload, msg, id, value)) {
+          // RCLCPP_ERROR(this->get_logger(),
+          //              "Error deserializing flatbuffer message!");
+          if (failure_counter++ > MAX_FAIL_COUNT) {
+            RCLCPP_ERROR(this->get_logger(),
+                         "Too many failures, shutting down");
+            running = false;
+          }
+          continue;
+        }
+        failure_counter = 0;
+
+        if (msg == "SHUTDOWN") {
+          RCLCPP_INFO(this->get_logger(), "Shutdown message received");
+          running = false;
+          std::this_thread::sleep_for(std::chrono::seconds(5));
+          continue;
+
+        } else if (msg == "GRACE") {
+          RCLCPP_INFO(this->get_logger(), "Grace message received");
+          msg = "GRACE_ACK";
+        }
+
+        else {
+          std::string test_string(std::pow(10, value), 'B');
+          msg = test_string;
+        }
+
+        flatbuffers::FlatBufferBuilder builder{1024};
+        char raw_buf[1024];
+        char frame[1524];
+        uint32_t size;
+        custom_ser::ser_msg(msg, id, value, &builder, (uint8_t *)raw_buf,
+                            &size);
+
+        struct ethhdr *eth = (struct ethhdr *)frame;
+        memcpy(eth->h_dest, MAC_131, 6);
+        memcpy(eth->h_source, MAC_122, 6);
+        eth->h_proto = htons(CUSTOM_ETHERTYPE);
+
+        // Add payload after ethernet header
+        memcpy(frame + sizeof(struct ethhdr), raw_buf, size);
+
+        size_t frame_len = sizeof(struct ethhdr) + size;
+        // Ensure minimum frame size (64 bytes total)
+        // Minimum size for ethernet frames is 64 bytes
+        if (frame_len < 64) {
+          memset(frame + sizeof(struct ethhdr) + size, 0, 64 - frame_len);
+          frame_len = 64;
+        }
+
+        ssize_t sent = sendto(sockfd, frame, frame_len, 0,
+                              (struct sockaddr *)&sll, sizeof(sll));
+      }
+    }
+    std::this_thread::sleep_for(std::chrono::microseconds(1));
+  }
+
+#endif
+
   // Close the socket
   close(sockfd);
 
@@ -253,7 +351,6 @@ bool listener::socket_setup() {
   sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 
   // // Bind the socket to the WIFI card interface
-  struct sockaddr_ll sll;
   if (setup_raw_socket(&sockfd, &sll, MAC_131) == 0) {
     RCLCPP_ERROR(this->get_logger(), "ERROR: socket setup failed");
     return 0;
