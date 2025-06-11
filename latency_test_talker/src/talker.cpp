@@ -21,6 +21,10 @@ talker::talker() : Node("talker") {
   this->declare_parameter("msg_size", DEFAULT_MSG_SIZE);
   msg_size = this->get_parameter("msg_size").as_int();
 
+#ifdef RAW
+  msg_size = 4;
+#endif
+
   total_nb_msgs = msg_size * NB_MSGS;
 
   RCLCPP_INFO(this->get_logger(), "Spacing time %d ms", spacing_ms_);
@@ -321,6 +325,14 @@ void talker::socket_exp_launch() {
           grace_counter_read++;
           continue;
         }
+
+        // Add the time to the socket_send_receive_time array
+        std::get<1>(socket_send_receive_time[atoi(message_id.c_str())]) =
+            recieving_time;
+
+        // Add msg id to the socket_send_receive_time array
+        std::get<3>(socket_send_receive_time[atoi(message_id.c_str())]) =
+            atoi(message_id.c_str());
 #endif
 
 #ifdef RAW
@@ -364,17 +376,13 @@ void talker::socket_exp_launch() {
           continue;
         }
 
+        // Add the time to the socket_send_receive_time array
+        std::get<1>(socket_send_receive_time[id]) = recieving_time;
+
+        // Add msg id to the socket_send_receive_time array
+        std::get<3>(socket_send_receive_time[id]) = id;
+
 #endif
-
-        //     // Add the time to the socket_send_receive_time array
-        //     std::get<1>(socket_send_receive_time[atoi(message_id.c_str())]) =
-        //         recieving_time;
-
-        //     // Add msg id to the socket_send_receive_time array
-        //     std::get<3>(socket_send_receive_time[atoi(message_id.c_str())]) =
-        //         atoi(message_id.c_str());
-        //   }
-        // }
       }
     }
     // 2) Send the data
@@ -478,12 +486,53 @@ void talker::socket_exp_launch() {
         write_enable = false;
         continue;
       }
-#endif
+
+      std::string test_string(sizes[socket_msg_size], 'A');
+      custom_ser::ser_msg(test_string, socket_msg_count, socket_msg_size,
+                          &builder, (uint8_t *)&raw_buffer, &size);
+
+      // Add payload after ethernet header
+      memcpy(frame + sizeof(struct ethhdr), raw_buffer, size);
+
+      frame_len = sizeof(struct ethhdr) + size;
+      // Ensure minimum frame size (64 bytes total)
+      // Minimum size for ethernet frames is 64 bytes
+      if (frame_len < 64) {
+        memset(frame + sizeof(struct ethhdr) + size, 0, 64 - frame_len);
+        frame_len = 64;
+      }
+
+      // Write the data to the socket
+      sent = sendto(sockfd, frame, frame_len, 0, (struct sockaddr *)&sll,
+                    sizeof(sll));
+      if (sent < 0) {
+        RCLCPP_ERROR(this->get_logger(), "ERROR whilst sending test msg");
+      }
+
+      double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+      // Add the time to the socket_send_receive_time array
+      std::get<0>(socket_send_receive_time[socket_msg_count]) = sending_time;
+      // Add msg id to the socket_send_receive_time array
+      std::get<2>(socket_send_receive_time[socket_msg_count]) =
+          socket_msg_count;
+
+      // Increment the message count
+      socket_msg_count++;
+
+      // If there is no data to be read nor to write, terminate session
+      if (socket_msg_count > total_nb_msgs - 1) {
+        RCLCPP_INFO(this->get_logger(), "Socket session terminated");
+        running = false;
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+      }
+
+      write_enable = false; // Disable writing until next timer event
     }
 
-    std::this_thread::sleep_for(std::chrono::microseconds(10));
 #endif
   }
+  std::this_thread::sleep_for(std::chrono::microseconds(10));
+#endif
 }
 
 void talker::create_logger() {
@@ -556,6 +605,38 @@ void talker::terminate_exp() {
   }
 
   close(sockfd);
+#endif
+
+#ifdef RAW
+
+  char frame[1524];
+  custom_ser::ser_msg("SHUTDOWN", 0, 0, &builder, (uint8_t *)&buffer, &size);
+
+  struct ethhdr *eth_write = (struct ethhdr *)frame;
+  memcpy(eth_write->h_dest, MAC_122, 6);
+  memcpy(eth_write->h_source, MAC_131, 6);
+  eth_write->h_proto = htons(CUSTOM_ETHERTYPE);
+
+  size_t frame_len, sent;
+
+  // Add payload after ethernet header
+  memcpy(frame + sizeof(struct ethhdr), buffer, size);
+
+  frame_len = sizeof(struct ethhdr) + size;
+  // Ensure minimum frame size (64 bytes total)
+  // Minimum size for ethernet frames is 64 bytes
+  if (frame_len < 64) {
+    memset(frame + sizeof(struct ethhdr) + size, 0, 64 - frame_len);
+    frame_len = 64;
+  }
+
+  // Write the data to the socket
+  for (int i = 0; i < 10; i++) {
+    sent = sendto(sockfd, frame, frame_len, 0, (struct sockaddr *)&sll,
+                  sizeof(sll));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+
 #endif
   RCLCPP_INFO(this->get_logger(), "Processing data...");
   process_data();

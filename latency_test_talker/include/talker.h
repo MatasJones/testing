@@ -47,7 +47,7 @@ using TestProtocol::message;
 #define NB_MSGS 50
 #define NB_OF_SIZES 7
 #define TOTAL_MSGS (NB_MSGS * NB_OF_SIZES)
-#define DEFAULT_MSG_SIZE 5
+#define DEFAULT_MSG_SIZE 3
 #define SOCKET_BUFFER_SIZE 65490
 #define GRACE_COUNTER_MAX 20
 
