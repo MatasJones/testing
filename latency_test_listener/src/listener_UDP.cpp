@@ -12,7 +12,7 @@ bool socket_udp::sync_check(int sockfd, struct sockaddr_in *serv_addr,
   // Set the serv_addr parameters
   bzero((char *)serv_addr, sizeof(serv_addr));
   serv_addr->sin_family = AF_INET; // Means that we are using IPv4
-  serv_addr->sin_addr.s_addr = inet_addr("192.168.0.72"); // Set the server IP
+  serv_addr->sin_addr.s_addr = inet_addr("192.168.0.131"); // Set the server IP
   serv_addr->sin_port = htons(port);
 
   // Setup cli_addr then bind the socket

@@ -1,8 +1,8 @@
 #include "listener.h"
 
-// #define UDP
+#define UDP
 // #define TCP
-#define RAW
+// #define RAW
 #define CUSTOM_ETHERTYPE 0x88B5
 
 // #define MANUAL_SER
@@ -271,7 +271,7 @@ listener::listener() : Node("listener"), count_(0) {
           continue;
 
         } else if (msg == "GRACE") {
-          //RCLCPP_INFO(this->get_logger(), "Grace message received");
+          // RCLCPP_INFO(this->get_logger(), "Grace message received");
           msg = "GRACE_ACK";
         }
 

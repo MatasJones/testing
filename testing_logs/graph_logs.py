@@ -28,7 +28,7 @@ def plot_data_from_csv(csv_file_path):
 
     # Get unique powers of 10 for coloring
     unique_powers = sorted(df['log10_msg_size'].unique())
-    unique_powers = unique_powers[:-1]
+    #unique_powers = unique_powers[:-1]
     print(f"Unique powers of 10 in msg_size: {unique_powers}")
     
     # Create a colormap for both scatter plot and histogram
@@ -42,7 +42,7 @@ def plot_data_from_csv(csv_file_path):
 
     # Recalculate the average after filtering
     filtered_avg_values = filtered_df.groupby('log10_msg_size')['time'].mean()
-    filtered_avg_values = filtered_avg_values[:-1]
+    #filtered_avg_values = filtered_avg_values[:-1]
     # Print the filtered averages
     print("\nFiltered Average Value for Each Power of 10 in msg_size (Excluding Outliers):")
     for power, avg in filtered_avg_values.items():
