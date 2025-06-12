@@ -51,6 +51,7 @@ public:
 private:
   //
   int b;
+  //
 };
 
 #endif
