@@ -2,7 +2,7 @@
 
 // #define UDP
 #define TCP
-// #define RAW
+//  #define RAW
 #define CUSTOM_ETHERTYPE 0x88B5
 
 // #define MANUAL_SER
@@ -162,6 +162,7 @@ listener::listener() : Node("listener"), count_(0) {
     // 1) Read incoming data from the socket
     if (ret > 0) {
       if (fds.revents & POLLIN) {
+        RCLCPP_INFO(this->get_logger(), "Reading something");
         char buffer[SOCKET_BUFFER_SIZE];
         bzero(buffer, SOCKET_BUFFER_SIZE);
         int n = recvfrom(sockfd, buffer, sizeof(buffer), 0,
@@ -171,34 +172,47 @@ listener::listener() : Node("listener"), count_(0) {
           continue;
         }
 
-        // Extract msg number from the message
-        std::string str_buffer(buffer);
-        if (str_buffer == "SHUTDOWN") {
-          RCLCPP_INFO(this->get_logger(), "Shutdown message received");
-          running = false;
-          break;
-        }
-        size_t first = str_buffer.find('_');
-        size_t second = str_buffer.find('_', first + 1);
-        std::string extracted =
-            str_buffer.substr(first + 1, second - first - 1);
-
-        // Verify that the msg id is extractable
-        if (!(first != std::string::npos && second != std::string::npos &&
-              second > first)) {
+        if (!custom_ser::deser_msg((uint8_t *)buffer, msg, id, value)) {
+          if (++failure_counter > MAX_FAIL_COUNT) {
+            RCLCPP_ERROR(this->get_logger(),
+                         "Too many failures, shutting down");
+            return;
+          }
           continue;
         }
+        failure_counter = 0;
 
-        power =
-            ((std::stoi(extracted.c_str()) + 1) % 50) == 0 ? power + 1 : power;
-        std::string test_string(std::pow(10, power), 'B');
+        RCLCPP_INFO(this->get_logger(), "Received_msg: %s", msg.c_str());
 
-        // Send the data back to the server
-        std::string msg = "C_" + extracted + "_" + test_string;
-        strncpy(buffer, msg.c_str(), sizeof(buffer));
-        int msg_len = msg.size();
-        n = sendto(sockfd, buffer, msg_len, 0, (struct sockaddr *)&serv_addr,
-                   addr_len);
+        // // Extract msg number from the message
+        // std::string str_buffer(buffer);
+        // if (str_buffer == "SHUTDOWN") {
+        //   RCLCPP_INFO(this->get_logger(), "Shutdown message received");
+        //   running = false;
+        //   break;
+        // }
+        // size_t first = str_buffer.find('_');
+        // size_t second = str_buffer.find('_', first + 1);
+        // std::string extracted =
+        //     str_buffer.substr(first + 1, second - first - 1);
+
+        // // Verify that the msg id is extractable
+        // if (!(first != std::string::npos && second != std::string::npos &&
+        //       second > first)) {
+        //   continue;
+        // }
+
+        // power =
+        //     ((std::stoi(extracted.c_str()) + 1) % 50) == 0 ? power + 1 :
+        //     power;
+        // std::string test_string(std::pow(10, power), 'B');
+
+        // // Send the data back to the server
+        // std::string msg = "C_" + extracted + "_" + test_string;
+        // strncpy(buffer, msg.c_str(), sizeof(buffer));
+        // int msg_len = msg.size();
+        // n = sendto(sockfd, buffer, msg_len, 0, (struct sockaddr *)&serv_addr,
+        //            addr_len);
       }
     }
     std::this_thread::sleep_for(std::chrono::microseconds(1));
@@ -335,8 +349,25 @@ bool listener::socket_setup() {
     return 0;
   }
 
-  if (!socket_udp::sync_check(sockfd, &serv_addr, &cli_addr, port)) {
-    RCLCPP_ERROR(this->get_logger(), "ERROR: socket setup failed");
+  // if (!socket_udp::sync_check(sockfd, &serv_addr, &cli_addr, port)) {
+  //   RCLCPP_ERROR(this->get_logger(), "ERROR: socket setup failed");
+  //   return 0;
+  // }
+  char buffer[256];
+
+  socklen_t clilen = sizeof(cli_addr);
+
+  // Set the serv_addr parameters
+  serv_addr.sin_family = AF_INET; // Means that we are using IPv4
+  serv_addr.sin_addr.s_addr = inet_addr("192.168.0.131"); // Set the server IP
+  serv_addr.sin_port = htons(5002);
+
+  // Setup cli_addr then bind the socket
+  cli_addr.sin_family = AF_INET;
+  cli_addr.sin_addr.s_addr = INADDR_ANY;
+  cli_addr.sin_port = htons(port);
+
+  if (bind(sockfd, (struct sockaddr *)&cli_addr, sizeof(cli_addr)) < 0) {
     return 0;
   }
 #endif

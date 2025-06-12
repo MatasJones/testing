@@ -64,6 +64,9 @@ public:
 private:
   ////// Variables //////
 
+  //
+  struct ip_addrs ip_addr;
+
   // Sockets //
   struct sockaddr_in sock_addr[2], dest_addr[2];
   int sockfd[2];
@@ -81,14 +84,14 @@ private:
 
   // Threads //
   bool sync_check = true;
+  bool sync_success = false;
 
   ////// Function declarations //////
   void get_ip(struct ip_addrs *this_ip_addrs);
   bool device_UDP_socket(struct ip_addrs this_ip_addrs, int sockfd[],
                          struct sockaddr_in sock_addr[],
                          struct sockaddr_in dest_addr[]);
-  bool holo_holo_sync(struct ip_addrs this_ip_addrs, int sockfd[],
-                      struct sockaddr_in sock_addr[]);
+  void holo_holo_sync();
   void enable_socket_write();
 };
 

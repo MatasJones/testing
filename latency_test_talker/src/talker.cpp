@@ -173,9 +173,8 @@ void talker::socket_exp_launch() {
           continue;
         }
 
-        // RCLCPP_INFO(this->get_logger(), "Flatbuffer reading, msg: %s, id:
-        // %d",
-        //             msg.c_str(), id);
+        RCLCPP_INFO(this->get_logger(), "Flatbuffer reading, msg: %s, id: % d ",
+                    msg.c_str(), id);
 
         // Add the time to the socket_send_receive_time array
         std::get<1>(socket_send_receive_time[id]) = recieving_time;
