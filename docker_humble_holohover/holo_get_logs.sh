@@ -1,10 +1,10 @@
 #!/bash/bin
 
-PATH_TO_LOGS="/home/ubuntu/Documents/holohover_latency/testing/testing_logs/logger.csv"
+PATH_TO_LOGS="/home/ubuntu/testing/testing_logs/logger.csv"
 
 ### Change file location and name
-PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/PDS_II/holo_tests/Week16"
-file_name_first_part="socket_RAW"
+PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/PDS_II/holo_tests/week16"
+file_name_first_part="RAW_socket"
 ###
 
 CMD="scp $PATH_TO_LOGS $PATH_TO_LOCAL_LOGS"
@@ -16,14 +16,14 @@ echo "$1"
 source config.sh
 
 # REMOTE_IPS[1] corresponds to the black holohover
-if ping -c 1 ${SERVER_IP} &> /dev/null; then # ping -c 1 ip_address -> sends a ping to the ip address and &> /dev/null redirects any output to /dev/null effectively hiding it
+if ping -c 1 ${REMOTE_IPS[0]} &> /dev/null; then # ping -c 1 ip_address -> sends a ping to the ip address and &> /dev/null redirects any output to /dev/null effectively hiding it
     
     # Send command to devices
     
-    scp ${USERS[1]}@${SERVER_IP}:${PATH_TO_LOGS} ${PATH_TO_LOCAL_LOGS}
+    scp ${USERS[1]}@${REMOTE_IPS[0]}:${PATH_TO_LOGS} ${PATH_TO_LOCAL_LOGS}
 
 else
-    echo "Ping to $SERVER_IP failed..."
+    echo "Ping to $REMOTE_IPS[0]] failed..."
 
 fi # Used to indicated the end of an if statement block
 csv_file="$PATH_TO_LOCAL_LOGS/logger.csv"

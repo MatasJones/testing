@@ -3,15 +3,13 @@
 PATH_TO_LOGS="/home/ubuntu/Documents/holohover_latency/testing/testing_logs/logger.csv"
 
 ### Change file location and name
-PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/PDS_II/holo_tests/Week16"
-file_name_first_part="socket_RAW"
+PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/PDS_II/holo_tests/week16/logger.csv"
+file_name_first_part="log viewer"
 ###
 
 CMD="scp $PATH_TO_LOGS $PATH_TO_LOCAL_LOGS"
 
 echo "Fetching logs.."
-
-echo "$1"
 
 source config.sh
 
@@ -26,11 +24,5 @@ else
     echo "Ping to $SERVER_IP failed..."
 
 fi # Used to indicated the end of an if statement block
-csv_file="$PATH_TO_LOCAL_LOGS/logger.csv"
-first_line=$(head -n 1 "$csv_file")
-echo "First line: $first_line"
-file_name="${file_name_first_part}_${first_line}"
-mv "$PATH_TO_LOCAL_LOGS/logger.csv" "$PATH_TO_LOCAL_LOGS/$file_name.csv"
-PATH_TO_LOCAL_LOGS="$PATH_TO_LOCAL_LOGS/$file_name.csv"
-echo $PATH_TO_LOCAL_LOGS
-python3 /Users/matasjones/Documents/Coding_projects/testing/testing_logs/graph_logs.py $PATH_TO_LOCAL_LOGS "$1"
+
+python3 /Users/matasjones/Documents/Coding_projects/testing/testing_logs/graph_logs.py $PATH_TO_LOCAL_LOGS "viewer"

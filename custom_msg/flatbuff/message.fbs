@@ -1,0 +1,9 @@
+namespace TestProtocol;
+
+table message {
+  id: uint8;
+  value: int32;
+  msg: string;
+}
+
+root_type message;

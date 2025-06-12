@@ -21,10 +21,10 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)  # If you're using std_msgs for message passing
 find_package(custom_msg REQUIRED)
 find_package(yaml-cpp REQUIRED)
-find_package(sync_service REQUIRED)
 
 include_directories(
   include
+  ../../custom_msg/flatbuff
 )
 
 if(BUILD_TESTING)
@@ -42,16 +42,19 @@ endif()
 add_executable(latency_test_talker
   src/talker.cpp
   src/talker_main.cpp
+  src/talker_TCP.cpp
+  src/talker_UDP.cpp
+  src/talker_RAW.cpp
+  src/holo.cpp
 )
 
-target_link_libraries(latency_test_talker yaml-cpp)
+target_link_libraries(latency_test_talker yaml-cpp flatbuffers)
 
 ament_target_dependencies(
   latency_test_talker
   rclcpp
   std_msgs  # Include std_msgs if you're using it for your messages
   custom_msg
-  sync_service
 )
 
 install(

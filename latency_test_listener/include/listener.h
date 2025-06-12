@@ -1,23 +1,33 @@
 #ifndef LISTENER_H
 #define LISTENER_H
 
-#include "custom_msg/msg/custom_string.hpp"
-#include "custom_msg/msg/int16msg.hpp"
-#include "custom_msg/msg/sync_msg.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/string.hpp"
-
-#include "sync_service/srv/sync_check.hpp"
 
 #include <arpa/inet.h>
 #include <chrono>
+#include <cmath>
 #include <filesystem>
 #include <iostream>
 #include <netdb.h>
+#include <poll.h>
 #include <string>
 #include <sys/socket.h>
-#include <unistd.h> // gethostname
+#include <unistd.h>
 #include <yaml-cpp/yaml.h>
+
+#include "listener_RAW.h"
+#include "listener_TCP.h"
+#include "listener_UDP.h"
+
+// Serialization includes
+#include "../../custom_msg/flatbuff/custom_ser.h"
+#include "../../custom_msg/flatbuff/message_generated.h"
+#include "flatbuffers/flatbuffers.h"
+using TestProtocol::message;
+
+#define QUEUE_SIZE 100
+#define SOCKET_BUFFER_SIZE 65490
+#define MAX_FAIL_COUNT 100
 
 class listener : public rclcpp::Node {
 
@@ -26,33 +36,30 @@ public:
   int count_ = 0;
 
 private:
-  // Declare a service server
-  rclcpp::Service<sync_service::srv::SyncCheck>::SharedPtr sync_service_;
-
-  // Declare a Publisher
-  rclcpp::Publisher<custom_msg::msg::CustomString>::SharedPtr
-      listener_publisher_;
-
-  rclcpp::Publisher<custom_msg::msg::SyncMsg>::SharedPtr sync_publisher_;
-
-  // Declare a subscriber
-  rclcpp::Subscription<custom_msg::msg::CustomString>::SharedPtr
-      listener_subscriber_;
-
-  rclcpp::Subscription<custom_msg::msg::SyncMsg>::SharedPtr sync_subscriber_;
-
-  void sync_response(
-      const std::shared_ptr<sync_service::srv::SyncCheck::Request> request,
-      std::shared_ptr<sync_service::srv::SyncCheck::Response> response);
-  void echo(const custom_msg::msg::CustomString::SharedPtr msg);
-  void echo_sync(const custom_msg::msg::SyncMsg::SharedPtr msg);
-  void get_ip_addr();
+  bool socket_setup();
 
   std::string ip_addr;
   std::filesystem::path cwd = std::filesystem::current_path();
   std::string config_file_path = cwd.string() + "/src/config/config.yaml";
 
   int id;
-};
+  int port = 5000;
+  char server_ip[14] = "192.168.0.108"; // Server IP
+  int sockfd;
+  int power = 0;
 
-#endif
+  bool running = true;
+
+  struct sockaddr_in serv_addr, cli_addr;
+  socklen_t addr_len = sizeof(serv_addr);
+
+  // RAW socket
+  struct sockaddr_ll sll;
+
+  // Flatbuffer variables
+  flatbuffers::FlatBufferBuilder builder{1024};
+  uint8_t *buf;
+  uint32_t size;
+  int failure_counter = 0;
+};
+#endif // LISTENER_H
