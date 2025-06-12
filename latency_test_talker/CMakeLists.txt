@@ -46,6 +46,7 @@ add_executable(latency_test_talker
   src/talker_UDP.cpp
   src/talker_RAW.cpp
   src/holo.cpp
+  src/holo_socket.cpp
 )
 
 target_link_libraries(latency_test_talker yaml-cpp flatbuffers)

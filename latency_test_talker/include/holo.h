@@ -30,6 +30,7 @@
 
 #include <poll.h>
 
+#include "holo_socket.h"
 #include "talker_TCP.h"
 #include "talker_UDP.h"
 
@@ -37,6 +38,10 @@
 #include "../../custom_msg/flatbuff/message_generated.h"
 #include "flatbuffers/flatbuffers.h"
 using TestProtocol::message;
+
+#define PORT 5002
+#define SYNC_BUFFER_SIZE 256
+#define MAX_FAIL_COUNT 100
 
 /*
 holo1: white  | 192.168.0.131
@@ -57,9 +62,34 @@ public:
   holo();
 
 private:
-  //
+  ////// Variables //////
+
+  // Sockets //
+  struct sockaddr_in sock_addr[2], dest_addr[2];
+  int sockfd[2];
+  socklen_t socklen[2] = {sizeof(sock_addr[0]), sizeof(sock_addr[1])};
+  bool sync_validated[2] = {0};
+  bool write_enable[2] = {0};
+
+  // Flatbuffer //
+  std::string msg;
+  uint8_t id;
+  int32_t value;
+  int failure_counter = 0;
+  flatbuffers::FlatBufferBuilder builder{1024};
+  uint32_t size;
+
+  // Threads //
+  bool sync_check = true;
+
+  ////// Function declarations //////
   void get_ip(struct ip_addrs *this_ip_addrs);
-  //
+  bool device_UDP_socket(struct ip_addrs this_ip_addrs, int sockfd[],
+                         struct sockaddr_in sock_addr[],
+                         struct sockaddr_in dest_addr[]);
+  bool holo_holo_sync(struct ip_addrs this_ip_addrs, int sockfd[],
+                      struct sockaddr_in sock_addr[]);
+  void enable_socket_write();
 };
 
 #endif
