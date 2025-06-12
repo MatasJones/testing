@@ -1,7 +1,7 @@
 #include "listener.h"
 
-#define UDP
-// #define TCP
+// #define UDP
+#define TCP
 // #define RAW
 #define CUSTOM_ETHERTYPE 0x88B5
 

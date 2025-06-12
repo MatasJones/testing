@@ -1,8 +1,8 @@
 #include "talker.h"
 
-// #define TCP
-#define UDP
-// #define RAW
+#define TCP
+// #define UDP
+//  #define RAW
 
 // #define MANUAL_SER
 #define FLATBUFF_SER
@@ -531,8 +531,8 @@ void talker::socket_exp_launch() {
 
 #endif
 }
-std::this_thread::sleep_for(std::chrono::microseconds(10));
 #endif
+std::this_thread::sleep_for(std::chrono::microseconds(10));
 }
 
 void talker::create_logger() {

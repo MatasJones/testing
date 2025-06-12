@@ -36,7 +36,7 @@ bool socket_udp::sync_check(int sockfd, struct sockaddr_in *serv_addr,
   }
 
   int buf_size = 1 << 20; // 1MB
-  setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &buf_size, sizeof(buf_size));
+  // setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &buf_size, sizeof(buf_size));
   setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &buf_size, sizeof(buf_size));
 
   // recvfrom: clilen needs a vlaue of type socklen_t, NOT a ptr!
