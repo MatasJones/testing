@@ -24,6 +24,7 @@ find_package(yaml-cpp REQUIRED)
 
 include_directories(
   include
+  ../latency_test_talker/include
 )
 
 if(BUILD_TESTING)
@@ -44,6 +45,8 @@ add_executable(latency_test_listener
     src/listener_TCP.cpp
     src/listener_UDP.cpp
     src/listener_RAW.cpp
+    src/comp.cpp
+    ../latency_test_talker/src/holo_socket.cpp
 )
 
 target_link_libraries(latency_test_listener yaml-cpp)

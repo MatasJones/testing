@@ -1,5 +1,5 @@
-#ifndef HOLO_H
-#define HOLO_H
+#ifndef COMP_H
+#define COMP_H
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -30,16 +30,14 @@
 
 #include <poll.h>
 
-#include "holo_socket.h"
-#include "talker_TCP.h"
-#include "talker_UDP.h"
+#include "../../latency_test_talker/include/holo_socket.h"
 
 // Serialization includes
 #include "../../custom_msg/flatbuff/message_generated.h"
 #include "flatbuffers/flatbuffers.h"
 using TestProtocol::message;
 
-#define PORT 5002
+#define PORT 5000
 #define SYNC_BUFFER_SIZE 256
 #define MAX_FAIL_COUNT 100
 
@@ -52,34 +50,17 @@ holo4: yellow | 192.168.0.109
 comp: 192.168.0.72
 */
 
-struct ip_addrs {
-  std::string device_ip;
-  int nb_neigh;
-  std::string neigh_ip[2];
-};
-
-struct sync_valid {
-  bool device;
-  bool neigh;
-};
-
-class holo : public rclcpp::Node {
+class comp : public rclcpp::Node {
 
 public:
-  holo();
+  comp();
 
 private:
   ////// Variables //////
 
-  //
-  struct ip_addrs ip_addr;
-
   // Sockets //
-  struct sockaddr_in sock_addr[2], dest_addr[2];
-  int sockfd[2];
-  socklen_t socklen[2] = {sizeof(sock_addr[0]), sizeof(sock_addr[1])};
-  struct sync_valid sync_validated[2];
-  bool write_enable[2] = {0};
+  struct sockaddr_in sock_addr, broadcast_addr;
+  int compfd;
 
   // Flatbuffer //
   std::string msg;
@@ -90,16 +71,10 @@ private:
   uint32_t size;
 
   // Threads //
-  bool sync_check = true;
-  bool sync_success = false;
 
   ////// Function declarations //////
-  void get_ip(struct ip_addrs *this_ip_addrs);
-  bool device_UDP_socket(struct ip_addrs this_ip_addrs, int sockfd[],
-                         struct sockaddr_in sock_addr[],
-                         struct sockaddr_in dest_addr[]);
-  void holo_holo_sync();
-  void enable_socket_write();
+  bool device_UDP_socket(int *sockfd, struct sockaddr_in *sock_addr,
+                         struct sockaddr_in *broad_addr);
 };
 
 #endif
