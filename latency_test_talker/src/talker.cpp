@@ -432,6 +432,7 @@ void talker::socket_exp_launch() {
       int msg_len = msg.size();
       strncpy(buffer, msg.c_str(), sizeof(buffer));
 
+      double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
       int n = sendto(sockfd, buffer, msg_len, 0, (struct sockaddr *)&dest_addr,
                      sizeof(struct sockaddr_in)); // Send only the msg part of
                                                   // the buffer, until the \0
@@ -439,7 +440,6 @@ void talker::socket_exp_launch() {
         continue;
       }
 
-      double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
       // Add the time to the socket_send_receive_time array
       std::get<0>(socket_send_receive_time[socket_msg_count]) = sending_time;
       // Add msg id to the socket_send_receive_time array

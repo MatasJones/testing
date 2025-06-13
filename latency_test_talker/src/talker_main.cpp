@@ -2,8 +2,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "talker.h"
 
-// #define HOLO
-#define TEST
+#define HOLO
+// #define TEST
 
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);

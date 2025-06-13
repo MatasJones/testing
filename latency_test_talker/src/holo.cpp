@@ -116,7 +116,7 @@ bool holo::device_UDP_socket(struct ip_addrs this_ip_addrs, int sockfd[],
 }
 
 void holo::enable_socket_write() {
-  while (sync_check) {
+  while (!sync_success) {
     write_enable[0] = true;
     write_enable[1] = true;
     std::this_thread::sleep_for(
@@ -125,157 +125,185 @@ void holo::enable_socket_write() {
   return;
 }
 
-void holo::holo_holo_sync() { int a; }
+void holo::holo_holo_sync() {
 
-//   char buffer[SYNC_BUFFER_SIZE];
-//   // device needs to be sync and it needs to know that neighbour is synced
-//   // Needs to keep track of information about the other
+  char buffer[SYNC_BUFFER_SIZE];
+  // device needs to be sync and it needs to know that neighbour is synced
+  // Needs to keep track of information about the other
 
-//   struct pollfd pfd_1;
-//   pfd_1.fd = sockfd[0];
-//   pfd_1.events = POLLIN;
+  struct pollfd pfd_1;
+  pfd_1.fd = sockfd[0];
+  pfd_1.events = POLLIN;
 
-//   // Extract the last digit of device and neighbours ip addr
-//   char last = this_ip_addrs->device_ip.back();
-//   int device_last_ip_digit = last - '0';
+  // Extract the last digit of device and neighbours ip addr
+  char last = ip_addr.device_ip.back();
+  int device_last_ip_digit = last - '0';
 
-//   last = this_ip_addrs->neigh_ip[0].back();
-//   int neigh_1_last_ip_digit = last - '0';
+  last = ip_addr.neigh_ip[0].back();
+  int neigh_1_last_ip_digit = last - '0';
 
-//   int neigh_2_last_ip_digit;
-//   if (ip_addr.nb_neigh) {
-//     last = this_ip_addrs->neigh_ip[1].back();
-//     neigh_2_last_ip_digit = last - '0';
-//   }
+  int neigh_2_last_ip_digit;
+  if (ip_addr.nb_neigh) {
+    last = ip_addr.neigh_ip[1].back();
+    neigh_2_last_ip_digit = last - '0';
+  }
 
-//   struct pollfd pfd_2;
-//   pfd_2.fd = sockfd[1];
-//   pfd_2.events = POLLIN; // Monitor for incoming data
+  struct pollfd pfd_2;
+  pfd_2.fd = sockfd[1];
+  pfd_2.events = POLLIN; // Monitor for incoming data
 
-//   while (sync_check) {
-//     // If device and neigh sync checks are true skip next part
-//     if (!(sync_validated[0].device && sync_validated[0].neigh)) {
-//       // poll socket to see if something needs reading
-//       int ret = poll(&pfd_1, 1, 0);
-//       if (ret > 0) {
-//         if (pfd_1.revents & POLLIN) {
-//           RCLCPP_INFO(this->get_logger(), "Received_msg on 1");
-//           // Read datagram
-//           bzero(buffer, SYNC_BUFFER_SIZE);
-//           int n = recvfrom(sockfd[0], buffer, 255, 0,
-//                            (struct sockaddr *)&sock_addr[0], &socklen[0]);
-//           if (n < 0) {
-//             continue;
-//           }
-//           // Extract flatbuffer payload
-//           if (!custom_ser::deser_msg((uint8_t *)buffer, msg, id, value)) {
-//             if (++failure_counter > MAX_FAIL_COUNT) {
-//               RCLCPP_ERROR(this->get_logger(),
-//                            "Too many failures, shutting down");
-//               return;
-//             }
-//             continue;
-//           }
-//           failure_counter = 0;
+  while (sync_check) {
+    // If device and neigh sync checks are true skip next part
+    if (!(sync_validated[0].device && sync_validated[0].neigh)) {
+      // poll socket to see if something needs reading
+      int ret = poll(&pfd_1, 1, 0);
+      if (ret > 0) {
+        if (pfd_1.revents & POLLIN) {
+          RCLCPP_INFO(this->get_logger(), "Received_msg on 1");
+          // Read datagram
+          bzero(buffer, SYNC_BUFFER_SIZE);
+          int n = recvfrom(sockfd[0], buffer, 255, 0,
+                           (struct sockaddr *)&sock_addr[0], &socklen[0]);
+          if (n < 0) {
+            continue;
+          }
+          // Extract flatbuffer payload
+          if (!custom_ser::deser_msg((uint8_t *)buffer, msg, id, value)) {
+            if (++failure_counter > MAX_FAIL_COUNT) {
+              RCLCPP_ERROR(this->get_logger(),
+                           "Too many failures, shutting down");
+              return;
+            }
+            continue;
+          }
+          failure_counter = 0;
 
-//           RCLCPP_INFO(this->get_logger(), "Received_msg: %s", msg.c_str());
+          RCLCPP_INFO(this->get_logger(), "Received_msg: %s", msg.c_str());
 
-//           // Compare msg with expected response
-//           std::string expected_response = "ACK_" + ip_addr.neigh_ip[0];
-//           if (expected_response == msg) {
-//             sync_validated[0] = true;
-//             RCLCPP_INFO(this->get_logger(), "Received_msg: %s",
-//             msg.c_str()); RCLCPP_INFO(this->get_logger(), "Sync to
-//             neighbour 1 check!"); continue;
-//           }
-//         }
-//       }
-//       // Write ACK to neighbour 1
-//       if (write_enable[0]) {
-//         RCLCPP_INFO(this->get_logger(), "Writting sync ACK");
-//         std::string this_ACK = "ACK_" + ip_addr.device_ip;
-//         custom_ser::ser_msg(this_ACK, 0, 0, &builder, (uint8_t *)&buffer,
-//                             &size);
-//         strncpy(buffer, this_ACK.c_str(), sizeof(buffer));
-//         int n = sendto(sockfd[0], buffer, sizeof(buffer), 0,
-//                        (struct sockaddr *)&dest_addr[0],
-//                        sizeof(struct sockaddr_in));
+          // If msg is not comming from extected neighbour, ignore it
+          if (!(id == neigh_1_last_ip_digit)) {
+            continue;
+          }
 
-//         // Write the data to the socket
-//         int n =
-//             sendto(sockfd[0], buffer, size, 0, (struct sockaddr
-//             *)&dest_addr[0],
-//                    sizeof(struct sockaddr_in));
-//         if (n < 0) {
-//           RCLCPP_ERROR(this->get_logger(), "Error writing to socket!");
-//           continue;
-//         }
-//         write_enable[0] = false;
-//       }
-//     }
+          // If value == 0: ACK request from neighbour
+          // If value == 1: ACK response from neighbour
+          switch (value) {
+          case 0:
+            // The neighbour has requested a ACK, send response
+            RCLCPP_INFO(this->get_logger(), "Returning ACK to neighbour");
+            std::string this_ACK = "ACK_" + ip_addr.device_ip;
+            // Set value to 1 to indicate we got the ACK
+            custom_ser::ser_msg(this_ACK, device_last_ip_digit, 1, &builder,
+                                (uint8_t *)&buffer, &size);
 
-// // If there is a second neighbour & sync not validated, perform sync
-// if (ip_addr.nb_neigh == 2 && !sync_validated[1]) {
-//   // poll socket to see if something needs reading
-//   int ret = poll(&pfd_2, 1, 0);
-//   if (ret > 0) {
-//     if (pfd_2.revents & POLLIN) {
-//       RCLCPP_INFO(this->get_logger(), "Received_msg on 2");
-//       // Read datagram
-//       bzero(buffer, SYNC_BUFFER_SIZE);
-//       int n = recvfrom(sockfd[1], buffer, 255, 0,
-//                        (struct sockaddr *)&sock_addr[1], &socklen[1]);
-//       if (n < 0) {
-//         continue;
-//       }
-//       // Extract flatbuffer payload
-//       if (!custom_ser::deser_msg((uint8_t *)buffer, msg, id, value)) {
-//         if (++failure_counter > MAX_FAIL_COUNT) {
-//           RCLCPP_ERROR(this->get_logger(),
-//                        "Too many failures, shutting down");
-//           return;
-//         }
-//         continue;
-//       }
+            // Write the data to the socket
+            n = sendto(sockfd[0], buffer, size, 0,
+                           (struct sockaddr *)&dest_addr[0],
+                           sizeof(struct sockaddr_in));
+            if (n < 0) {
+              RCLCPP_ERROR(this->get_logger(), "Error writing to socket!");
+            }
+            // Note that we can listen to neighbour
+            sync_validated[0].neigh = true;
+            break;
 
-//       RCLCPP_INFO(this->get_logger(), "Received_msg: %s", msg.c_str());
+          case 1:
+            // The neighbour has returned our ACK request, we can talk to him,
+            // note
+            RCLCPP_INFO(this->get_logger(),
+                        "Received return ACK from neighbour");
+            sync_validated[0].device = true;
+            break;
 
-//       // Compare msg with expected response
-//       std::string expected_response = "ACK_" + ip_addr.neigh_ip[1];
-//       if (expected_response == msg) {
-//         sync_validated[1] = true;
-//         RCLCPP_INFO(this->get_logger(), "Received_msg: %s",
-//         msg.c_str()); RCLCPP_INFO(this->get_logger(), "Sync to
-//         neighbour 1 check!"); continue;
-//       }
-//     }
-//   }
-//   // Write ACK to neighbour 1
-//   if (write_enable[1]) {
-//     std::string this_ACK = "ACK_" + ip_addr.device_ip;
-//     custom_ser::ser_msg(this_ACK, 113, 101, &builder, (uint8_t
-//     *)&buffer,
-//                         &size);
+          default:
+            break;
+          }
+        }
+      }
+      // Write ACK to neighbour 1
+      if (write_enable[0]) {
+        RCLCPP_INFO(this->get_logger(), "Writting sync ACK");
+        std::string this_ACK = "ACK_" + ip_addr.device_ip;
+        // value = 0 as we are making an ACK request
+        custom_ser::ser_msg(this_ACK, device_last_ip_digit, 0, &builder,
+                            (uint8_t *)&buffer, &size);
 
-//     // Write the data to the socket
-//     int n = sendto(
-//         sockfd[1], buffer, size, 0, (struct sockaddr *)&dest_addr[1],
-//         sizeof(struct sockaddr_in)); //  (struct sockaddr *)&dest_addr?
-//     if (n < 0) {
-//       RCLCPP_ERROR(this->get_logger(), "Error writing to socket!");
-//       continue;
-//     }
-//     write_enable[1] = false;
-//   }
-// }
-//   if (sync_validated[0]) { //} && (sync_validated[1] ||
-//                            //!(ip_addr.nb_neigh ==
-//                            // 2))) {
-//     RCLCPP_INFO(this->get_logger(), "Holo sync check!");
-//     sync_success = true;
-//     return;
-//   }
-//   std::this_thread::sleep_for(std::chrono::microseconds(10));
+        // Write the data to the socket
+        int n =
+            sendto(sockfd[0], buffer, size, 0, (struct sockaddr *)&dest_addr[0],
+                   sizeof(struct sockaddr_in));
+        if (n < 0) {
+          RCLCPP_ERROR(this->get_logger(), "Error writing to socket!");
+          continue;
+        }
+        write_enable[0] = false;
+      }
+    }
+
+    // // If there is a second neighbour & sync not validated, perform sync
+    // if (ip_addr.nb_neigh == 2 && !sync_validated[1]) {
+    //   // poll socket to see if something needs reading
+    //   int ret = poll(&pfd_2, 1, 0);
+    //   if (ret > 0) {
+    //     if (pfd_2.revents & POLLIN) {
+    //       RCLCPP_INFO(this->get_logger(), "Received_msg on 2");
+    //       // Read datagram
+    //       bzero(buffer, SYNC_BUFFER_SIZE);
+    //       int n = recvfrom(sockfd[1], buffer, 255, 0,
+    //                        (struct sockaddr *)&sock_addr[1], &socklen[1]);
+    //       if (n < 0) {
+    //         continue;
+    //       }
+    //       // Extract flatbuffer payload
+    //       if (!custom_ser::deser_msg((uint8_t *)buffer, msg, id, value)) {
+    //         if (++failure_counter > MAX_FAIL_COUNT) {
+    //           RCLCPP_ERROR(this->get_logger(),
+    //                        "Too many failures, shutting down");
+    //           return;
+    //         }
+    //         continue;
+    //       }
+
+    //       RCLCPP_INFO(this->get_logger(), "Received_msg: %s", msg.c_str());
+
+    //       // Compare msg with expected response
+    //       std::string expected_response = "ACK_" + ip_addr.neigh_ip[1];
+    //       if (expected_response == msg) {
+    //         sync_validated[1] = true;
+    //         RCLCPP_INFO(this->get_logger(), "Received_msg: %s", msg.c_str());
+    //         RCLCPP_INFO(this->get_logger(), "Sync to
+    //     neighbour 1 check!"); continue;
+    //       }
+    //     }
+    //   }
+    //   // Write ACK to neighbour 1
+    //   if (write_enable[1]) {
+    //     std::string this_ACK = "ACK_" + ip_addr.device_ip;
+    //     custom_ser::ser_msg(this_ACK, 113, 101, &builder, (uint8_t *)&buffer,
+    //                         &size);
+
+    //     // Write the data to the socket
+    //     int n = sendto(
+    //         sockfd[1], buffer, size, 0, (struct sockaddr *)&dest_addr[1],
+    //         sizeof(struct sockaddr_in)); //  (struct sockaddr *)&dest_addr?
+    //     if (n < 0) {
+    //       RCLCPP_ERROR(this->get_logger(), "Error writing to socket!");
+    //       continue;
+    //     }
+    //     write_enable[1] = false;
+    //   }
+    // }
+    if (sync_validated[0].device &&
+        sync_validated[0].neigh) { //} && (sync_validated[1] ||
+                                   //!(ip_addr.nb_neigh ==
+                                   // 2))) {
+      RCLCPP_INFO(this->get_logger(), "Holo sync check!");
+      sync_success = true;
+      return;
+    }
+    std::this_thread::sleep_for(std::chrono::microseconds(10));
+  }
+}
 // }
 //   return;
 //   char last = ip_addr.device_ip.back();
