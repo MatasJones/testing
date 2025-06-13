@@ -56,6 +56,11 @@ struct ip_addrs {
   std::string neigh_ip[2];
 };
 
+struct sync_valid {
+  bool device;
+  bool neigh;
+};
+
 class holo : public rclcpp::Node {
 
 public:
@@ -71,7 +76,7 @@ private:
   struct sockaddr_in sock_addr[2], dest_addr[2];
   int sockfd[2];
   socklen_t socklen[2] = {sizeof(sock_addr[0]), sizeof(sock_addr[1])};
-  bool sync_validated[2] = {0};
+  struct sync_valid sync_validated[2];
   bool write_enable[2] = {0};
 
   // Flatbuffer //

@@ -1,7 +1,7 @@
 #include "talker.h"
 
-#define TCP
-// #define UDP
+// #define TCP
+#define UDP
 //  #define RAW
 
 // #define MANUAL_SER

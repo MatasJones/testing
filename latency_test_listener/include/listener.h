@@ -44,7 +44,7 @@ private:
 
   int id;
   int port = 5000;
-  char server_ip[14] = "192.168.0.122"; // Server IP
+  char server_ip[14] = "127.0.0.1"; // Server IP
   int sockfd;
   int power = 0;
 
