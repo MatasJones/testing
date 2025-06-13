@@ -1,3 +1,6 @@
+#ifndef CUSTOM_SER_H
+#define CUSTOM_SER_H
+
 #include "../../custom_msg/flatbuff/message_generated.h"
 #include "flatbuffers/flatbuffers.h"
 
@@ -66,3 +69,5 @@ public:
     return 1;
   }
 };
+
+#endif

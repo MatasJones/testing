@@ -33,6 +33,10 @@ holo::holo() : Node("holo") {
     RCLCPP_ERROR(this->get_logger(), "ERROR: failed holo-holo sync check!");
   }
   RCLCPP_INFO(this->get_logger(), "Holo-holo sync check success!");
+
+  RCLCPP_INFO(this->get_logger(), "Starting experiment.");
+  std::thread exp_thread(std::bind(&holo::perform_exp, this));
+  exp_thread.join();
 }
 
 void holo::get_ip(struct ip_addrs *this_ip_addrs) {
@@ -120,7 +124,7 @@ void holo::enable_socket_write() {
     write_enable[0] = true;
     write_enable[1] = true;
     std::this_thread::sleep_for(
-        std::chrono::milliseconds(1000)); // Sleep for the spacing time
+        std::chrono::milliseconds(10)); // Sleep for the spacing time
   }
   return;
 }
@@ -339,4 +343,77 @@ void holo::holo_holo_sync() {
     }
     std::this_thread::sleep_for(std::chrono::microseconds(10));
   }
+}
+
+void holo::perform_exp() {
+
+  char buffer[SYNC_BUFFER_SIZE];
+  // device needs to be sync and it needs to know that neighbour is synced
+  // Needs to keep track of information about the other
+
+  struct pollfd pfd_1;
+  pfd_1.fd = sockfd[0];
+  pfd_1.events = POLLIN;
+
+  struct pollfd pfd_2;
+  pfd_2.fd = sockfd[1];
+  pfd_2.events = POLLIN;
+
+  // Extract the last digit of device and neighbours ip addr
+  char last = ip_addr.device_ip.back();
+  int device_last_ip_digit = last - '0';
+
+  last = ip_addr.neigh_ip[0].back();
+  int neigh_1_last_ip_digit = last - '0';
+
+  int neigh_2_last_ip_digit;
+  if (ip_addr.nb_neigh) {
+    last = ip_addr.neigh_ip[1].back();
+    neigh_2_last_ip_digit = last - '0';
+  }
+  std::string this_string;
+
+  while (running) {
+    // poll socket to see if something needs reading
+    int ret = poll(&pfd_1, 1, 0);
+    if (ret > 0) {
+      if (pfd_1.revents & POLLIN) {
+        RCLCPP_INFO(this->get_logger(), "Received_msg on 1");
+        // Read datagram
+        bzero(buffer, SYNC_BUFFER_SIZE);
+        int n = recvfrom(sockfd[0], buffer, 255, 0,
+                         (struct sockaddr *)&sock_addr[0], &socklen[0]);
+        if (n < 0) {
+          continue;
+        }
+        // Extract flatbuffer payload
+        if (!custom_ser::deser_msg((uint8_t *)buffer, msg, id, value)) {
+          if (++failure_counter > MAX_FAIL_COUNT) {
+            RCLCPP_ERROR(this->get_logger(),
+                         "Too many failures, shutting down");
+            return;
+          }
+          continue;
+        }
+        failure_counter = 0;
+
+        RCLCPP_INFO(this->get_logger(), "Received_msg: %s", msg.c_str());
+
+        // Check if the message is a broadcast
+        if (id == 17) {
+          if (msg == "READY") {
+            RCLCPP_INFO(this->get_logger(), "Comp send READY msg.");
+          }
+          if (msg == "START") {
+            RCLCPP_INFO(this->get_logger(), "Comp send START msg.");
+          }
+          if (msg == "STOP") {
+            RCLCPP_INFO(this->get_logger(), "Comp send STOP msg.");
+          }
+        }
+      }
+    }
+  }
+
+  std::this_thread::sleep_for(std::chrono::microseconds(10));
 }

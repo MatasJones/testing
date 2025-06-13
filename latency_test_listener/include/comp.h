@@ -33,6 +33,7 @@
 #include "../../latency_test_talker/include/holo_socket.h"
 
 // Serialization includes
+#include "../../custom_msg/flatbuff/custom_ser.h"
 #include "../../custom_msg/flatbuff/message_generated.h"
 #include "flatbuffers/flatbuffers.h"
 using TestProtocol::message;
@@ -57,9 +58,17 @@ public:
 
 private:
   ////// Variables //////
+  /*
+  comp_fsm_state:
+  0 : check if system in ready
+  1 : start procedure
+  2 : stop exp
+  */
+  int comp_fsm_state = 0;
 
   // Sockets //
   struct sockaddr_in sock_addr, broadcast_addr;
+  socklen_t socklen;
   int compfd;
 
   // Flatbuffer //
@@ -71,10 +80,15 @@ private:
   uint32_t size;
 
   // Threads //
+  bool start_success = false;
+  bool write_enable;
 
   ////// Function declarations //////
   bool device_UDP_socket(int *sockfd, struct sockaddr_in *sock_addr,
                          struct sockaddr_in *broad_addr);
+
+  void enable_socket_write();
+  void exp_start();
 };
 
 #endif

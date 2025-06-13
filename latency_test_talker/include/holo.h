@@ -90,7 +90,7 @@ private:
   uint32_t size;
 
   // Threads //
-  bool sync_check = true;
+  bool sync_check = true, running = true;
   bool sync_success = false;
 
   ////// Function declarations //////
@@ -100,6 +100,7 @@ private:
                          struct sockaddr_in dest_addr[]);
   void holo_holo_sync();
   void enable_socket_write();
+  void perform_exp();
 };
 
 #endif

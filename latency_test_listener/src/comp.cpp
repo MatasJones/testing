@@ -4,7 +4,16 @@ comp::comp() : Node("comp") {
   RCLCPP_INFO(this->get_logger(), "Setting up comp.");
 
   // Setup socket
-  comp::device_UDP_socket(&compfd, &sock_addr, &broadcast_addr);
+  if (!comp::device_UDP_socket(&compfd, &sock_addr, &broadcast_addr)) {
+    RCLCPP_ERROR(this->get_logger(),
+                 "ERROR: failed to create broadcast socket");
+  }
+  RCLCPP_INFO(this->get_logger(), "Broadcast socket setup.");
+
+  std::thread timer_thread(std::bind(&comp::enable_socket_write, this));
+  std::thread start_thread(std::bind(&comp::exp_start, this));
+  timer_thread.join();
+  start_thread.join();
 }
 
 bool comp::device_UDP_socket(int *sockfd, struct sockaddr_in *sock_addr,
@@ -37,4 +46,84 @@ bool comp::device_UDP_socket(int *sockfd, struct sockaddr_in *sock_addr,
   inet_pton(AF_INET, "192.168.0.255", &broad_addr->sin_addr);
 
   return true;
+}
+
+void comp::enable_socket_write() {
+  while (!start_success) {
+    write_enable = true;
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(100)); // Sleep for the spacing time
+  }
+  return;
+}
+
+void comp::exp_start() {
+  char buffer[SYNC_BUFFER_SIZE];
+  // device needs to be sync and it needs to know that neighbour is synced
+  // Needs to keep track of information about the other
+
+  struct pollfd pfd;
+  pfd.fd = compfd;
+  pfd.events = POLLIN;
+
+  std::string broad_msg;
+
+  while (!start_success) {
+    int ret = poll(&pfd, 1, 0);
+    // If there is something to read, do it
+    if (ret > 0) {
+      if (pfd.revents & POLLIN) {
+        RCLCPP_INFO(this->get_logger(), "Received_msg on 1");
+        // Read datagram
+        bzero(buffer, SYNC_BUFFER_SIZE);
+        int n = recvfrom(compfd, buffer, 255, 0, (struct sockaddr *)&sock_addr,
+                         &socklen);
+        if (n < 0) {
+          continue;
+        }
+        // Extract flatbuffer payload
+        if (!custom_ser::deser_msg((uint8_t *)buffer, msg, id, value)) {
+          if (++failure_counter > MAX_FAIL_COUNT) {
+            RCLCPP_ERROR(this->get_logger(),
+                         "Too many failures, shutting down");
+            return;
+          }
+          continue;
+        }
+        failure_counter = 0;
+
+        RCLCPP_INFO(this->get_logger(), "Received_msg: %s", msg.c_str());
+      }
+    }
+    if (write_enable) {
+      RCLCPP_INFO(this->get_logger(), "Broadcasting..");
+
+      switch (comp_fsm_state) {
+      case 0:
+        broad_msg = "READY";
+        break;
+      case 1:
+        broad_msg = "START";
+        break;
+      case 2:
+        broad_msg = "STOP";
+        break;
+      default:
+        break;
+      }
+
+      custom_ser::ser_msg(broad_msg, 17, 0, &builder, (uint8_t *)&buffer,
+                          &size);
+
+      // Write the data to the socket
+      int n =
+          sendto(compfd, buffer, size, 0, (struct sockaddr *)&broadcast_addr,
+                 sizeof(struct sockaddr_in));
+      if (n < 0) {
+        RCLCPP_ERROR(this->get_logger(), "Error writing to socket!");
+        continue;
+      }
+      write_enable = false;
+    }
+  }
 }
