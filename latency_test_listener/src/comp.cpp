@@ -37,6 +37,7 @@ bool comp::device_UDP_socket(int *sockfd, struct sockaddr_in *sock_addr,
                  sizeof(use_broadcast)) < 0) {
     RCLCPP_ERROR(this->get_logger(),
                  "ERROR: failed to set broadcast parameter");
+    return false;
   }
 
   // Create a broadcast addr
@@ -73,7 +74,6 @@ void comp::exp_start() {
     // If there is something to read, do it
     if (ret > 0) {
       if (pfd.revents & POLLIN) {
-        RCLCPP_INFO(this->get_logger(), "Received_msg on 1");
         // Read datagram
         bzero(buffer, SYNC_BUFFER_SIZE);
         int n = recvfrom(compfd, buffer, 255, 0, (struct sockaddr *)&sock_addr,
@@ -92,12 +92,15 @@ void comp::exp_start() {
         }
         failure_counter = 0;
 
+        // Filter out own broadcast
+        if (id == 17) {
+          continue;
+        }
+
         RCLCPP_INFO(this->get_logger(), "Received_msg: %s", msg.c_str());
       }
     }
     if (write_enable) {
-      RCLCPP_INFO(this->get_logger(), "Broadcasting..");
-
       switch (comp_fsm_state) {
       case 0:
         broad_msg = "READY";
@@ -111,6 +114,8 @@ void comp::exp_start() {
       default:
         break;
       }
+
+      RCLCPP_INFO(this->get_logger(), "Broadcasting: %s", broad_msg.c_str());
 
       custom_ser::ser_msg(broad_msg, 17, 0, &builder, (uint8_t *)&buffer,
                           &size);
