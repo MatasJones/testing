@@ -334,6 +334,7 @@ bool listener::socket_setup() {
     RCLCPP_ERROR(this->get_logger(), "ERROR opening socket");
     return 0;
   }
+  RCLCPP_INFO(this->get_logger(), "Device UDP socketfd: %d", sockfd);
 
   if (!socket_udp::sync_check(sockfd, &serv_addr, &cli_addr, port)) {
     RCLCPP_ERROR(this->get_logger(), "ERROR: socket setup failed");

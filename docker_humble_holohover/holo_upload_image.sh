@@ -9,7 +9,7 @@
 source config.sh
 
 echo "Starting upload.."
-for i in {0..1}; do
+for i in {0..3}; do
 # REMOTE_IPS[1] corresponds to the black holohover
     if ping -c 1 ${REMOTE_IPS[i]} &> /dev/null; then # ping -c i ip_address -> sends a ping to the ip address and &> /dev/null redirects any output to /dev/null effectively hiding it
         # Create a command to the devices: to pull the change, retag the image so that it is easier to use localy and prune all unnecessary images

@@ -527,11 +527,11 @@ void talker::socket_exp_launch() {
     }
 
     write_enable = false; // Disable writing until next timer event
-  }
 
 #endif
-}
-std::this_thread::sleep_for(std::chrono::microseconds(10));
+    std::this_thread::sleep_for(std::chrono::microseconds(10));
+  }
+
 #endif
 }
 
@@ -724,7 +724,15 @@ bool talker::socket_setup() {
 
 #ifdef UDP
   // SOCK_DGRAM means that we are using UDP
-  sockfd = socket(AF_INET, SOCK_DGRAM, 0); // Create a socket
+  int targetfd = socket(AF_INET, SOCK_DGRAM, 0); // Create a socket
+  sockfd = 17;
+  if (dup2(targetfd, sockfd) < 0) {
+    RCLCPP_ERROR(this->get_logger(), "ERROR during socket dumping!");
+    close(targetfd);
+    return -1;
+  }
+
+  RCLCPP_INFO(this->get_logger(), "Device UDP socketfd: %d", sockfd);
   if (!socket_udp::sync_check(sockfd, &serv_addr, &dest_addr, port)) {
     RCLCPP_ERROR(this->get_logger(), "ERROR: sync check failed");
     return 0;
