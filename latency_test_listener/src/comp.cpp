@@ -15,14 +15,23 @@ comp::comp() : Node("comp") {
   timer_thread.join();
   start_thread.join();
 
-  // Find the minimum nb of iterations
-  int min_nb_it = 0;
-  RCLCPP_INFO(this->get_logger(), "Number of iterations performed in 150ms: %d",
-              min_nb_it);
-
   // Terminate session
   close(compfd);
   std::this_thread::sleep_for(std::chrono::seconds(1));
+
+  float a = 1, b = 2, c = 8, d = 9;
+  int nb_iterations = 10;
+  for (int i = 0; i < nb_iterations; i++) {
+    a = (a + b) / 2;
+    b = (a + b + c) / 3;
+    c = (b + c + d) / 3;
+    d = (c + d) / 2;
+  }
+  float avg = (a + b + c + d) / 4;
+
+  RCLCPP_INFO(this->get_logger(), "EXPECTED AVG for %d iterations: %0.2f",
+              nb_iterations, avg);
+
   RCLCPP_INFO(this->get_logger(), "Shutting down node");
   rclcpp::shutdown();
 }

@@ -452,9 +452,9 @@ void holo::perform_exp() {
         }
         failure_counter = 0;
 
-        RCLCPP_INFO(this->get_logger(),
-                    "Received from neigh 1, ip: %s, id: %d, value: %0.2f", msg,
-                    id, value);
+        // RCLCPP_INFO(this->get_logger(),
+        //             "Received from neigh 1, ip: %s, id: %d, value: %0.2f",
+        //             msg, id, value);
 
         // Check if the message is a broadcast
         if (id == 17) {
@@ -491,8 +491,11 @@ void holo::perform_exp() {
         // Have you received a msg from neighbour 1?
         // If msg == neighbour (holo identification)
         if (id == neigh_1_last_ip_digit) {
-          neigh_1_avg = value;
-          new_value_1 = true;
+          // If the difference is smalleer than a certain amount
+          if (fabs(neigh_1_avg - value) > 0.001f) {
+            neigh_1_avg = value;
+            new_value_1 = true;
+          }
         }
       }
     }
@@ -518,9 +521,9 @@ void holo::perform_exp() {
         }
         failure_counter = 0;
 
-        RCLCPP_INFO(this->get_logger(),
-                    "Received from neigh 2, ip: %s, id: %d, value: %0.2f", msg,
-                    id, value);
+        // RCLCPP_INFO(this->get_logger(),
+        //             "Received from neigh 2, ip: %s, id: %d, value: %0.2f",
+        //             msg, id, value);
 
         // Check if the message is a broadcast
         if (id == 17) {
@@ -557,8 +560,11 @@ void holo::perform_exp() {
         // Do you have a second neighbour, if not skip if statement
         // Have you received a msg from neighbour 2?
         if (ip_addr.nb_neigh == 2 && id == neigh_2_last_ip_digit) {
-          neigh_2_avg = value;
-          new_value_2 = true;
+          // If the difference is smalleer than a certain amount
+          if (fabs(neigh_2_avg - value) > 0.001f) {
+            neigh_2_avg = value;
+            new_value_2 = true;
+          }
         }
       }
     }
