@@ -40,6 +40,7 @@
 using TestProtocol::message;
 
 #define PORT 5002
+#define COMP_PORT 5000
 #define SYNC_BUFFER_SIZE 256
 #define MAX_FAIL_COUNT 100
 
@@ -70,21 +71,22 @@ public:
 
 private:
   ////// Variables //////
-
+  int neigh_1_last_ip_digit, neigh_2_last_ip_digit;
   //
   struct ip_addrs ip_addr;
 
   // Sockets //
-  struct sockaddr_in sock_addr[2], dest_addr[2];
+  struct sockaddr_in sock_addr[2], dest_addr[2], comp_addr;
   int sockfd[2];
   socklen_t socklen[2] = {sizeof(sock_addr[0]), sizeof(sock_addr[1])};
   struct sync_valid sync_validated[2];
   bool write_enable[2] = {0};
+  bool averaging = false;
 
   // Flatbuffer //
   std::string msg;
   uint8_t id;
-  int32_t value;
+  float value;
   int failure_counter = 0;
   flatbuffers::FlatBufferBuilder builder{1024};
   uint32_t size;
@@ -101,6 +103,7 @@ private:
   void holo_holo_sync();
   void enable_socket_write();
   void perform_exp();
+  void avg_enable();
 };
 
 #endif

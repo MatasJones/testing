@@ -42,6 +42,11 @@ using TestProtocol::message;
 #define SYNC_BUFFER_SIZE 256
 #define MAX_FAIL_COUNT 100
 
+#define READY 0
+#define START 1
+#define STOP 2
+#define END 3
+
 /*
 holo1: white  | 192.168.0.131
 holo2: black  | 192.168.0.122
@@ -64,7 +69,8 @@ private:
   1 : start procedure
   2 : stop exp
   */
-  int comp_fsm_state = 0;
+  int comp_fsm_state = READY;
+  bool holo_ready[4] = {0}, holo_stop[4] = {0};
 
   // Sockets //
   struct sockaddr_in sock_addr, broadcast_addr;
@@ -74,13 +80,13 @@ private:
   // Flatbuffer //
   std::string msg;
   uint8_t id;
-  int32_t value;
+  float value;
   int failure_counter = 0;
   flatbuffers::FlatBufferBuilder builder{1024};
   uint32_t size;
 
   // Threads //
-  bool start_success = false;
+  bool running = true;
   bool write_enable;
 
   ////// Function declarations //////

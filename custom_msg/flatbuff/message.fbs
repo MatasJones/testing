@@ -2,7 +2,7 @@ namespace TestProtocol;
 
 table message {
   id: uint8;
-  value: int32;
+  value: float;
   msg: string;
 }
 

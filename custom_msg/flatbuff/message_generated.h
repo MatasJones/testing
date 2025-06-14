@@ -28,8 +28,8 @@ struct message FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   uint8_t id() const {
     return GetField<uint8_t>(VT_ID, 0);
   }
-  int32_t value() const {
-    return GetField<int32_t>(VT_VALUE, 0);
+  float value() const {
+    return GetField<float>(VT_VALUE, 0.0f);
   }
   const ::flatbuffers::String *msg() const {
     return GetPointer<const ::flatbuffers::String *>(VT_MSG);
@@ -37,7 +37,7 @@ struct message FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint8_t>(verifier, VT_ID, 1) &&
-           VerifyField<int32_t>(verifier, VT_VALUE, 4) &&
+           VerifyField<float>(verifier, VT_VALUE, 4) &&
            VerifyOffset(verifier, VT_MSG) &&
            verifier.VerifyString(msg()) &&
            verifier.EndTable();
@@ -51,8 +51,8 @@ struct messageBuilder {
   void add_id(uint8_t id) {
     fbb_.AddElement<uint8_t>(message::VT_ID, id, 0);
   }
-  void add_value(int32_t value) {
-    fbb_.AddElement<int32_t>(message::VT_VALUE, value, 0);
+  void add_value(float value) {
+    fbb_.AddElement<float>(message::VT_VALUE, value, 0.0f);
   }
   void add_msg(::flatbuffers::Offset<::flatbuffers::String> msg) {
     fbb_.AddOffset(message::VT_MSG, msg);
@@ -71,7 +71,7 @@ struct messageBuilder {
 inline ::flatbuffers::Offset<message> Createmessage(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     uint8_t id = 0,
-    int32_t value = 0,
+    float value = 0.0f,
     ::flatbuffers::Offset<::flatbuffers::String> msg = 0) {
   messageBuilder builder_(_fbb);
   builder_.add_msg(msg);
@@ -83,7 +83,7 @@ inline ::flatbuffers::Offset<message> Createmessage(
 inline ::flatbuffers::Offset<message> CreatemessageDirect(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     uint8_t id = 0,
-    int32_t value = 0,
+    float value = 0.0f,
     const char *msg = nullptr) {
   auto msg__ = msg ? _fbb.CreateString(msg) : 0;
   return TestProtocol::Createmessage(

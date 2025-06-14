@@ -34,11 +34,11 @@ listener::listener() : Node("listener"), count_(0) {
   // Deserialize the flatbuffer message
   std::string msg;
   uint8_t id;
-  int32_t value;
+  float value;
   if (!custom_ser::deser_msg((uint8_t *)&test_buffer, msg, id, value)) {
     RCLCPP_ERROR(this->get_logger(), "Error deserializing flatbuffer message");
   } else {
-    if (msg == "TEST" && id == 1 && value == 42) {
+    if (msg == "TEST" && id == 1 && value == 42.0) {
       RCLCPP_INFO(this->get_logger(), "Flatbuffer working");
     } else {
       RCLCPP_ERROR(this->get_logger(),

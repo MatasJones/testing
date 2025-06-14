@@ -114,7 +114,7 @@ private:
   bool custom_seri = false;
   std::string msg;
   uint8_t id;
-  int32_t value;
+  float value;
   int failure_counter = 0;
 
   std::tuple<double, double, uint16_t, uint16_t>

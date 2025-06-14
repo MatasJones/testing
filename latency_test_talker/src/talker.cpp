@@ -62,7 +62,7 @@ talker::talker() : Node("talker") {
   if (!custom_ser::deser_msg((uint8_t *)test_buffer, msg, id, value)) {
     RCLCPP_ERROR(this->get_logger(), "Error deserializing flatbuffer message");
   } else {
-    if (msg == "TEST" && id == 1 && value == 42) {
+    if (msg == "TEST" && id == 1 && value == 42.0) {
       RCLCPP_INFO(this->get_logger(), "Flatbuffer working");
     } else {
       RCLCPP_ERROR(this->get_logger(),

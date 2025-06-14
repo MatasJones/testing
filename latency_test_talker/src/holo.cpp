@@ -35,8 +35,15 @@ holo::holo() : Node("holo") {
   RCLCPP_INFO(this->get_logger(), "Holo-holo sync check success!");
 
   RCLCPP_INFO(this->get_logger(), "Starting experiment.");
+  std::thread avg_enable_thread(std::bind(&holo::avg_enable, this));
   std::thread exp_thread(std::bind(&holo::perform_exp, this));
   exp_thread.join();
+  avg_enable_thread.join();
+
+  // Terminate session
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  RCLCPP_INFO(this->get_logger(), "Shutting down node");
+  rclcpp::shutdown();
 }
 
 void holo::get_ip(struct ip_addrs *this_ip_addrs) {
@@ -111,9 +118,8 @@ bool holo::device_UDP_socket(struct ip_addrs this_ip_addrs, int sockfd[],
     }
     // Setup neighbour addr
     memset(&dest_addr[n], 0, sizeof(dest_addr[n]));
-    dest_addr[n].sin_family = AF_INET; // Means that we are using IPv4
-    dest_addr[n].sin_addr.s_addr =
-        inet_addr(this_ip_addrs.neigh_ip[n].c_str()); // Set the server IP
+    dest_addr[n].sin_family = AF_INET;
+    dest_addr[n].sin_addr.s_addr = inet_addr(this_ip_addrs.neigh_ip[n].c_str());
     dest_addr[n].sin_port = htons(port);
   }
   return true;
@@ -144,10 +150,9 @@ void holo::holo_holo_sync() {
   int device_last_ip_digit = last - '0';
 
   last = ip_addr.neigh_ip[0].back();
-  int neigh_1_last_ip_digit = last - '0';
+  neigh_1_last_ip_digit = last - '0';
 
-  int neigh_2_last_ip_digit;
-  if (ip_addr.nb_neigh) {
+  if (ip_addr.nb_neigh == 2) {
     last = ip_addr.neigh_ip[1].back();
     neigh_2_last_ip_digit = last - '0';
   }
@@ -192,7 +197,7 @@ void holo::holo_holo_sync() {
 
           // If value == 0: ACK request from neighbour
           // If value == 1: ACK response from neighbour
-          switch (value) {
+          switch ((int)value) {
           case 0:
             // The neighbour has requested a ACK, send response
             RCLCPP_INFO(this->get_logger(), "Returning ACK to neighbour");
@@ -280,7 +285,7 @@ void holo::holo_holo_sync() {
 
           // If value == 0: ACK request from neighbour
           // If value == 1: ACK response from neighbour
-          switch (value) {
+          switch ((int)value) {
           case 0:
             // The neighbour has requested a ACK, send response
             RCLCPP_INFO(this->get_logger(), "Returning ACK to neighbour");
@@ -345,6 +350,20 @@ void holo::holo_holo_sync() {
   }
 }
 
+void holo::avg_enable() {
+
+  while (!averaging) {
+    std::this_thread::sleep_for(std::chrono::microseconds(100));
+  }
+
+  while (averaging) {
+    write_enable[0] = true;
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(5)); // Sleep for the spacing time
+  }
+  return;
+}
+
 void holo::perform_exp() {
 
   char buffer[SYNC_BUFFER_SIZE];
@@ -364,25 +383,61 @@ void holo::perform_exp() {
   int device_last_ip_digit = last - '0';
 
   last = ip_addr.neigh_ip[0].back();
-  int neigh_1_last_ip_digit = last - '0';
+  neigh_1_last_ip_digit = last - '0';
 
-  int neigh_2_last_ip_digit;
+  neigh_2_last_ip_digit;
   if (ip_addr.nb_neigh) {
     last = ip_addr.neigh_ip[1].back();
     neigh_2_last_ip_digit = last - '0';
   }
-  std::string this_string;
+
+  // RCLCPP_INFO(
+  //     this->get_logger(), "this device nb: %d, neigh 1 nb: %d, neigh 2 nb:
+  //     %d", device_last_ip_digit, neigh_1_last_ip_digit,
+  //     neigh_2_last_ip_digit);
+
+  if (device_last_ip_digit <= 0) {
+    RCLCPP_ERROR(this->get_logger(),
+                 "ERROR: could not get device last ip digit");
+    running = false;
+  }
+
+  // holo_nb: 1 -> 0, 2 -> 1, 8 -> 2, 9 -> 3
+  int holo_nb = (device_last_ip_digit < 3) ? (device_last_ip_digit - 1)
+                                           : (device_last_ip_digit - 6);
+
+  std::string device_msg;
+  int ret, n;
+  bool terninate_session = false;
+
+  int iteration_nb = 0;
+  float neigh_1_avg, neigh_2_avg;
+  bool new_value_1, new_value_2;
+  int nb_participants = (ip_addr.nb_neigh == 2) ? 3 : 2;
+  write_enable[0] = false;
+
+  RCLCPP_INFO(this->get_logger(), "Number participants: %d", nb_participants);
+
+  /////// INITIAL AVG VALUE FOR THIS DEVICE ///////
+  float device_avg = device_last_ip_digit;
+  /////// INITIAL AVG VALUE FOR THIS DEVICE ///////
+  RCLCPP_INFO(this->get_logger(), "Starting avg: %f", device_avg);
+
+  // Setup the comp addr for later writting
+  memset(&comp_addr, 0, sizeof(comp_addr));
+  comp_addr.sin_family = AF_INET; // Means that we are using IPv4
+  comp_addr.sin_addr.s_addr = inet_addr("192.168.0.72"); // Set the server IP
+  comp_addr.sin_port = htons(COMP_PORT);
 
   while (running) {
     // poll socket to see if something needs reading
-    int ret = poll(&pfd_1, 1, 0);
+    ret = poll(&pfd_1, 1, 0);
     if (ret > 0) {
       if (pfd_1.revents & POLLIN) {
-        RCLCPP_INFO(this->get_logger(), "Received_msg on 1");
         // Read datagram
         bzero(buffer, SYNC_BUFFER_SIZE);
-        int n = recvfrom(sockfd[0], buffer, 255, 0,
-                         (struct sockaddr *)&sock_addr[0], &socklen[0]);
+        n = recvfrom(sockfd[0], buffer, 255, 0,
+                     (struct sockaddr *)&sock_addr[0], &socklen[0]);
         if (n < 0) {
           continue;
         }
@@ -397,22 +452,159 @@ void holo::perform_exp() {
         }
         failure_counter = 0;
 
-        RCLCPP_INFO(this->get_logger(), "Received_msg: %s", msg.c_str());
+        RCLCPP_INFO(this->get_logger(),
+                    "Received from neigh 1, ip: %s, id: %d, value: %0.2f", msg,
+                    id, value);
 
         // Check if the message is a broadcast
         if (id == 17) {
           if (msg == "READY") {
             RCLCPP_INFO(this->get_logger(), "Comp send READY msg.");
-          }
-          if (msg == "START") {
+            device_msg = "READY";
+          } else if (msg == "START") {
             RCLCPP_INFO(this->get_logger(), "Comp send START msg.");
-          }
-          if (msg == "STOP") {
+            averaging = true;
+            continue;
+          } else if (msg == "STOP") {
             RCLCPP_INFO(this->get_logger(), "Comp send STOP msg.");
+            device_msg = "STOP";
+          } else if (msg == "END") {
+            RCLCPP_INFO(this->get_logger(), "Comp send END msg.");
+            terninate_session = true;
+            continue;
+          } else {
+            continue;
           }
+
+          // Send ACK to comp
+          custom_ser::ser_msg(device_msg, holo_nb, iteration_nb, &builder,
+                              (uint8_t *)&buffer, &size);
+
+          // Write the data to the socket
+          n = sendto(sockfd[0], buffer, size, 0, (struct sockaddr *)&comp_addr,
+                     sizeof(struct sockaddr_in));
+          if (n < 0) {
+            RCLCPP_ERROR(this->get_logger(), "Error writing to socket!");
+          }
+        }
+
+        // Have you received a msg from neighbour 1?
+        // If msg == neighbour (holo identification)
+        if (id == neigh_1_last_ip_digit) {
+          neigh_1_avg = value;
+          new_value_1 = true;
         }
       }
     }
-    std::this_thread::sleep_for(std::chrono::microseconds(10));
+
+    ret = poll(&pfd_2, 1, 0);
+    if (ret > 0) {
+      if (pfd_2.revents & POLLIN) {
+        // Read datagram
+        bzero(buffer, SYNC_BUFFER_SIZE);
+        n = recvfrom(sockfd[1], buffer, 255, 0,
+                     (struct sockaddr *)&sock_addr[1], &socklen[1]);
+        if (n < 0) {
+          continue;
+        }
+        // Extract flatbuffer payload
+        if (!custom_ser::deser_msg((uint8_t *)buffer, msg, id, value)) {
+          if (++failure_counter > MAX_FAIL_COUNT) {
+            RCLCPP_ERROR(this->get_logger(),
+                         "Too many failures, shutting down");
+            return;
+          }
+          continue;
+        }
+        failure_counter = 0;
+
+        RCLCPP_INFO(this->get_logger(),
+                    "Received from neigh 2, ip: %s, id: %d, value: %0.2f", msg,
+                    id, value);
+
+        // Check if the message is a broadcast
+        if (id == 17) {
+          if (msg == "READY") {
+            RCLCPP_INFO(this->get_logger(), "Comp send READY msg.");
+            device_msg = "READY";
+          } else if (msg == "START") {
+            RCLCPP_INFO(this->get_logger(), "Comp send START msg.");
+            averaging = true;
+            continue;
+          } else if (msg == "STOP") {
+            RCLCPP_INFO(this->get_logger(), "Comp send STOP msg.");
+            device_msg = "STOP";
+          } else if (msg == "END") {
+            RCLCPP_INFO(this->get_logger(), "Comp send END msg.");
+            terninate_session = true;
+            continue;
+          } else {
+            continue;
+          }
+
+          // Send ACK to comp
+          custom_ser::ser_msg(device_msg, holo_nb, iteration_nb, &builder,
+                              (uint8_t *)&buffer, &size);
+
+          // Write the data to the socket
+          n = sendto(sockfd[1], buffer, size, 0, (struct sockaddr *)&comp_addr,
+                     sizeof(struct sockaddr_in));
+          if (n < 0) {
+            RCLCPP_ERROR(this->get_logger(), "Error writing to socket!");
+          }
+        }
+
+        // Do you have a second neighbour, if not skip if statement
+        // Have you received a msg from neighbour 2?
+        if (ip_addr.nb_neigh == 2 && id == neigh_2_last_ip_digit) {
+          neigh_2_avg = value;
+          new_value_2 = true;
+        }
+      }
+    }
+
+    if (write_enable[0]) {
+      if (new_value_1 && (ip_addr.nb_neigh == 1 || new_value_2)) {
+        device_avg = (device_avg + neigh_1_avg + neigh_2_avg) / nb_participants;
+        iteration_nb++;
+        new_value_1 = false;
+        new_value_2 = false;
+      }
+
+      // Write to first neighbour
+      custom_ser::ser_msg(ip_addr.device_ip, device_last_ip_digit, device_avg,
+                          &builder, (uint8_t *)&buffer, &size);
+
+      // Write the data to the socket
+      n = sendto(sockfd[0], buffer, size, 0, (struct sockaddr *)&dest_addr[0],
+                 sizeof(struct sockaddr_in));
+      if (n < 0) {
+        RCLCPP_ERROR(this->get_logger(), "Error writing to socket avg 1!");
+      }
+
+      // If there is a second neigbour, write to it
+      if (ip_addr.nb_neigh == 2) {
+
+        custom_ser::ser_msg(ip_addr.device_ip, device_last_ip_digit, device_avg,
+                            &builder, (uint8_t *)&buffer, &size);
+
+        n = sendto(sockfd[1], buffer, size, 0, (struct sockaddr *)&dest_addr[1],
+                   sizeof(struct sockaddr_in));
+        if (n < 0) {
+          RCLCPP_ERROR(this->get_logger(), "Error writing to socket avg 2!");
+        }
+      }
+      write_enable[0] = false;
+    }
+
+    // Send data to first neighbour
+
+    if (terninate_session) {
+      running = false;
+      averaging = false;
+      RCLCPP_INFO(this->get_logger(), "NB ITERATIONS: %d", iteration_nb);
+      RCLCPP_INFO(this->get_logger(), "FINAL AVG: %.02f", device_avg);
+    }
+    std::this_thread::sleep_for(std::chrono::microseconds(40));
   }
 }

@@ -14,6 +14,17 @@ comp::comp() : Node("comp") {
   std::thread start_thread(std::bind(&comp::exp_start, this));
   timer_thread.join();
   start_thread.join();
+
+  // Find the minimum nb of iterations
+  int min_nb_it = 0;
+  RCLCPP_INFO(this->get_logger(), "Number of iterations performed in 150ms: %d",
+              min_nb_it);
+
+  // Terminate session
+  close(compfd);
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  RCLCPP_INFO(this->get_logger(), "Shutting down node");
+  rclcpp::shutdown();
 }
 
 bool comp::device_UDP_socket(int *sockfd, struct sockaddr_in *sock_addr,
@@ -42,15 +53,15 @@ bool comp::device_UDP_socket(int *sockfd, struct sockaddr_in *sock_addr,
 
   // Create a broadcast addr
   broad_addr->sin_family = AF_INET; // Use IPv4
-  broad_addr->sin_port = htons(PORT);
+  broad_addr->sin_port = htons(5002);
   // 192.168.0.255 is the broadcast IP for the subnet 192.168.0
-  inet_pton(AF_INET, "192.168.0.255", &broad_addr->sin_addr);
+  broad_addr->sin_addr.s_addr = INADDR_BROADCAST;
 
   return true;
 }
 
 void comp::enable_socket_write() {
-  while (!start_success) {
+  while (running) {
     write_enable = true;
     std::this_thread::sleep_for(
         std::chrono::milliseconds(100)); // Sleep for the spacing time
@@ -68,8 +79,10 @@ void comp::exp_start() {
   pfd.events = POLLIN;
 
   std::string broad_msg;
+  bool comp_holo_sync = true;
+  int end_counter;
 
-  while (!start_success) {
+  while (running) {
     int ret = poll(&pfd, 1, 0);
     // If there is something to read, do it
     if (ret > 0) {
@@ -92,15 +105,24 @@ void comp::exp_start() {
         }
         failure_counter = 0;
 
+        RCLCPP_INFO(this->get_logger(), "Received msg: %s, from %d",
+                    msg.c_str(), id);
+
         // Filter out own broadcast
         if (id == 17) {
           continue;
         }
 
-        RCLCPP_INFO(this->get_logger(), "Received_msg: %s", msg.c_str());
+        if (msg == "READY" && id < 4) {
+          holo_ready[id] = true;
+        }
+
+        if (msg == "STOP" && id < 4) {
+          holo_stop[id] = true;
+        }
       }
     }
-    if (write_enable) {
+    if (write_enable || comp_fsm_state == 1 || comp_fsm_state == 3) {
       switch (comp_fsm_state) {
       case 0:
         broad_msg = "READY";
@@ -111,11 +133,13 @@ void comp::exp_start() {
       case 2:
         broad_msg = "STOP";
         break;
+      case 3:
+        broad_msg = "END";
+        end_counter++;
+        break;
       default:
         break;
       }
-
-      RCLCPP_INFO(this->get_logger(), "Broadcasting: %s", broad_msg.c_str());
 
       custom_ser::ser_msg(broad_msg, 17, 0, &builder, (uint8_t *)&buffer,
                           &size);
@@ -130,5 +154,32 @@ void comp::exp_start() {
       }
       write_enable = false;
     }
+
+    if (comp_fsm_state == START) {
+      // Go to sleep for 150 ms
+      std::this_thread::sleep_for(std::chrono::milliseconds(150));
+      comp_fsm_state = STOP;
+      continue;
+    }
+
+    if (comp_holo_sync) {
+      if (holo_ready[0] && holo_ready[1] && holo_ready[2] && holo_ready[3]) {
+        comp_fsm_state = START;
+        comp_holo_sync = false;
+        RCLCPP_INFO(this->get_logger(), "All holohovers ready");
+      }
+    }
+
+    if (comp_fsm_state == END && end_counter == 10) {
+      running = false;
+      continue;
+    }
+
+    if (holo_stop[0] && holo_stop[1] && holo_stop[2] && holo_stop[3]) {
+      comp_fsm_state = END;
+    }
+
+    std::this_thread::sleep_for(std::chrono::microseconds(10));
   }
+  RCLCPP_INFO(this->get_logger(), "Killing node");
 }
