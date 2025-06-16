@@ -20,12 +20,19 @@ comp::comp() : Node("comp") {
   std::this_thread::sleep_for(std::chrono::seconds(1));
 
   float a = 1, b = 2, c = 8, d = 9;
+  float a_bar, b_bar, c_bar, d_bar;
   int nb_iterations = 10;
   for (int i = 0; i < nb_iterations; i++) {
-    a = (a + b) / 2;
-    b = (a + b + c) / 3;
-    c = (b + c + d) / 3;
-    d = (c + d) / 2;
+    a_bar = (a + b) / 2;
+    b_bar = (a + b + c) / 3;
+    c_bar = (b + c + d) / 3;
+    d_bar = (c + d) / 2;
+    a = a_bar;
+    b = b_bar;
+    c = c_bar;
+    d = d_bar;
+    RCLCPP_INFO(this->get_logger(), "it %d: a = %f | b = %f | c = %f | d = %f",
+                i, a, b, c, d);
   }
   float avg = (a + b + c + d) / 4;
 
