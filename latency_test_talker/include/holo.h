@@ -83,7 +83,6 @@ private:
   socklen_t socklen[2] = {sizeof(sock_addr[0]), sizeof(sock_addr[1])};
   struct sync_valid sync_validated[2];
   bool write_enable[2] = {0};
-  bool averaging = false;
 
   // Flatbuffer //
   std::string msg;

@@ -351,22 +351,13 @@ void holo::holo_holo_sync() {
 }
 
 void holo::avg_enable() {
-
-  while (!averaging) {
-    std::this_thread::sleep_for(std::chrono::microseconds(100));
-  }
-
-  while (averaging) {
-    write_enable[0] = true;
-    std::this_thread::sleep_for(
-        std::chrono::milliseconds(5)); // Sleep for the spacing time
-  }
-  return;
+  write_enable[0] = true;
+  RCLCPP_INFO(this->get_logger(), "Enabling write!");
 }
 
 void holo::start_timer() {
-  timer_ = this->create_wall_timer(std::chrono::milliseconds(5),
-                                   std::bind(&Node::avg_enable, this));
+  timer_ = this->create_wall_timer(std::chrono::microseconds(100),
+                                   std::bind(&holo::avg_enable, this));
 }
 
 void holo::perform_exp() {
@@ -414,6 +405,7 @@ void holo::perform_exp() {
   bool new_value_1, new_value_2;
   int nb_participants = (ip_addr.nb_neigh == 2) ? 3 : 2;
   write_enable[0] = false;
+  bool first_it = true;
 
   RCLCPP_INFO(this->get_logger(), "Number participants: %d", nb_participants);
 
@@ -423,6 +415,7 @@ void holo::perform_exp() {
   float avg;
   int it;
   bool send_prev_it_1, send_prev_it_2;
+  bool averaging = false;
 
   /////// INITIAL AVG VALUE FOR THIS DEVICE ///////
   device_avg.push_back(device_last_ip_digit);
@@ -469,7 +462,6 @@ void holo::perform_exp() {
           } else if (msg == "STOP") {
             RCLCPP_INFO(this->get_logger(), "Comp sent STOP msg.");
             device_msg = "STOP";
-            averaging = false;
             write_enable[0] = false;
           } else if (msg == "END") {
             RCLCPP_INFO(this->get_logger(), "Comp sent END msg.");
@@ -492,8 +484,12 @@ void holo::perform_exp() {
           continue;
         }
 
-        // Have you received a msg from neighbour 1?
-        // If msg == neighbour (holo identification)
+        RCLCPP_INFO(this->get_logger(), "Received_msg: %s, id: %d, value: %f",
+                    msg.c_str(), id, value);
+
+        /*
+        Send only if a new avg has been calculated
+        */
         if (msg == ip_addr.neigh_ip[0]) {
           // If my iteration is greater than that of my neighbour, resend
           // previous avg
@@ -505,9 +501,48 @@ void holo::perform_exp() {
             if (fabs(neigh_1_avg.back() - value) > 0.001f) {
               new_value_1 = true;
               send_prev_it_1 = false;
-              averaging = true; // In case message starts before receiving start
-                                // from comp
               neigh_1_avg.push_back(value);
+            }
+            // If a new avg can be calculated, do so and send it to neighbours
+            if (new_value_1 && (ip_addr.nb_neigh == 1 || new_value_2)) {
+              neigh_1_avg.pop_front();
+              neigh_2_avg.pop_front();
+
+              avg = (device_avg[iteration_nb] + neigh_1_avg.front() +
+                     neigh_2_avg.front()) /
+                    nb_participants;
+
+              device_avg.push_back(avg);
+
+              iteration_nb++;
+              new_value_1 = false;
+              new_value_2 = false;
+
+              custom_ser::ser_msg(ip_addr.device_ip, iteration_nb,
+                                  device_avg[iteration_nb], &builder,
+                                  (uint8_t *)&buffer, &size);
+
+              n = sendto(sockfd[0], buffer, size, 0,
+                         (struct sockaddr *)&dest_addr[0],
+                         sizeof(struct sockaddr_in));
+              if (n < 0) {
+                RCLCPP_ERROR(this->get_logger(),
+                             "Error writing to socket avg 1!");
+              }
+
+              // If there is a second neighbour, send avg to it as well
+              if (ip_addr.nb_neigh == 2) {
+                // Write the data to the socket
+                n = sendto(sockfd[1], buffer, size, 0,
+                           (struct sockaddr *)&dest_addr[1],
+                           sizeof(struct sockaddr_in));
+                if (n < 0) {
+                  RCLCPP_ERROR(this->get_logger(),
+                               "Error writing to socket avg 2!");
+                }
+              }
+              // Reset the timer
+              // timer_->reset();
             }
           }
         }
@@ -534,6 +569,8 @@ void holo::perform_exp() {
           continue;
         }
         failure_counter = 0;
+
+        // RCLCPP_INFO(this->get_logger(), "Received_msg: %s", msg.c_str());
 
         // Check if the message is a broadcast
         if (id == 17) {
@@ -568,6 +605,9 @@ void holo::perform_exp() {
           continue;
         }
 
+        RCLCPP_INFO(this->get_logger(), "Received_msg: %s, id: %d, value: %f",
+                    msg.c_str(), id, value);
+
         // Do you have a second neighbour, if not skip if statement
         // Have you received a msg from neighbour 2?
         if (ip_addr.nb_neigh == 2 && msg == ip_addr.neigh_ip[1]) {
@@ -581,39 +621,42 @@ void holo::perform_exp() {
               send_prev_it_2 = false;
               neigh_2_avg.push_back(value);
             }
-          }
-          // If a new avg can be calculated, do so and send it to neighbours
-          if (new_value_1 && (ip_addr.nb_neigh == 1 || new_value_2)) {
-            neigh_1_avg.pop_front();
-            neigh_2_avg.pop_front();
+            // If a new avg can be calculated, do so and send it to neighbours
+            if (new_value_1 && (ip_addr.nb_neigh == 1 || new_value_2)) {
+              neigh_1_avg.pop_front();
+              neigh_2_avg.pop_front();
 
-            avg = (device_avg[iteration_nb] + neigh_1_avg.front() +
-                   neigh_2_avg.front()) /
-                  nb_participants;
+              avg = (device_avg[iteration_nb] + neigh_1_avg.front() +
+                     neigh_2_avg.front()) /
+                    nb_participants;
 
-            device_avg.push_back(avg);
+              device_avg.push_back(avg);
 
-            iteration_nb++;
-            new_value_1 = false;
-            new_value_2 = false;
+              iteration_nb++;
+              new_value_1 = false;
+              new_value_2 = false;
 
-            custom_ser::ser_msg(ip_addr.device_ip, iteration_nb, device_avg[it],
-                                &builder, (uint8_t *)&buffer, &size);
+              custom_ser::ser_msg(ip_addr.device_ip, iteration_nb,
+                                  device_avg[iteration_nb], &builder,
+                                  (uint8_t *)&buffer, &size);
 
-            n = sendto(sockfd[0], buffer, size, 0,
-                       (struct sockaddr *)&dest_addr[0],
-                       sizeof(struct sockaddr_in));
-            if (n < 0) {
-              RCLCPP_ERROR(this->get_logger(),
-                           "Error writing to socket avg 1!");
-            }
+              n = sendto(sockfd[0], buffer, size, 0,
+                         (struct sockaddr *)&dest_addr[0],
+                         sizeof(struct sockaddr_in));
+              if (n < 0) {
+                RCLCPP_ERROR(this->get_logger(),
+                             "Error writing to socket avg 1!");
+              }
 
-            n = sendto(sockfd[1], buffer, size, 0,
-                       (struct sockaddr *)&dest_addr[1],
-                       sizeof(struct sockaddr_in));
-            if (n < 0) {
-              RCLCPP_ERROR(this->get_logger(),
-                           "Error writing to socket avg 2!");
+              n = sendto(sockfd[1], buffer, size, 0,
+                         (struct sockaddr *)&dest_addr[1],
+                         sizeof(struct sockaddr_in));
+              if (n < 0) {
+                RCLCPP_ERROR(this->get_logger(),
+                             "Error writing to socket avg 2!");
+              }
+              // Reset the timer
+              // timer_->reset();
             }
           }
         }
@@ -621,38 +664,37 @@ void holo::perform_exp() {
     }
 
     if (write_enable[0]) {
-      // if (new_value_1 && (ip_addr.nb_neigh == 1 || new_value_2)) {
-      //   neigh_1_avg.pop_front();
-      //   neigh_2_avg.pop_front();
+      if (new_value_1 && (ip_addr.nb_neigh == 1 || new_value_2)) {
+        neigh_1_avg.pop_front();
+        neigh_2_avg.pop_front();
 
-      //   avg = (device_avg[iteration_nb] + neigh_1_avg.front() +
-      //          neigh_2_avg.front()) /
-      //         nb_participants;
+        avg = (device_avg[iteration_nb] + neigh_1_avg.front() +
+               neigh_2_avg.front()) /
+              nb_participants;
 
-      //   device_avg.push_back(avg);
+        device_avg.push_back(avg);
 
-      //   iteration_nb++;
-      //   new_value_1 = false;
-      //   new_value_2 = false;
-      // }
+        iteration_nb++;
+        new_value_1 = false;
+        new_value_2 = false;
+      }
 
-      // // Write to first neighbour
-      // it = (send_prev_it_1) ? iteration_nb - 1 : iteration_nb;
-      // if (it < 0) {
-      //   RCLCPP_ERROR(this->get_logger(), "Tried sending it smaller than 0!");
-      //   continue;
-      // }
+      // Write to first neighbour
+      it = (send_prev_it_1) ? iteration_nb - 1 : iteration_nb;
+      if (it < 0) {
+        RCLCPP_ERROR(this->get_logger(), "Tried sending it smaller than 0!");
+        continue;
+      }
 
-      // custom_ser::ser_msg(ip_addr.device_ip, iteration_nb, device_avg[it],
-      //                     &builder, (uint8_t *)&buffer, &size);
+      custom_ser::ser_msg(ip_addr.device_ip, iteration_nb, device_avg[it],
+                          &builder, (uint8_t *)&buffer, &size);
 
-      // // Write the data to the socket
-      // n = sendto(sockfd[0], buffer, size, 0, (struct sockaddr
-      // *)&dest_addr[0],
-      //            sizeof(struct sockaddr_in));
-      // if (n < 0) {
-      //   RCLCPP_ERROR(this->get_logger(), "Error writing to socket avg 1!");
-      // }
+      // Write the data to the socket
+      n = sendto(sockfd[0], buffer, size, 0, (struct sockaddr *)&dest_addr[0],
+                 sizeof(struct sockaddr_in));
+      if (n < 0) {
+        RCLCPP_ERROR(this->get_logger(), "Error writing to socket avg 1!");
+      }
 
       // If there is a second neigbour, write to it
       if (ip_addr.nb_neigh == 2) {
@@ -668,6 +710,7 @@ void holo::perform_exp() {
         }
       }
       write_enable[0] = false;
+      // timer_.reset();
     }
 
     // Send data to first neighbour
@@ -677,6 +720,16 @@ void holo::perform_exp() {
       averaging = false;
       RCLCPP_INFO(this->get_logger(), "NB ITERATIONS: %d", iteration_nb);
       RCLCPP_INFO(this->get_logger(), "FINAL AVG: %.02f", device_avg.back());
+    }
+
+    // RCLCPP_INFO(this->get_logger(), "Running: %d, Averaging: %d", running,
+    //             averaging);
+    // If experiment has started, start the timer
+    if (averaging && first_it) {
+      start_timer();
+      first_it = false;
+      write_enable[0] = true;
+      RCLCPP_INFO(this->get_logger(), "FRIST IT");
     }
     std::this_thread::sleep_for(std::chrono::microseconds(1));
   }
