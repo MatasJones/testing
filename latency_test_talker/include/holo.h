@@ -75,6 +75,7 @@ private:
   int neigh_1_last_ip_digit, neigh_2_last_ip_digit;
   //
   struct ip_addrs ip_addr;
+  rclcpp::TimerBase::SharedPtr timer_;
 
   // Sockets //
   struct sockaddr_in sock_addr[2], dest_addr[2], comp_addr;
@@ -105,6 +106,7 @@ private:
   void enable_socket_write();
   void perform_exp();
   void avg_enable();
+  void start_timer();
 };
 
 #endif

@@ -364,6 +364,11 @@ void holo::avg_enable() {
   return;
 }
 
+void holo::start_timer() {
+  timer_ = this->create_wall_timer(std::chrono::milliseconds(5),
+                                   std::bind(&Node::avg_enable, this));
+}
+
 void holo::perform_exp() {
 
   char buffer[SYNC_BUFFER_SIZE];
@@ -577,42 +582,77 @@ void holo::perform_exp() {
               neigh_2_avg.push_back(value);
             }
           }
+          // If a new avg can be calculated, do so and send it to neighbours
+          if (new_value_1 && (ip_addr.nb_neigh == 1 || new_value_2)) {
+            neigh_1_avg.pop_front();
+            neigh_2_avg.pop_front();
+
+            avg = (device_avg[iteration_nb] + neigh_1_avg.front() +
+                   neigh_2_avg.front()) /
+                  nb_participants;
+
+            device_avg.push_back(avg);
+
+            iteration_nb++;
+            new_value_1 = false;
+            new_value_2 = false;
+
+            custom_ser::ser_msg(ip_addr.device_ip, iteration_nb, device_avg[it],
+                                &builder, (uint8_t *)&buffer, &size);
+
+            n = sendto(sockfd[0], buffer, size, 0,
+                       (struct sockaddr *)&dest_addr[0],
+                       sizeof(struct sockaddr_in));
+            if (n < 0) {
+              RCLCPP_ERROR(this->get_logger(),
+                           "Error writing to socket avg 1!");
+            }
+
+            n = sendto(sockfd[1], buffer, size, 0,
+                       (struct sockaddr *)&dest_addr[1],
+                       sizeof(struct sockaddr_in));
+            if (n < 0) {
+              RCLCPP_ERROR(this->get_logger(),
+                           "Error writing to socket avg 2!");
+            }
+          }
         }
       }
     }
 
     if (write_enable[0]) {
-      if (new_value_1 && (ip_addr.nb_neigh == 1 || new_value_2)) {
-        neigh_1_avg.pop_front();
-        neigh_2_avg.pop_front();
+      // if (new_value_1 && (ip_addr.nb_neigh == 1 || new_value_2)) {
+      //   neigh_1_avg.pop_front();
+      //   neigh_2_avg.pop_front();
 
-        avg = (device_avg[iteration_nb] + neigh_1_avg.front() +
-               neigh_2_avg.front()) /
-              nb_participants;
+      //   avg = (device_avg[iteration_nb] + neigh_1_avg.front() +
+      //          neigh_2_avg.front()) /
+      //         nb_participants;
 
-        device_avg.push_back(avg);
+      //   device_avg.push_back(avg);
 
-        iteration_nb++;
-        new_value_1 = false;
-        new_value_2 = false;
-      }
+      //   iteration_nb++;
+      //   new_value_1 = false;
+      //   new_value_2 = false;
+      // }
 
-      // Write to first neighbour
-      it = (send_prev_it_1) ? iteration_nb - 1 : iteration_nb;
-      if (it < 0) {
-        RCLCPP_ERROR(this->get_logger(), "Tried sending it smaller than 0!");
-        continue;
-      }
+      // // Write to first neighbour
+      // it = (send_prev_it_1) ? iteration_nb - 1 : iteration_nb;
+      // if (it < 0) {
+      //   RCLCPP_ERROR(this->get_logger(), "Tried sending it smaller than 0!");
+      //   continue;
+      // }
 
-      custom_ser::ser_msg(ip_addr.device_ip, iteration_nb, device_avg[it],
-                          &builder, (uint8_t *)&buffer, &size);
+      // custom_ser::ser_msg(ip_addr.device_ip, iteration_nb, device_avg[it],
+      //                     &builder, (uint8_t *)&buffer, &size);
 
-      // Write the data to the socket
-      n = sendto(sockfd[0], buffer, size, 0, (struct sockaddr *)&dest_addr[0],
-                 sizeof(struct sockaddr_in));
-      if (n < 0) {
-        RCLCPP_ERROR(this->get_logger(), "Error writing to socket avg 1!");
-      }
+      // // Write the data to the socket
+      // n = sendto(sockfd[0], buffer, size, 0, (struct sockaddr
+      // *)&dest_addr[0],
+      //            sizeof(struct sockaddr_in));
+      // if (n < 0) {
+      //   RCLCPP_ERROR(this->get_logger(), "Error writing to socket avg 1!");
+      // }
 
       // If there is a second neigbour, write to it
       if (ip_addr.nb_neigh == 2) {
