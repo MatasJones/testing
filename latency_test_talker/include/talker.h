@@ -28,7 +28,7 @@
 #define SYNC_CHECK_PERIOD 200
 
 #define NB_MSGS 50
-#define NB_OF_SIZES 6
+#define NB_OF_SIZES 5
 
 using namespace std;
 

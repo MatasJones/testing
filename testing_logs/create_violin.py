@@ -5,7 +5,7 @@ import matplotlib.ticker as ticker
 import math
 
 # === Load and parse the CSV ===
-file_path = '/Users/matasjones/Desktop/PDS_II/holo_tests/june_19/main_holo_OG_logs_1ms.csv'
+file_path = '/Users/matasjones/Desktop/PDS_II/holo_tests/june_19/ROS_CUSTOM_QOS/holo_holo_custom_5ms.csv'
 df = pd.read_csv(file_path, header=None, skiprows=1)
 df[0] = df[0].astype(str)
 split_df = df[0].str.split('|', expand=True).apply(lambda x: x.str.strip())
@@ -74,7 +74,7 @@ ax.xaxis.grid(True, which='both', linestyle='--', linewidth=0.5, alpha=0.7)
 # Labels and title
 ax.set_xlabel('Latency [ms]')
 ax.set_ylabel('Message Size [bytes]')
-ax.set_title('Latency Distribution | ROS2, default QOS, with logs | 1 ms interval')
+ax.set_title('Latency Distribution | ROS2, custom QOS, no logs | HOLO-HOLO | 5 ms interval')
 
 # Legend with packet loss percentages
 ax.legend(legend_labels, title="Packets Lost", loc='upper right', fontsize=9, title_fontsize=10)

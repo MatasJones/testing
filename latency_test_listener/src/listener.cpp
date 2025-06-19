@@ -1,7 +1,7 @@
 #include "listener.h"
 
-#define OG_QOS_MODE
-// #define CUSTOM_QOS_MODE
+// #define OG_QOS_MODE
+#define CUSTOM_QOS_MODE
 // #define LOG_MODE
 
 listener::listener() : Node("listener"), count_(0) {

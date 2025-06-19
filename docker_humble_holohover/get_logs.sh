@@ -3,8 +3,8 @@
 PATH_TO_LOGS="/home/ubuntu/Documents/holohover_latency/testing/testing_logs/logger.csv"
 
 ### Change file location and name
-PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/PDS_II/holo_tests/june_19"
-file_name_first_part="main_holo_OG_logs"
+PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/PDS_II/holo_tests/june_19/ROS_CUSTOM_QOS"
+file_name_first_part="main_holo_custom"
 ###
 
 CMD="scp $PATH_TO_LOGS $PATH_TO_LOCAL_LOGS"
