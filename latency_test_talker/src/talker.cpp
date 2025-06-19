@@ -2,7 +2,7 @@
 
 #define OG_QOS_MODE
 // #define CUSTOM_QOS_MODE
-#define LOG_MODE
+// #define LOG_MODE
 
 talker::talker() : Node("talker") {
 
@@ -200,6 +200,8 @@ void talker::run_experiment() {
   if (current_iteration == repetitions) {
     current_iteration = 0;
     current_size++;
+    this_thread::sleep_for(
+        std::chrono::milliseconds(1000)); // Wait for the specified time
   }
 
   // If the experiment is completed, shutdown the node
@@ -230,10 +232,10 @@ void talker::run_experiment() {
 
   // Set the send time and publish the message
   double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
-  talker_publisher_->publish(message);
-
   std::get<0>(send_receive_time[msg_id]) = sending_time;
   std::get<2>(send_receive_time[msg_id]) = msg_id;
+
+  talker_publisher_->publish(message);
 
 #ifdef LOG_MODE
   RCLCPP_INFO(this->get_logger(), "Message %d of size %d sent", msg_id,
