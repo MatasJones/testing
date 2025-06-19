@@ -3,8 +3,8 @@
 PATH_TO_LOGS="/home/ubuntu/Documents/holohover_latency/testing/testing_logs/logger.csv"
 
 ### Change file location and name
-PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/PDS_II/holo_tests/Week16"
-file_name_first_part="socket_RAW"
+PATH_TO_LOCAL_LOGS="/Users/matasjones/Desktop/PDS_II/holo_tests/june_19/TCP_MAIN"
+file_name_first_part="socket_TCP_MAIN"
 ###
 
 CMD="scp $PATH_TO_LOGS $PATH_TO_LOCAL_LOGS"
@@ -20,7 +20,7 @@ if ping -c 1 ${SERVER_IP} &> /dev/null; then # ping -c 1 ip_address -> sends a p
     
     # Send command to devices
     
-    scp ${USERS[1]}@${SERVER_IP}:${PATH_TO_LOGS} ${PATH_TO_LOCAL_LOGS}
+    scp ${USERS[0]}@${SERVER_IP}:${PATH_TO_LOGS} ${PATH_TO_LOCAL_LOGS}
 
 else
     echo "Ping to $SERVER_IP failed..."

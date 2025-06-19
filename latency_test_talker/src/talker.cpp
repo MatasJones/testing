@@ -87,6 +87,7 @@ talker::talker() : Node("talker") {
   timer_thread.join();
 
   // Finish the experiment
+  RCLCPP_INFO(this->get_logger(), "Experiment finished, closing socket...");
   std::this_thread::sleep_for(std::chrono::seconds(3));
   talker::terminate_exp();
 }
@@ -314,25 +315,28 @@ void talker::socket_exp_launch() {
         // Set timestamp
         double recieving_time = this->get_clock()->now().nanoseconds() / 1.0e6;
 
-        // Verify message is valid
-        std::string message_id = socket_tcp::extract_message(buffer);
-        if (message_id == "") {
+        if (!custom_ser::deser_msg((uint8_t *)buffer, msg, id, value)) {
+          // RCLCPP_ERROR(this->get_logger(),
+          //              "Error deserializing flatbuffer message!");
+          if (failure_counter > MAX_FAIL_COUNT) {
+            RCLCPP_ERROR(this->get_logger(),
+                         "Too many failures, shutting down");
+            running = false;
+            break;
+          }
           continue;
         }
-
-        // Grace period counter
-        if (std::stoi(message_id.c_str()) == 131313) {
+        if (msg == "GRACE_ACK") {
+          RCLCPP_INFO(this->get_logger(), "Grace message received");
           grace_counter_read++;
           continue;
         }
 
         // Add the time to the socket_send_receive_time array
-        std::get<1>(socket_send_receive_time[atoi(message_id.c_str())]) =
-            recieving_time;
+        std::get<1>(socket_send_receive_time[id]) = recieving_time;
 
         // Add msg id to the socket_send_receive_time array
-        std::get<3>(socket_send_receive_time[atoi(message_id.c_str())]) =
-            atoi(message_id.c_str());
+        std::get<3>(socket_send_receive_time[id]) = id;
 #endif
 
 #ifdef RAW
@@ -392,7 +396,6 @@ void talker::socket_exp_launch() {
       }
 
 #ifdef UDP
-      // If grace period
       if (grace == true) {
         if (grace_counter_write > GRACE_COUNTER_MAX &&
             grace_counter_read > GRACE_COUNTER_MAX) {
@@ -400,72 +403,102 @@ void talker::socket_exp_launch() {
           RCLCPP_INFO(this->get_logger(),
                       "Grace period ended, starting experiment");
           continue;
+        };
+
+        custom_ser::ser_msg("GRACE", grace_counter_write, 404, &builder,
+                            (uint8_t *)buffer, &size);
+
+        // Add payload after ethernet header
+        // memcpy(frame + sizeof(struct ethhdr), buffer, size);
+
+        // frame_len = sizeof(struct ethhdr) + size;
+        // // Ensure minimum frame size (64 bytes total)
+        // // Minimum size for ethernet frames is 64 bytes
+        // if (frame_len < 64) {
+        //   memset(frame + sizeof(struct ethhdr) + size, 0, 64 - frame_len);
+        //   frame_len = 64;
+        // }
+
+        sent = sendto(sockfd, buffer, size, 0, (struct sockaddr *)&dest_addr,
+                      sizeof(struct sockaddr_in));
+        if (sent > 0) {
+          grace_counter_write++;
         }
-        std::string msg = "S_131313_";
-        strncpy(buffer, msg.c_str(), sizeof(buffer));
-        grace_counter_write++;
-        int n = sendto(sockfd, buffer, sizeof(buffer), 0,
-                       (struct sockaddr *)&dest_addr,
-                       sizeof(struct sockaddr_in)); // Send only the msg part of
-                                                    // the buffer, until the \0
-        if (n < 0) {
-          continue;
-        }
+
         write_enable = false;
         continue;
       }
 
-      // If there is no data to be read nor to write, terminate session
-      if (socket_msg_count > total_nb_msgs) {
-        RCLCPP_INFO(this->get_logger(), "Socket session terminated");
-        running = false;
-        std::this_thread::sleep_for(std::chrono::seconds(3));
-        break;
-      }
-
-      // If not grace period
-      // Write the data to the socket
-      bzero(buffer, SOCKET_BUFFER_SIZE);
       std::string test_string(sizes[socket_msg_size], 'A');
-
-      std::string msg =
-          "S_" + std::to_string(socket_msg_count) + "_" + test_string;
-      int msg_len = msg.size();
-      strncpy(buffer, msg.c_str(), sizeof(buffer));
-
-      int n = sendto(sockfd, buffer, msg_len, 0, (struct sockaddr *)&dest_addr,
-                     sizeof(struct sockaddr_in)); // Send only the msg part of
-                                                  // the buffer, until the \0
-      if (n < 0) {
-        continue;
-      }
+      custom_ser::ser_msg(test_string, socket_msg_count, socket_msg_size,
+                          &builder, (uint8_t *)&buffer, &size);
 
       double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+
+      // Write the data to the socket
+      sent = sendto(sockfd, buffer, size, 0, (struct sockaddr *)&dest_addr,
+                    sizeof(struct sockaddr_in));
+      if (sent < 0) {
+        RCLCPP_ERROR(this->get_logger(), "ERROR whilst sending test msg");
+      }
+
       // Add the time to the socket_send_receive_time array
       std::get<0>(socket_send_receive_time[socket_msg_count]) = sending_time;
       // Add msg id to the socket_send_receive_time array
       std::get<2>(socket_send_receive_time[socket_msg_count]) =
           socket_msg_count;
 
+      // Increment the message count
       socket_msg_count++;
 
+      // If there is no data to be read nor to write, terminate session
+      if (socket_msg_count >= total_nb_msgs - 1) {
+        RCLCPP_INFO(this->get_logger(), "Socket session terminated");
+        running = false;
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+      }
+
       write_enable = false; // Disable writing until next timer event
-    }
 
 #endif
 
 #ifdef RAW
-    if (grace == true) {
-      if (grace_counter_write > GRACE_COUNTER_MAX &&
-          grace_counter_read > GRACE_COUNTER_MAX) {
-        grace = false;
-        RCLCPP_INFO(this->get_logger(),
-                    "Grace period ended, starting experiment");
-        continue;
-      };
+      if (grace == true) {
+        if (grace_counter_write > GRACE_COUNTER_MAX &&
+            grace_counter_read > GRACE_COUNTER_MAX) {
+          grace = false;
+          RCLCPP_INFO(this->get_logger(),
+                      "Grace period ended, starting experiment");
+          continue;
+        };
 
-      custom_ser::ser_msg("GRACE", grace_counter_write, 404, &builder,
-                          (uint8_t *)raw_buffer, &size);
+        custom_ser::ser_msg("GRACE", grace_counter_write, 404, &builder,
+                            (uint8_t *)raw_buffer, &size);
+
+        // Add payload after ethernet header
+        memcpy(frame + sizeof(struct ethhdr), raw_buffer, size);
+
+        frame_len = sizeof(struct ethhdr) + size;
+        // Ensure minimum frame size (64 bytes total)
+        // Minimum size for ethernet frames is 64 bytes
+        if (frame_len < 64) {
+          memset(frame + sizeof(struct ethhdr) + size, 0, 64 - frame_len);
+          frame_len = 64;
+        }
+
+        sent = sendto(sockfd, frame, frame_len, 0, (struct sockaddr *)&sll,
+                      sizeof(sll));
+        if (sent > 0) {
+          grace_counter_write++;
+        }
+
+        write_enable = false;
+        continue;
+      }
+
+      std::string test_string(sizes[socket_msg_size], 'A');
+      custom_ser::ser_msg(test_string, socket_msg_count, socket_msg_size,
+                          &builder, (uint8_t *)&raw_buffer, &size);
 
       // Add payload after ethernet header
       memcpy(frame + sizeof(struct ethhdr), raw_buffer, size);
@@ -478,58 +511,35 @@ void talker::socket_exp_launch() {
         frame_len = 64;
       }
 
+      // Write the data to the socket
       sent = sendto(sockfd, frame, frame_len, 0, (struct sockaddr *)&sll,
                     sizeof(sll));
-      if (sent > 0) {
-        grace_counter_write++;
+      if (sent < 0) {
+        RCLCPP_ERROR(this->get_logger(), "ERROR whilst sending test msg");
       }
 
-      write_enable = false;
-      continue;
-    }
+      double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
+      // Add the time to the socket_send_receive_time array
+      std::get<0>(socket_send_receive_time[socket_msg_count]) = sending_time;
+      // Add msg id to the socket_send_receive_time array
+      std::get<2>(socket_send_receive_time[socket_msg_count]) =
+          socket_msg_count;
 
-    std::string test_string(sizes[socket_msg_size], 'A');
-    custom_ser::ser_msg(test_string, socket_msg_count, socket_msg_size,
-                        &builder, (uint8_t *)&raw_buffer, &size);
+      // Increment the message count
+      socket_msg_count++;
 
-    // Add payload after ethernet header
-    memcpy(frame + sizeof(struct ethhdr), raw_buffer, size);
+      // If there is no data to be read nor to write, terminate session
+      if (socket_msg_count > total_nb_msgs - 1) {
+        RCLCPP_INFO(this->get_logger(), "Socket session terminated");
+        running = false;
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+      }
 
-    frame_len = sizeof(struct ethhdr) + size;
-    // Ensure minimum frame size (64 bytes total)
-    // Minimum size for ethernet frames is 64 bytes
-    if (frame_len < 64) {
-      memset(frame + sizeof(struct ethhdr) + size, 0, 64 - frame_len);
-      frame_len = 64;
-    }
-
-    // Write the data to the socket
-    sent = sendto(sockfd, frame, frame_len, 0, (struct sockaddr *)&sll,
-                  sizeof(sll));
-    if (sent < 0) {
-      RCLCPP_ERROR(this->get_logger(), "ERROR whilst sending test msg");
-    }
-
-    double sending_time = this->get_clock()->now().nanoseconds() / 1.0e6;
-    // Add the time to the socket_send_receive_time array
-    std::get<0>(socket_send_receive_time[socket_msg_count]) = sending_time;
-    // Add msg id to the socket_send_receive_time array
-    std::get<2>(socket_send_receive_time[socket_msg_count]) = socket_msg_count;
-
-    // Increment the message count
-    socket_msg_count++;
-
-    // If there is no data to be read nor to write, terminate session
-    if (socket_msg_count > total_nb_msgs - 1) {
-      RCLCPP_INFO(this->get_logger(), "Socket session terminated");
-      running = false;
-      std::this_thread::sleep_for(std::chrono::seconds(3));
-    }
-
-    write_enable = false; // Disable writing until next timer event
+      write_enable = false; // Disable writing until next timer event
 
 #endif
-    std::this_thread::sleep_for(std::chrono::microseconds(10));
+      std::this_thread::sleep_for(std::chrono::microseconds(10));
+    }
   }
 
 #endif
@@ -596,11 +606,13 @@ void talker::terminate_exp() {
 #endif
 
 #ifdef UDP
+  int sent;
   for (int i = 0; i < 10; i++) {
-    std::string msg = "S_SHUTDOWN_";
-    strncpy(buffer, msg.c_str(), sizeof(buffer));
-    int n = sendto(sockfd, buffer, sizeof(buffer), 0,
-                   (struct sockaddr *)&dest_addr, sizeof(struct sockaddr_in));
+    RCLCPP_INFO(this->get_logger(), "Sending shutdown message");
+    custom_ser::ser_msg("SHUTDOWN", 13, 404, &builder, (uint8_t *)buffer,
+                        &size);
+    sent = sendto(sockfd, buffer, size, 0, (struct sockaddr *)&dest_addr,
+                  sizeof(struct sockaddr_in));
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

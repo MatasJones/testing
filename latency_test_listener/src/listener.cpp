@@ -166,38 +166,69 @@ listener::listener() : Node("listener"), count_(0) {
         bzero(buffer, SOCKET_BUFFER_SIZE);
         int n = recvfrom(sockfd, buffer, sizeof(buffer), 0,
                          (struct sockaddr *)&cli_addr, &addr_len);
-        buffer[-1] = '\0';
+        // buffer[-1] = '\0';
         if (n < 0) {
           continue;
         }
 
-        // Extract msg number from the message
-        std::string str_buffer(buffer);
-        if (str_buffer == "SHUTDOWN") {
-          RCLCPP_INFO(this->get_logger(), "Shutdown message received");
-          running = false;
-          break;
-        }
-        size_t first = str_buffer.find('_');
-        size_t second = str_buffer.find('_', first + 1);
-        std::string extracted =
-            str_buffer.substr(first + 1, second - first - 1);
+        // // Extract msg number from the message
+        // std::string str_buffer(buffer);
+        // if (str_buffer == "SHUTDOWN") {
+        //   RCLCPP_INFO(this->get_logger(), "Shutdown message received");
+        //   running = false;
+        //   break;
+        // }
+        // size_t first = str_buffer.find('_');
+        // size_t second = str_buffer.find('_', first + 1);
+        // std::string extracted =
+        //     str_buffer.substr(first + 1, second - first - 1);
 
-        // Verify that the msg id is extractable
-        if (!(first != std::string::npos && second != std::string::npos &&
-              second > first)) {
+        // // Verify that the msg id is extractable
+        // if (!(first != std::string::npos && second != std::string::npos &&
+        //       second > first)) {
+        //   continue;
+        // }
+
+        if (!custom_ser::deser_msg((uint8_t *)buffer, msg, id, value)) {
+          // RCLCPP_ERROR(this->get_logger(),
+          //              "Error deserializing flatbuffer message!");
+          if (failure_counter++ > MAX_FAIL_COUNT) {
+            RCLCPP_ERROR(this->get_logger(),
+                         "Too many failures, shutting down");
+            running = false;
+          }
           continue;
         }
+        failure_counter = 0;
 
-        power =
-            ((std::stoi(extracted.c_str()) + 1) % 50) == 0 ? power + 1 : power;
-        std::string test_string(std::pow(10, power), 'B');
+        if (msg == "SHUTDOWN") {
+          RCLCPP_INFO(this->get_logger(), "Shutdown message received");
+          running = false;
+          std::this_thread::sleep_for(std::chrono::seconds(5));
+          continue;
+
+        } else if (msg == "GRACE") {
+          // RCLCPP_INFO(this->get_logger(), "Grace message received");
+          msg = "GRACE_ACK";
+        }
+
+        else {
+          std::string test_string(std::pow(10, value), 'B');
+          msg = test_string;
+        }
+
+        custom_ser::ser_msg(msg, id, value, &builder, (uint8_t *)buffer, &size);
+
+        // power =
+        //     ((std::stoi(extracted.c_str()) + 1) % 50) == 0 ? power + 1 :
+        //     power;
+        // std::string test_string(std::pow(10, power), 'B');
 
         // Send the data back to the server
-        std::string msg = "C_" + extracted + "_" + test_string;
-        strncpy(buffer, msg.c_str(), sizeof(buffer));
-        int msg_len = msg.size();
-        n = sendto(sockfd, buffer, msg_len, 0, (struct sockaddr *)&serv_addr,
+        // std::string msg = "C_" + extracted + "_" + test_string;
+        // strncpy(buffer, msg.c_str(), sizeof(buffer));
+        // int msg_len = msg.size();
+        n = sendto(sockfd, buffer, size, 0, (struct sockaddr *)&serv_addr,
                    addr_len);
       }
     }

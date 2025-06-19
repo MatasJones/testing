@@ -43,8 +43,8 @@ private:
   std::string config_file_path = cwd.string() + "/src/config/config.yaml";
 
   int id;
-  int port = 5001;
-  char server_ip[14] = "192.168.0.131"; // Server IP
+  int port = 5000;
+  char server_ip[14] = "192.168.0.122"; // Server IP
   int sockfd;
   int power = 0;
 
