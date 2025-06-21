@@ -1,8 +1,8 @@
 #include "talker.h"
 
-// #define TCP
-#define UDP
-// #define RAW
+//#define TCP
+//#define UDP
+#define RAW
 
 // #define MANUAL_SER
 #define FLATBUFF_SER
@@ -174,10 +174,6 @@ void talker::socket_exp_launch() {
           continue;
         }
 
-        // RCLCPP_INFO(this->get_logger(), "Flatbuffer reading, msg: %s, id:
-        // %d",
-        //             msg.c_str(), id);
-
         // Add the time to the socket_send_receive_time array
         std::get<1>(socket_send_receive_time[id]) = recieving_time;
 
@@ -201,9 +197,6 @@ void talker::socket_exp_launch() {
                                       grace_counter_read, &grace, true)) {
           RCLCPP_ERROR(this->get_logger(), "Error writing grace message!");
         }
-
-        // custom_ser::ser_msg("GRACE", 3, 404, &builder, (uint8_t *)buffer,
-        //                     &size);
 
         write_enable = false;
         continue;
@@ -357,7 +350,6 @@ void talker::socket_exp_launch() {
         // Correct MAC address comparison using memcmp()
         if (memcmp(eth_read->h_dest, MAC_131, 6) != 0 ||
             memcmp(eth_read->h_source, MAC_122, 6) != 0) {
-          // RCLCPP_INFO(this->get_logger(), "Frame not for us - MAC mismatch");
           continue; // Skip frames not intended for us
         }
         // If we got this far, means message is for us, read payload
@@ -407,17 +399,6 @@ void talker::socket_exp_launch() {
 
         custom_ser::ser_msg("GRACE", grace_counter_write, 404, &builder,
                             (uint8_t *)buffer, &size);
-
-        // Add payload after ethernet header
-        // memcpy(frame + sizeof(struct ethhdr), buffer, size);
-
-        // frame_len = sizeof(struct ethhdr) + size;
-        // // Ensure minimum frame size (64 bytes total)
-        // // Minimum size for ethernet frames is 64 bytes
-        // if (frame_len < 64) {
-        //   memset(frame + sizeof(struct ethhdr) + size, 0, 64 - frame_len);
-        //   frame_len = 64;
-        // }
 
         sent = sendto(sockfd, buffer, size, 0, (struct sockaddr *)&dest_addr,
                       sizeof(struct sockaddr_in));

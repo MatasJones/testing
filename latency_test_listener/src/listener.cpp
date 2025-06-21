@@ -2,7 +2,7 @@
 
 #define UDP
 // #define TCP
-// #define RAW
+//  #define RAW
 #define CUSTOM_ETHERTYPE 0x88B5
 
 // #define MANUAL_SER
@@ -171,24 +171,6 @@ listener::listener() : Node("listener"), count_(0) {
           continue;
         }
 
-        // // Extract msg number from the message
-        // std::string str_buffer(buffer);
-        // if (str_buffer == "SHUTDOWN") {
-        //   RCLCPP_INFO(this->get_logger(), "Shutdown message received");
-        //   running = false;
-        //   break;
-        // }
-        // size_t first = str_buffer.find('_');
-        // size_t second = str_buffer.find('_', first + 1);
-        // std::string extracted =
-        //     str_buffer.substr(first + 1, second - first - 1);
-
-        // // Verify that the msg id is extractable
-        // if (!(first != std::string::npos && second != std::string::npos &&
-        //       second > first)) {
-        //   continue;
-        // }
-
         if (!custom_ser::deser_msg((uint8_t *)buffer, msg, id, value)) {
           // RCLCPP_ERROR(this->get_logger(),
           //              "Error deserializing flatbuffer message!");
@@ -219,15 +201,6 @@ listener::listener() : Node("listener"), count_(0) {
 
         custom_ser::ser_msg(msg, id, value, &builder, (uint8_t *)buffer, &size);
 
-        // power =
-        //     ((std::stoi(extracted.c_str()) + 1) % 50) == 0 ? power + 1 :
-        //     power;
-        // std::string test_string(std::pow(10, power), 'B');
-
-        // Send the data back to the server
-        // std::string msg = "C_" + extracted + "_" + test_string;
-        // strncpy(buffer, msg.c_str(), sizeof(buffer));
-        // int msg_len = msg.size();
         n = sendto(sockfd, buffer, size, 0, (struct sockaddr *)&serv_addr,
                    addr_len);
       }
@@ -274,7 +247,6 @@ listener::listener() : Node("listener"), count_(0) {
         // Correct MAC address comparison using memcmp()
         if (memcmp(eth_read->h_dest, MAC_122, 6) != 0 ||
             memcmp(eth_read->h_source, MAC_131, 6) != 0) {
-          // RCLCPP_INFO(this->get_logger(), "Frame not for us - MAC mismatch");
           continue; // Skip frames not intended for us
         }
 
