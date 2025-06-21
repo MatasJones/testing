@@ -1,8 +1,8 @@
 #include "listener.h"
 
-#define UDP
-// #define TCP
-//  #define RAW
+// #define UDP
+//  #define TCP
+#define RAW
 #define CUSTOM_ETHERTYPE 0x88B5
 
 // #define MANUAL_SER
@@ -113,8 +113,6 @@ listener::listener() : Node("listener"), count_(0) {
 
         // Send response to server
         if (!custom_ser::deser_msg((uint8_t *)buffer, msg, id, value)) {
-          // RCLCPP_ERROR(this->get_logger(),
-          //              "Error deserializing flatbuffer message!");
           if (failure_counter++ > MAX_FAIL_COUNT) {
             RCLCPP_ERROR(this->get_logger(),
                          "Too many failures, shutting down");
@@ -166,14 +164,11 @@ listener::listener() : Node("listener"), count_(0) {
         bzero(buffer, SOCKET_BUFFER_SIZE);
         int n = recvfrom(sockfd, buffer, sizeof(buffer), 0,
                          (struct sockaddr *)&cli_addr, &addr_len);
-        // buffer[-1] = '\0';
         if (n < 0) {
           continue;
         }
 
         if (!custom_ser::deser_msg((uint8_t *)buffer, msg, id, value)) {
-          // RCLCPP_ERROR(this->get_logger(),
-          //              "Error deserializing flatbuffer message!");
           if (failure_counter++ > MAX_FAIL_COUNT) {
             RCLCPP_ERROR(this->get_logger(),
                          "Too many failures, shutting down");
@@ -274,7 +269,6 @@ listener::listener() : Node("listener"), count_(0) {
           continue;
 
         } else if (msg == "GRACE") {
-          // RCLCPP_INFO(this->get_logger(), "Grace message received");
           msg = "GRACE_ACK";
         }
 

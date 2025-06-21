@@ -451,7 +451,7 @@ void talker::socket_exp_launch() {
           RCLCPP_INFO(this->get_logger(),
                       "Grace period ended, starting experiment");
           continue;
-        };
+        }
 
         custom_ser::ser_msg("GRACE", grace_counter_write, 404, &builder,
                             (uint8_t *)raw_buffer, &size);

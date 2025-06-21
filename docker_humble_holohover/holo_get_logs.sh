@@ -16,14 +16,14 @@ echo "$1"
 source config.sh
 
 # REMOTE_IPS[1] corresponds to the black holohover
-if ping -c 1 ${REMOTE_IPS[1]} &> /dev/null; then # ping -c 1 ip_address -> sends a ping to the ip address and &> /dev/null redirects any output to /dev/null effectively hiding it
+if ping -c 1 ${REMOTE_IPS[0]} &> /dev/null; then # ping -c 1 ip_address -> sends a ping to the ip address and &> /dev/null redirects any output to /dev/null effectively hiding it
     
     # Send command to devices
     
-    scp ${USERS[1]}@${REMOTE_IPS[1]}:${PATH_TO_LOGS} ${PATH_TO_LOCAL_LOGS}
+    scp ${USERS[0]}@${REMOTE_IPS[0]}:${PATH_TO_LOGS} ${PATH_TO_LOCAL_LOGS}
 
 else
-    echo "Ping to $REMOTE_IPS[1]] failed..."
+    echo "Ping to $REMOTE_IPS[0]] failed..."
 
 fi # Used to indicated the end of an if statement block
 csv_file="$PATH_TO_LOCAL_LOGS/logger.csv"
